@@ -1,12 +1,33 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import React, { useEffect } from 'react';
+import Navbar from '@/components/Navbar';
+import Hero from '@/components/Hero';
+import Features from '@/components/Features';
+import AlgorithmCards from '@/components/AlgorithmCards';
+import PerformanceChart from '@/components/PerformanceChart';
+import Testimonials from '@/components/Testimonials';
+import PricingSection from '@/components/PricingSection';
+import Footer from '@/components/Footer';
+import MvpBadge from '@/components/MvpBadge';
 
 const Index = () => {
+  useEffect(() => {
+    document.title = "Tezaoro | AI-Powered Algorithmic Trading";
+  }, []);
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen flex flex-col dark">
+      <Navbar />
+      <MvpBadge />
+      <main>
+        <Hero />
+        <Features />
+        <AlgorithmCards />
+        <PerformanceChart />
+        <Testimonials />
+        <PricingSection />
+      </main>
+      <Footer />
     </div>
   );
 };
