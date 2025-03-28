@@ -1,59 +1,164 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from "@/components/ui/button";
-import { 
-  Menu, X, BarChart2, Cpu, Zap, BookOpen, Users
-} from 'lucide-react';
+import { NavLink } from 'react-router-dom';
+import { Menu, X, ChevronDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Navbar = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
+    setIsOpen(!isOpen);
   };
 
+  const navLinks = [
+    { name: 'Platform', url: '/platform' },
+    { name: 'Features', url: '/features' },
+    { name: 'Algorithms', url: '/algorithms' },
+    { name: 'Performance', url: '/performance' },
+    { name: 'Pricing', url: '/pricing' },
+    {
+      name: 'Resources',
+      url: '/resources',
+      submenu: [
+        { name: 'Documentation', url: '/documentation' },
+        { name: 'API', url: '/api' },
+        { name: 'Blog', url: '/blog' },
+        { name: 'Support', url: '/support' },
+      ]
+    },
+  ];
+
   return (
-    <nav className="fixed w-full z-40 bg-background/80 backdrop-blur-md border-b border-border">
+    <nav className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-lg border-b border-border">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
-            <Link to="/" className="flex items-center gap-2">
-              <BarChart2 className="h-8 w-8 text-tezaoro-400" />
-              <span className="text-xl font-bold text-foreground">Tezaoro</span>
-            </Link>
+            <NavLink to="/" className="flex items-center gap-2 font-bold text-2xl">
+              <span className="text-gradient">Tezaoro</span>
+            </NavLink>
           </div>
-          
-          <div className="hidden md:flex items-center space-x-6">
-            <Link to="/how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">How It Works</Link>
-            <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
-            <a href="#algorithms" className="text-muted-foreground hover:text-foreground transition-colors">Algorithms</a>
-            <a href="#performance" className="text-muted-foreground hover:text-foreground transition-colors">Performance</a>
-            <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">Pricing</a>
-            <Button variant="outline" className="ml-4">Log In</Button>
-            <Button className="bg-primary hover:bg-primary/90 btn-glow">Get Started</Button>
+
+          {/* Desktop nav links */}
+          <div className="hidden md:block">
+            <div className="ml-10 flex items-center space-x-4">
+              {navLinks.map((link) => {
+                if (link.submenu) {
+                  return (
+                    <DropdownMenu key={link.name}>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="flex items-center gap-1">
+                          {link.name}
+                          <ChevronDown className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {link.submenu.map((sublink) => (
+                          <DropdownMenuItem key={sublink.name} asChild>
+                            <NavLink 
+                              to={sublink.url}
+                              className="w-full cursor-pointer"
+                            >
+                              {sublink.name}
+                            </NavLink>
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  );
+                }
+                return (
+                  <NavLink
+                    key={link.name}
+                    to={link.url}
+                    className={({ isActive }) => `${
+                      isActive ? 'text-primary' : 'text-foreground'
+                    } hover:text-primary px-3 py-2 text-sm font-medium`}
+                  >
+                    {link.name}
+                  </NavLink>
+                );
+              })}
+            </div>
           </div>
-          
-          <div className="md:hidden">
-            <button onClick={toggleMenu} className="text-foreground">
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+
+          <div className="hidden md:block">
+            <div className="flex items-center gap-2">
+              <NavLink to="/how-it-works">
+                <Button variant="outline">How It Works</Button>
+              </NavLink>
+              <Button disabled={true}>Sign Up</Button>
+            </div>
+          </div>
+
+          {/* Mobile menu button */}
+          <div className="md:hidden flex items-center">
+            <button
+              onClick={toggleMenu}
+              className="inline-flex items-center justify-center p-2 rounded-md text-foreground focus:outline-none"
+            >
+              {isOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
             </button>
           </div>
         </div>
       </div>
-      
+
       {/* Mobile menu */}
-      {isMenuOpen && (
-        <div className="md:hidden bg-background/95 backdrop-blur-lg border-b border-border">
-          <div className="px-2 pt-2 pb-4 space-y-1 sm:px-3">
-            <Link to="/how-it-works" className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-primary/10">How It Works</Link>
-            <a href="#features" className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-primary/10">Features</a>
-            <a href="#algorithms" className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-primary/10">Algorithms</a>
-            <a href="#performance" className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-primary/10">Performance</a>
-            <a href="#pricing" className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-primary/10">Pricing</a>
-            <div className="flex flex-col pt-4 space-y-2">
-              <Button variant="outline" className="w-full">Log In</Button>
-              <Button className="w-full bg-primary hover:bg-primary/90">Get Started</Button>
+      {isOpen && (
+        <div className="md:hidden">
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-background border-b border-border">
+            {navLinks.map((link) => {
+              if (link.submenu) {
+                return (
+                  <React.Fragment key={link.name}>
+                    <div className="text-foreground px-3 py-2 text-base font-medium">
+                      {link.name}
+                    </div>
+                    <div className="pl-6 space-y-1">
+                      {link.submenu.map((sublink) => (
+                        <NavLink
+                          key={sublink.name}
+                          to={sublink.url}
+                          className={({ isActive }) => `${
+                            isActive ? 'text-primary' : 'text-muted-foreground'
+                          } hover:text-primary block px-3 py-2 text-sm font-medium`}
+                          onClick={toggleMenu}
+                        >
+                          {sublink.name}
+                        </NavLink>
+                      ))}
+                    </div>
+                  </React.Fragment>
+                );
+              }
+              return (
+                <NavLink
+                  key={link.name}
+                  to={link.url}
+                  className={({ isActive }) => `${
+                    isActive ? 'text-primary' : 'text-foreground'
+                  } hover:text-primary block px-3 py-2 text-base font-medium`}
+                  onClick={toggleMenu}
+                >
+                  {link.name}
+                </NavLink>
+              );
+            })}
+            <div className="pt-4 flex flex-col gap-2 px-3">
+              <NavLink to="/how-it-works" onClick={toggleMenu}>
+                <Button variant="outline" className="w-full">How It Works</Button>
+              </NavLink>
+              <Button className="w-full" disabled={true}>Sign Up</Button>
             </div>
           </div>
         </div>
