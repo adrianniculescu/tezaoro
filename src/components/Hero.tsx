@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BarChart2, Cpu, TrendingUp } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Hero = () => {
   return (
@@ -21,8 +22,8 @@ const Hero = () => {
                 Start Trading Now
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
-              <Button size="lg" variant="outline">
-                Watch Demo
+              <Button size="lg" variant="outline" asChild>
+                <Link to="/how-it-works">How It Works</Link>
               </Button>
             </div>
             

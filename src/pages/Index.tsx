@@ -12,7 +12,7 @@ import MvpBadge from '@/components/MvpBadge';
 
 const Index = () => {
   useEffect(() => {
-    document.title = "Tezaoro | AI-Powered Algorithmic Trading";
+    document.title = "Tezaoro | AI-Powered Algorithmic Trading Platform (MVP)";
   }, []);
 
   return (

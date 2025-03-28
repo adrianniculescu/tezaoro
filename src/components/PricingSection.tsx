@@ -3,7 +3,11 @@ import React from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, X } from 'lucide-react';
+import { Check, X, AlertCircle } from 'lucide-react';
+import {
+  Alert,
+  AlertDescription,
+} from "@/components/ui/alert";
 
 interface PricingTierProps {
   title: string;
@@ -46,6 +50,7 @@ const PricingTier = ({ title, price, description, features, buttonText, recommen
     <Button 
       className={`w-full ${recommended ? 'bg-primary hover:bg-primary/90' : ''}`}
       variant={recommended ? 'default' : 'outline'}
+      disabled={true}
     >
       {buttonText}
     </Button>
@@ -67,7 +72,7 @@ const PricingSection = () => {
         { text: "Advanced risk management", available: false },
         { text: "API access", available: false },
       ],
-      buttonText: "Get Started",
+      buttonText: "Join Waitlist",
       recommended: false
     },
     {
@@ -83,7 +88,7 @@ const PricingSection = () => {
         { text: "Advanced risk management", available: true },
         { text: "API access", available: false },
       ],
-      buttonText: "Subscribe Now",
+      buttonText: "Join Waitlist",
       recommended: true
     },
     {
@@ -107,13 +112,21 @@ const PricingSection = () => {
   return (
     <section id="pricing" className="py-20">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
+        <div className="text-center mb-8">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Simple, Transparent <span className="text-gradient">Pricing</span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
             Choose the plan that fits your trading strategy and goals.
           </p>
+          
+          <Alert className="bg-amber-500/10 border-amber-500/50 text-amber-200 max-w-3xl mx-auto mb-10">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Tezaoro is currently in testing mode. The platform is not yet open for customers. 
+              Join our waitlist to be notified when we launch.
+            </AlertDescription>
+          </Alert>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -132,7 +145,7 @@ const PricingSection = () => {
         
         <div className="mt-12 text-center">
           <p className="text-muted-foreground mb-4">
-            All plans include a 14-day free trial. No credit card required.
+            All plans will include a 14-day free trial once we launch. No credit card required.
           </p>
           <Button variant="link">View complete feature comparison</Button>
         </div>
