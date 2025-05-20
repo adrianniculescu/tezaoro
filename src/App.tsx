@@ -17,6 +17,7 @@ import Documentation from "./pages/Documentation";
 import Api from "./pages/Api";
 import Blog from "./pages/Blog";
 import Support from "./pages/Support";
+import MarketMaking from "./pages/MarketMaking";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/api" element={<Api />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/support" element={<Support />} />
+            <Route path="/market-making" element={<MarketMaking />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
