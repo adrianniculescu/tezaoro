@@ -43,14 +43,14 @@ const LoadingFallback = () => (
 );
 
 // Error boundary component
-class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean}> {
+class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean, error: Error | null}> {
   constructor(props: {children: React.ReactNode}) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, error: null };
   }
 
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
   }
 
   componentDidCatch(error: any, errorInfo: any) {
@@ -61,9 +61,14 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
     if (this.state.hasError) {
       return (
         <div className="flex items-center justify-center h-screen w-full bg-background">
-          <div className="text-center p-6">
+          <div className="text-center p-6 max-w-md">
             <h2 className="text-2xl font-bold text-foreground mb-4">Something went wrong</h2>
             <p className="text-muted-foreground mb-6">We're sorry for the inconvenience. Please try refreshing the page.</p>
+            {this.state.error && (
+              <div className="p-3 bg-muted/30 rounded-md text-sm text-left mb-6 overflow-auto max-h-40">
+                <p className="font-mono">{this.state.error.toString()}</p>
+              </div>
+            )}
             <button 
               onClick={() => window.location.reload()}
               className="bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-md"
@@ -79,60 +84,12 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
   }
 }
 
-// App initialization status check
-const AppInitializer = ({ children }: { children: React.ReactNode }) => {
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [initError, setInitError] = useState<string | null>(null);
-
-  useEffect(() => {
-    try {
-      // Check if all required global scripts are loaded
-      const isGptEngLoaded = window.hasOwnProperty('gptEngineer') || 
-                            document.querySelector('script[src*="gptengineer.js"]') !== null;
-      
-      if (!isGptEngLoaded) {
-        console.warn("GPT Engineer script may not be loaded properly");
-      }
-      
-      // Mark as initialized after a short delay to ensure all resources are loaded
-      const timer = setTimeout(() => {
-        setIsInitialized(true);
-      }, 500);
-      
-      return () => clearTimeout(timer);
-    } catch (err) {
-      console.error("Error during app initialization:", err);
-      setInitError("Failed to initialize application resources.");
-    }
-  }, []);
-
-  if (initError) {
-    return (
-      <div className="flex items-center justify-center h-screen w-full bg-background">
-        <div className="text-center p-6 max-w-md">
-          <h2 className="text-2xl font-bold text-foreground mb-4">Initialization Error</h2>
-          <p className="text-muted-foreground mb-6">{initError}</p>
-          <button 
-            onClick={() => window.location.reload()}
-            className="bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-md"
-          >
-            Retry Loading
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isInitialized) {
-    return <LoadingFallback />;
-  }
-
-  return <>{children}</>;
-};
-
-const App = () => (
-  <ErrorBoundary>
-    <AppInitializer>
+// Simplified App component without complex initialization checks
+const App = () => {
+  console.log("Starting App component render");
+  
+  return (
+    <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <div className="dark">
@@ -156,7 +113,6 @@ const App = () => (
                   <Route path="/market-making" element={<MarketMaking />} />
                   <Route path="/micro-cap" element={<MicroCap />} />
                   <Route path="/nano-cap" element={<NanoCap />} />
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>
@@ -164,8 +120,8 @@ const App = () => (
           </div>
         </TooltipProvider>
       </QueryClientProvider>
-    </AppInitializer>
-  </ErrorBoundary>
-);
+    </ErrorBoundary>
+  );
+};
 
 export default App;
