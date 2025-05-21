@@ -1,24 +1,62 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>algo-nest</title>
-    <meta name="description" content="Lovable Generated Project" />
-    <meta name="author" content="Lovable" />
+    <title>Tezaoro | AI-Powered Algorithmic Trading Platform</title>
+    <meta name="description" content="Tezaoro - AI-Powered Algorithmic Trading Platform for everyone. Access sophisticated trading algorithms powered by artificial intelligence." />
+    <meta name="author" content="Tezaoro" />
 
-    <meta property="og:title" content="Lovable Generated Project" />
-    <meta property="og:description" content="Lovable Generated Project" />
+    <meta property="og:title" content="Tezaoro | AI-Powered Algorithmic Trading Platform" />
+    <meta property="og:description" content="Access sophisticated trading algorithms powered by artificial intelligence. Tezaoro combines quantitative analysis with machine learning to deliver exceptional trading results." />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@lovable_dev" />
+    <meta name="twitter:site" content="@tezaoro" />
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    
+    <style>
+      /* Minimal fallback styling for when JS fails */
+      body {
+        background-color: #0f1729;
+        color: #e2e8f0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      }
+      .loading-fallback {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        text-align: center;
+      }
+      .spinner {
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border-left-color: #3b82f6;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
   </head>
 
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="loading-fallback">
+        <div>
+          <div class="spinner"></div>
+          <p>Loading Tezaoro...</p>
+          <p style="font-size: 14px; margin-top: 20px;">If this page doesn't load within a few seconds, please try refreshing.</p>
+        </div>
+      </div>
+    </div>
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
