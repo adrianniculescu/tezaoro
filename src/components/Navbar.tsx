@@ -9,6 +9,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -93,7 +99,14 @@ const Navbar = () => {
               <NavLink to="/how-it-works">
                 <Button variant="outline">How It Works</Button>
               </NavLink>
-              <Button disabled={true}>Sign Up</Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button disabled={true}>Sign Up</Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Registration available by invitation only</p>
+                </TooltipContent>
+              </Tooltip>
             </div>
           </div>
 
@@ -158,7 +171,14 @@ const Navbar = () => {
               <NavLink to="/how-it-works" onClick={toggleMenu}>
                 <Button variant="outline" className="w-full">How It Works</Button>
               </NavLink>
-              <Button className="w-full" disabled={true}>Sign Up</Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button className="w-full" disabled={true}>Sign Up</Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Registration available by invitation only</p>
+                </TooltipContent>
+              </Tooltip>
             </div>
           </div>
         </div>
