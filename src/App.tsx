@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -21,6 +20,7 @@ import Support from "./pages/Support";
 import MarketMaking from "./pages/MarketMaking";
 import MicroCap from "./pages/MicroCap";
 import NanoCap from "./pages/NanoCap";
+import SmallCap from "./pages/SmallCap";
 
 // Configure the query client with error handling
 const queryClient = new QueryClient({
@@ -113,6 +113,7 @@ const App = () => {
                   <Route path="/market-making" element={<MarketMaking />} />
                   <Route path="/micro-cap" element={<MicroCap />} />
                   <Route path="/nano-cap" element={<NanoCap />} />
+                  <Route path="/small-cap" element={<SmallCap />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>

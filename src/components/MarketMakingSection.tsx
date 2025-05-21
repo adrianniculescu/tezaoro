@@ -70,7 +70,7 @@ const MarketMakingSection = () => {
           </Card>
         </div>
 
-        {/* Add Micro-Cap section */}
+        {/* Micro-Cap section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-12">
           <Card className="glass-card col-span-1 lg:col-span-2">
             <CardContent className="p-6">
@@ -115,6 +115,59 @@ const MarketMakingSection = () => {
               </p>
               <Button className="w-full" asChild>
                 <Link to="/micro-cap">
+                  Learn More
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+        
+        {/* Small-Cap section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-12">
+          <Card className="glass-card col-span-1 lg:col-span-2">
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row items-start gap-6">
+                <div className="flex-shrink-0">
+                  <div className="w-16 h-16 rounded-full bg-tezaoro-500/20 flex items-center justify-center">
+                    <CircleDollarSign className="h-8 w-8 text-tezaoro-400" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold mb-3">
+                    Enterprise Market Making for Small-Cap Projects
+                  </h3>
+                  <p className="text-muted-foreground mb-6">
+                    Elevate your token with institutional-grade liquidity solutions. Starting at $1,999/month, our enterprise service for projects with $100M-$1B market cap delivers ultra-tight spreads, deep order books, and advanced analytics that attract institutional investors.
+                  </p>
+                  <div className="flex flex-wrap gap-4">
+                    <div className="flex items-center gap-2 bg-card/60 px-3 py-1 rounded-full">
+                      <div className="w-2 h-2 bg-profit rounded-full"></div>
+                      <span className="text-sm">Institutional-Grade Liquidity</span>
+                    </div>
+                    <div className="flex items-center gap-2 bg-card/60 px-3 py-1 rounded-full">
+                      <div className="w-2 h-2 bg-profit rounded-full"></div>
+                      <span className="text-sm">Multi-Exchange Presence</span>
+                    </div>
+                    <div className="flex items-center gap-2 bg-card/60 px-3 py-1 rounded-full">
+                      <div className="w-2 h-2 bg-profit rounded-full"></div>
+                      <span className="text-sm">From $1,999/Month</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-card flex items-center">
+            <CardContent className="p-6 flex flex-col justify-center items-center h-full w-full">
+              <ChartLine className="h-12 w-12 text-tezaoro-400 mb-4" />
+              <h3 className="text-xl font-bold mb-4 text-center">Major League Liquidity</h3>
+              <p className="text-muted-foreground text-center mb-6">
+                Enterprise solutions for ambitious projects
+              </p>
+              <Button className="w-full" asChild>
+                <Link to="/small-cap">
                   Learn More
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
