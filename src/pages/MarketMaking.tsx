@@ -1,4 +1,3 @@
-
 import React from 'react';
 import PageLayout from '@/components/PageLayout';
 import PageHeader from '@/components/PageHeader';
@@ -24,7 +23,7 @@ const MarketMaking = () => {
             AI-Powered Market Making for $1M–$10M Tokens | <span className="font-bold text-tezaoro-400">$299/Month</span>
           </p>
           <Button size="lg" className="bg-primary hover:bg-primary/90 btn-glow">
-            Get Started Today
+            Request Invitation
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
         </div>
@@ -303,7 +302,7 @@ const MarketMaking = () => {
             </CardContent>
             <div className="p-6 bg-card/60 text-center">
               <Button size="lg" className="bg-primary hover:bg-primary/90 btn-glow w-full">
-                Start Your 14-Day Trial
+                Schedule an Initial Meeting
               </Button>
             </div>
           </Card>
@@ -415,7 +414,7 @@ const MarketMaking = () => {
 
           <Card className="glass-card mb-8">
             <CardHeader>
-              <CardTitle className="text-center">Activate Liquidity in 48 Hours</CardTitle>
+              <CardTitle className="text-center">Activate Liquidity Through Our Exclusive Process</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -423,24 +422,24 @@ const MarketMaking = () => {
                   <div className="w-12 h-12 rounded-full bg-tezaoro-500/20 flex items-center justify-center mx-auto mb-4">
                     <span className="text-xl font-bold">1</span>
                   </div>
-                  <h3 className="font-semibold mb-2">Sign Up</h3>
-                  <p className="text-muted-foreground">Create your account on Tezaoro platform</p>
+                  <h3 className="font-semibold mb-2">Request Invitation</h3>
+                  <p className="text-muted-foreground">Contact us for an initial assessment</p>
                 </div>
 
                 <div className="text-center">
                   <div className="w-12 h-12 rounded-full bg-tezaoro-500/20 flex items-center justify-center mx-auto mb-4">
                     <span className="text-xl font-bold">2</span>
                   </div>
-                  <h3 className="font-semibold mb-2">Connect API</h3>
-                  <p className="text-muted-foreground">Securely link your exchange accounts</p>
+                  <h3 className="font-semibold mb-2">Strategy Discussion</h3>
+                  <p className="text-muted-foreground">Meet with our team for a tailored approach</p>
                 </div>
 
                 <div className="text-center">
                   <div className="w-12 h-12 rounded-full bg-tezaoro-500/20 flex items-center justify-center mx-auto mb-4">
                     <span className="text-xl font-bold">3</span>
                   </div>
-                  <h3 className="font-semibold mb-2">Launch Bots</h3>
-                  <p className="text-muted-foreground">Activate your market making strategy</p>
+                  <h3 className="font-semibold mb-2">Onboarding</h3>
+                  <p className="text-muted-foreground">Begin your market making journey with us</p>
                 </div>
               </div>
             </CardContent>
@@ -453,7 +452,7 @@ const MarketMaking = () => {
             </div>
             <div className="flex justify-center">
               <Button size="lg" className="bg-primary hover:bg-primary/90 btn-glow">
-                Sign Up Now
+                Request an Invitation
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </div>
@@ -462,8 +461,7 @@ const MarketMaking = () => {
           <div className="text-center">
             <h3 className="text-xl font-semibold mb-4">Contact</h3>
             <div className="space-y-2">
-              <p><span className="font-semibold">Email:</span> support@tezaoro.com</p>
-              <p><span className="font-semibold">Telegram:</span> @TezaoroMM</p>
+              <p><span className="font-semibold">Email:</span> office@tezaoro.com</p>
             </div>
           </div>
         </div>

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BarChart2, Twitter, Linkedin, Github, Mail } from 'lucide-react';
+import { BarChart2, Twitter, Linkedin, Github } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";

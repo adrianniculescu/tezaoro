@@ -1,4 +1,3 @@
-
 import React from 'react';
 import PageLayout from '@/components/PageLayout';
 import PageHeader from '@/components/PageHeader';
@@ -11,7 +10,7 @@ const SmallCap = () => {
     <PageLayout title="Small-Cap Liquidity Solutions">
       <PageHeader 
         title="Elevate Your Small-Cap Token to Major League Liquidity" 
-        description="AI-Driven Market Making for $100M–$1B Tokens | $1,999/Month"
+        description="AI-Driven Market Making for $100M–$1B Tokens | $2,500/Month"
       />
       
       <div className="container mx-auto px-4 py-12">
@@ -283,8 +282,8 @@ const SmallCap = () => {
 
           <Card className="max-w-xl mx-auto glass-card overflow-hidden">
             <div className="bg-primary/20 p-4 text-center">
-              <h3 className="text-2xl font-bold text-gradient">$1,999/Month</h3>
-              <p className="text-muted-foreground">(Quarterly Billing: $5,997)</p>
+              <h3 className="text-2xl font-bold text-gradient">$2,500/Month</h3>
+              <p className="text-muted-foreground">(Quarterly Billing: $7,500)</p>
             </div>
             <CardContent className="p-6">
               <div className="mb-6">
@@ -300,7 +299,7 @@ const SmallCap = () => {
                   </div>
                   <div className="flex justify-between font-bold">
                     <span>Tezaoro Solution</span>
-                    <span className="font-mono text-tezaoro-400">$1,999/month</span>
+                    <span className="font-mono text-tezaoro-400">$2,500/month</span>
                   </div>
                 </div>
               </div>
@@ -337,7 +336,7 @@ const SmallCap = () => {
             </CardContent>
             <div className="p-6 bg-card/60 text-center">
               <Button size="lg" className="bg-primary hover:bg-primary/90 btn-glow w-full">
-                Schedule a Demo
+                Schedule a Meeting
               </Button>
             </div>
           </Card>
@@ -462,7 +461,7 @@ const SmallCap = () => {
 
           <Card className="glass-card mb-8">
             <CardHeader>
-              <CardTitle className="text-center">Upgrade Your Liquidity in 72 Hours</CardTitle>
+              <CardTitle className="text-center">Upgrade Your Liquidity Through Our Exclusive Process</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -470,24 +469,24 @@ const SmallCap = () => {
                   <div className="w-12 h-12 rounded-full bg-tezaoro-500/20 flex items-center justify-center mx-auto mb-4">
                     <span className="text-xl font-bold">1</span>
                   </div>
-                  <h3 className="font-semibold mb-2">Sign Up</h3>
-                  <p className="text-muted-foreground">Create your enterprise account</p>
+                  <h3 className="font-semibold mb-2">Contact Us</h3>
+                  <p className="text-muted-foreground">Request an initial assessment meeting</p>
                 </div>
 
                 <div className="text-center">
                   <div className="w-12 h-12 rounded-full bg-tezaoro-500/20 flex items-center justify-center mx-auto mb-4">
                     <span className="text-xl font-bold">2</span>
                   </div>
-                  <h3 className="font-semibold mb-2">Connect APIs</h3>
-                  <p className="text-muted-foreground">Link to all your exchange accounts</p>
+                  <h3 className="font-semibold mb-2">Strategy Consultation</h3>
+                  <p className="text-muted-foreground">Detailed needs analysis with our team</p>
                 </div>
 
                 <div className="text-center">
                   <div className="w-12 h-12 rounded-full bg-tezaoro-500/20 flex items-center justify-center mx-auto mb-4">
                     <span className="text-xl font-bold">3</span>
                   </div>
-                  <h3 className="font-semibold mb-2">Go Live</h3>
-                  <p className="text-muted-foreground">Begin enterprise-grade market making</p>
+                  <h3 className="font-semibold mb-2">Custom Implementation</h3>
+                  <p className="text-muted-foreground">Begin your tailored market making solution</p>
                 </div>
               </div>
             </CardContent>
@@ -500,7 +499,7 @@ const SmallCap = () => {
             </div>
             <div className="flex justify-center">
               <Button size="lg" className="bg-primary hover:bg-primary/90 btn-glow">
-                Request Your Liquidity Audit
+                Request Your Initial Meeting
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </div>
@@ -509,8 +508,7 @@ const SmallCap = () => {
           <div className="text-center">
             <h3 className="text-xl font-semibold mb-4">Contact</h3>
             <div className="space-y-2">
-              <p><span className="font-semibold">Email:</span> enterprise@tezaoro.com</p>
-              <p><span className="font-semibold">Telegram:</span> @TezaoroEnterprise</p>
+              <p><span className="font-semibold">Email:</span> office@tezaoro.com</p>
             </div>
           </div>
         </div>

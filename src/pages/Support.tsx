@@ -1,4 +1,3 @@
-
 import React from 'react';
 import PageLayout from '@/components/PageLayout';
 import PageHeader from '@/components/PageHeader';
@@ -255,7 +254,7 @@ const Support = () => {
                       <Mail className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                       <div>
                         <h4 className="text-base font-medium">Email</h4>
-                        <p className="text-muted-foreground">support@tezaoro.com</p>
+                        <p className="text-muted-foreground">office@tezaoro.com</p>
                         <p className="text-xs text-muted-foreground">(Available after launch)</p>
                       </div>
                     </div>
