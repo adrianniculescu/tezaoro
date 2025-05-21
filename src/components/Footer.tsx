@@ -4,6 +4,7 @@ import { BarChart2, Twitter, Linkedin, Github } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
@@ -67,6 +68,8 @@ const Footer = () => {
               <li><a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a></li>
               <li><a href="#algorithms" className="text-muted-foreground hover:text-foreground transition-colors">Algorithms</a></li>
               <li><a href="#performance" className="text-muted-foreground hover:text-foreground transition-colors">Performance</a></li>
+              <li><Link to="/token-listing" className="text-muted-foreground hover:text-foreground transition-colors">Token Listing</Link></li>
+              <li><Link to="/market-making" className="text-muted-foreground hover:text-foreground transition-colors">Market Making</Link></li>
               <li><a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">Pricing</a></li>
             </ul>
           </div>

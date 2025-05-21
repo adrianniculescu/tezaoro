@@ -10,6 +10,7 @@ import PricingSection from '@/components/PricingSection';
 import Footer from '@/components/Footer';
 import MvpBadge from '@/components/MvpBadge';
 import MarketMakingSection from '@/components/MarketMakingSection';
+import TokenListingSection from '@/components/TokenListingSection';
 
 const Index = () => {
   useEffect(() => {
@@ -26,6 +27,7 @@ const Index = () => {
         <AlgorithmCards />
         <PerformanceChart />
         <MarketMakingSection />
+        <TokenListingSection />
         <Testimonials />
         <PricingSection />
       </main>

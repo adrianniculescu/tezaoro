@@ -21,6 +21,7 @@ import MarketMaking from "./pages/MarketMaking";
 import MicroCap from "./pages/MicroCap";
 import NanoCap from "./pages/NanoCap";
 import SmallCap from "./pages/SmallCap";
+import TokenListing from "./pages/TokenListing";
 
 // Configure the query client with error handling
 const queryClient = new QueryClient({
@@ -114,6 +115,7 @@ const App = () => {
                   <Route path="/micro-cap" element={<MicroCap />} />
                   <Route path="/nano-cap" element={<NanoCap />} />
                   <Route path="/small-cap" element={<SmallCap />} />
+                  <Route path="/token-listing" element={<TokenListing />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>
