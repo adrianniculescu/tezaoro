@@ -29,7 +29,7 @@ const MicroCap = () => {
                     Micro-Cap Market Making Strategy
                   </h3>
                   <p className="text-muted-foreground mb-6">
-                    Drive sustainable growth and market stability with our professional market making solution for projects with $10M-$50M market cap. Our AI-powered service provides consistent liquidity, tighter spreads, and strategic price support starting at $799/month.
+                    Drive sustainable growth and market stability with our professional market making solution for projects with $10M-$50M market cap. Our AI-powered service provides consistent liquidity, tighter spreads, and strategic price support starting at $699/month.
                   </p>
                   <div className="flex flex-wrap gap-4">
                     <div className="flex items-center gap-2 bg-card/60 px-3 py-1 rounded-full">
@@ -42,7 +42,7 @@ const MicroCap = () => {
                     </div>
                     <div className="flex items-center gap-2 bg-card/60 px-3 py-1 rounded-full">
                       <div className="w-2 h-2 bg-profit rounded-full"></div>
-                      <span className="text-sm">From $799/Month</span>
+                      <span className="text-sm">From $699/Month</span>
                     </div>
                   </div>
                 </div>
@@ -98,7 +98,7 @@ const MicroCap = () => {
         
         <div className="mt-16 text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-6">
-            Start from $799 per month
+            Start from $699 per month
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
             Tailored for projects with market caps between $10M-$50M. Custom solutions available for specific requirements.

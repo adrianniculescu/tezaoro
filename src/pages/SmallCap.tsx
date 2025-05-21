@@ -1,3 +1,4 @@
+
 import React from 'react';
 import PageLayout from '@/components/PageLayout';
 import PageHeader from '@/components/PageHeader';
@@ -10,7 +11,7 @@ const SmallCap = () => {
     <PageLayout title="Small-Cap Liquidity Solutions">
       <PageHeader 
         title="Elevate Your Small-Cap Token to Major League Liquidity" 
-        description="AI-Driven Market Making for $100M–$1B Tokens | $2,500/Month"
+        description="AI-Driven Market Making for $100M–$1B Tokens | $2,499/Month"
       />
       
       <div className="container mx-auto px-4 py-12">
@@ -282,8 +283,8 @@ const SmallCap = () => {
 
           <Card className="max-w-xl mx-auto glass-card overflow-hidden">
             <div className="bg-primary/20 p-4 text-center">
-              <h3 className="text-2xl font-bold text-gradient">$2,500/Month</h3>
-              <p className="text-muted-foreground">(Quarterly Billing: $7,500)</p>
+              <h3 className="text-2xl font-bold text-gradient">$2,499/Month</h3>
+              <p className="text-muted-foreground">(Quarterly Billing: $7,497)</p>
             </div>
             <CardContent className="p-6">
               <div className="mb-6">
@@ -299,7 +300,7 @@ const SmallCap = () => {
                   </div>
                   <div className="flex justify-between font-bold">
                     <span>Tezaoro Solution</span>
-                    <span className="font-mono text-tezaoro-400">$2,500/month</span>
+                    <span className="font-mono text-tezaoro-400">$2,499/month</span>
                   </div>
                 </div>
               </div>

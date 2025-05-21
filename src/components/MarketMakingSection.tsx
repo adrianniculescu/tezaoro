@@ -85,7 +85,7 @@ const MarketMakingSection = () => {
                     Professional Market Making for Micro-Cap Projects
                   </h3>
                   <p className="text-muted-foreground mb-6">
-                    Enhance market stability and growth with our professional market making solution. Starting at $799/month, our AI-powered service helps projects with $10M-$50M market cap achieve deeper liquidity, tighter spreads, and greater investor confidence.
+                    Enhance market stability and growth with our professional market making solution. Starting at $699/month, our AI-powered service helps projects with $10M-$50M market cap achieve deeper liquidity, tighter spreads, and greater investor confidence.
                   </p>
                   <div className="flex flex-wrap gap-4">
                     <div className="flex items-center gap-2 bg-card/60 px-3 py-1 rounded-full">
@@ -98,7 +98,7 @@ const MarketMakingSection = () => {
                     </div>
                     <div className="flex items-center gap-2 bg-card/60 px-3 py-1 rounded-full">
                       <div className="w-2 h-2 bg-profit rounded-full"></div>
-                      <span className="text-sm">From $799/Month</span>
+                      <span className="text-sm">From $699/Month</span>
                     </div>
                   </div>
                 </div>
@@ -138,7 +138,7 @@ const MarketMakingSection = () => {
                     Enterprise Market Making for Small-Cap Projects
                   </h3>
                   <p className="text-muted-foreground mb-6">
-                    Elevate your token with institutional-grade liquidity solutions. Starting at $1,999/month, our enterprise service for projects with $100M-$1B market cap delivers ultra-tight spreads, deep order books, and advanced analytics that attract institutional investors.
+                    Elevate your token with institutional-grade liquidity solutions. Starting at $2,499/month, our enterprise service for projects with $100M-$1B market cap delivers ultra-tight spreads, deep order books, and advanced analytics that attract institutional investors.
                   </p>
                   <div className="flex flex-wrap gap-4">
                     <div className="flex items-center gap-2 bg-card/60 px-3 py-1 rounded-full">
@@ -151,7 +151,7 @@ const MarketMakingSection = () => {
                     </div>
                     <div className="flex items-center gap-2 bg-card/60 px-3 py-1 rounded-full">
                       <div className="w-2 h-2 bg-profit rounded-full"></div>
-                      <span className="text-sm">From $1,999/Month</span>
+                      <span className="text-sm">From $2,499/Month</span>
                     </div>
                   </div>
                 </div>
