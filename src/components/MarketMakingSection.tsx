@@ -69,6 +69,59 @@ const MarketMakingSection = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Add Micro-Cap section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-12">
+          <Card className="glass-card col-span-1 lg:col-span-2">
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row items-start gap-6">
+                <div className="flex-shrink-0">
+                  <div className="w-16 h-16 rounded-full bg-tezaoro-500/20 flex items-center justify-center">
+                    <CircleDollarSign className="h-8 w-8 text-tezaoro-400" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold mb-3">
+                    Professional Market Making for Micro-Cap Projects
+                  </h3>
+                  <p className="text-muted-foreground mb-6">
+                    Enhance market stability and growth with our professional market making solution. Starting at $799/month, our AI-powered service helps projects with $10M-$50M market cap achieve deeper liquidity, tighter spreads, and greater investor confidence.
+                  </p>
+                  <div className="flex flex-wrap gap-4">
+                    <div className="flex items-center gap-2 bg-card/60 px-3 py-1 rounded-full">
+                      <div className="w-2 h-2 bg-profit rounded-full"></div>
+                      <span className="text-sm">Enhanced Liquidity</span>
+                    </div>
+                    <div className="flex items-center gap-2 bg-card/60 px-3 py-1 rounded-full">
+                      <div className="w-2 h-2 bg-profit rounded-full"></div>
+                      <span className="text-sm">Smart Exchange Coverage</span>
+                    </div>
+                    <div className="flex items-center gap-2 bg-card/60 px-3 py-1 rounded-full">
+                      <div className="w-2 h-2 bg-profit rounded-full"></div>
+                      <span className="text-sm">From $799/Month</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-card flex items-center">
+            <CardContent className="p-6 flex flex-col justify-center items-center h-full w-full">
+              <ChartLine className="h-12 w-12 text-tezaoro-400 mb-4" />
+              <h3 className="text-xl font-bold mb-4 text-center">Advanced Liquidity for Micro-Caps</h3>
+              <p className="text-muted-foreground text-center mb-6">
+                Professional solutions for emerging projects
+              </p>
+              <Button className="w-full" asChild>
+                <Link to="/micro-cap">
+                  Learn More
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
