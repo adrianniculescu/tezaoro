@@ -61,7 +61,7 @@ const MarketMakingSection = () => {
                 Stability, Growth, & Trust for your token project
               </p>
               <Button className="w-full" asChild>
-                <Link to="/market-making">
+                <Link to="/nano-cap">
                   Learn More
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>

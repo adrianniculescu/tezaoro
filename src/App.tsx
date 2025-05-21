@@ -19,6 +19,7 @@ import Blog from "./pages/Blog";
 import Support from "./pages/Support";
 import MarketMaking from "./pages/MarketMaking";
 import MicroCap from "./pages/MicroCap";
+import NanoCap from "./pages/NanoCap";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ const App = () => (
             <Route path="/support" element={<Support />} />
             <Route path="/market-making" element={<MarketMaking />} />
             <Route path="/micro-cap" element={<MicroCap />} />
+            <Route path="/nano-cap" element={<NanoCap />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
