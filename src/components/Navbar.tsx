@@ -15,6 +15,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import Logo from '@/components/Logo';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -46,8 +47,8 @@ const Navbar = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
-            <NavLink to="/" className="flex items-center gap-2 font-bold text-2xl">
-              <span className="text-gradient">Tezaoro</span>
+            <NavLink to="/" className="flex items-center">
+              <Logo />
             </NavLink>
           </div>
 
