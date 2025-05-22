@@ -1,2 +1,4 @@
 
-<!-- Binary data would go here, but we'll create a vector version for now -->
+<!-- This would be a PNG version of our SVG favicon, but since we can't generate actual binary PNG data here,
+     we'll indicate that this should be created from the SVG favicon. The SVG favicon will be used as the
+     primary icon across the site. -->
