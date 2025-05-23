@@ -20,7 +20,7 @@ const PlatformOverview = lazy(() => import('@/pages/guides/PlatformOverview'));
 const AccountSetup = lazy(() => import('@/pages/guides/AccountSetup'));
 const DeployingFirstAlgorithm = lazy(() => import('@/pages/guides/DeployingFirstAlgorithm'));
 
-// Import new guide pages
+// Import performance guide pages
 const PerformanceMetricsExplained = lazy(() => import('@/pages/guides/PerformanceMetricsExplained'));
 const PerformanceDashboardGuide = lazy(() => import('@/pages/guides/PerformanceDashboardGuide'));
 const ReportingFeatures = lazy(() => import('@/pages/guides/ReportingFeatures'));

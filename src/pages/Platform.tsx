@@ -3,7 +3,7 @@ import React from 'react';
 import PageLayout from '@/components/PageLayout';
 import PageHeader from '@/components/PageHeader';
 import { Card } from '@/components/ui/card';
-import { FileText, ArrowRight, Check, X } from 'lucide-react';
+import { FileText, ArrowRight, Check, X, Video, Users, Book } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
@@ -24,6 +24,24 @@ const Platform = () => {
       title: "Deploying Your First Algorithm",
       description: "A step-by-step guide to selecting and deploying your first trading algorithm.",
       url: "/platform/deploying-first-algorithm"
+    }
+  ];
+  
+  const algorithmDocs = [
+    {
+      title: "Algorithm Selection Guide",
+      description: "How to choose the right algorithm for your trading strategy.",
+      url: "/algorithms"
+    },
+    {
+      title: "Parameter Configuration",
+      description: "Understand and configure algorithm parameters for optimal performance.",
+      url: "/algorithms"
+    },
+    {
+      title: "Backtesting Guide",
+      description: "Test your algorithms against historical market data.",
+      url: "/algorithms"
     }
   ];
   
@@ -106,6 +124,65 @@ const Platform = () => {
         description="Everything you need to know about using our advanced algorithmic trading platform"
       />
       
+      <section className="py-12">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl">
+          <h2 className="text-3xl font-bold text-center mb-8">
+            How can we <span className="text-gradient">help you</span> today?
+          </h2>
+          
+          <div className="relative mb-12">
+            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+              </svg>
+            </div>
+            <input 
+              type="search" 
+              id="default-search" 
+              className="block w-full p-4 pl-10 text-sm bg-card border border-border rounded-lg focus:ring-primary focus:border-primary" 
+              placeholder="Search for help articles..." 
+              disabled={true}
+            />
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Link to="/platform" className="no-underline">
+              <Card className="glass-card bg-card p-5 h-full flex flex-col items-center justify-center text-center gap-3 hover:bg-card/80 transition-colors cursor-pointer">
+                <div className="p-3 bg-primary/10 rounded-full">
+                  <FileText className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-medium">Platform Guides</h3>
+              </Card>
+            </Link>
+            
+            <Link to="/algorithms" className="no-underline">
+              <Card className="glass-card bg-card p-5 h-full flex flex-col items-center justify-center text-center gap-3 hover:bg-card/80 transition-colors cursor-pointer">
+                <div className="p-3 bg-primary/10 rounded-full">
+                  <Book className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-medium">Algorithm Docs</h3>
+              </Card>
+            </Link>
+            
+            <Card className="glass-card bg-card p-5 h-full flex flex-col items-center justify-center text-center gap-3 opacity-75">
+              <div className="p-3 bg-primary/10 rounded-full">
+                <Video className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="text-lg font-medium">Video Tutorials</h3>
+              <Badge variant="outline" className="mt-1">Coming Soon</Badge>
+            </Card>
+            
+            <Card className="glass-card bg-card p-5 h-full flex flex-col items-center justify-center text-center gap-3 opacity-75">
+              <div className="p-3 bg-primary/10 rounded-full">
+                <Users className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="text-lg font-medium">Community</h3>
+              <Badge variant="outline" className="mt-1">Coming Soon</Badge>
+            </Card>
+          </div>
+        </div>
+      </section>
+      
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-center mb-12">
@@ -129,6 +206,38 @@ const Platform = () => {
                 <Link to={guide.url}>
                   <Button variant="outline" className="w-full flex items-center justify-between">
                     <span>Read guide</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+      
+      <section className="py-16 md:py-24 bg-card/30">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-center mb-12">
+            Algorithm <span className="text-gradient">Documentation</span>
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {algorithmDocs.map((doc, index) => (
+              <Card key={index} className="glass-card bg-card p-6 flex flex-col">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-primary/10 rounded-full">
+                    <Book className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="text-lg font-bold">{doc.title}</h3>
+                </div>
+                
+                <p className="text-muted-foreground mb-6 flex-grow">
+                  {doc.description}
+                </p>
+                
+                <Link to={doc.url}>
+                  <Button variant="outline" className="w-full flex items-center justify-between">
+                    <span>Read documentation</span>
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
