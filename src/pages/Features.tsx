@@ -3,6 +3,7 @@ import React from 'react';
 import PageLayout from '@/components/PageLayout';
 import PageHeader from '@/components/PageHeader';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Cpu, BarChart2, Zap, TrendingUp, Shield, Clock, 
@@ -121,6 +122,14 @@ const Features = () => {
     }
   ];
 
+  const handleCustomFeatures = () => {
+    const subject = encodeURIComponent("Tezaoro Custom Features Request");
+    const body = encodeURIComponent(
+      "Hello Tezaoro team,\n\nI am interested in discussing custom features for my trading needs.\n\nPlease contact me to discuss how Tezaoro can be customized for my requirements.\n\nThank you!"
+    );
+    window.location.href = `mailto:office@tezaoro.com?subject=${subject}&body=${body}`;
+  };
+
   return (
     <PageLayout title="Features">
       <PageHeader 
@@ -175,9 +184,9 @@ const Features = () => {
             <p className="text-lg text-muted-foreground mb-8">
               Contact our team to discuss how we can customize Tezaoro to meet your trading needs.
             </p>
-            <div className="inline-block bg-primary hover:bg-primary/90 text-white font-medium py-3 px-6 rounded-md cursor-not-allowed opacity-70">
-              Request Custom Features (Coming Soon)
-            </div>
+            <Button onClick={handleCustomFeatures} className="bg-primary hover:bg-primary/90">
+              Request Custom Features
+            </Button>
           </div>
         </div>
       </section>

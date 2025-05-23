@@ -3,6 +3,7 @@ import React from 'react';
 import PageLayout from '@/components/PageLayout';
 import PageHeader from '@/components/PageHeader';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Layers, Zap, Shield, LineChart, Users } from 'lucide-react';
 
 const Platform = () => {
@@ -33,6 +34,14 @@ const Platform = () => {
       description: "Team workspaces enable efficient collaboration between traders, analysts, and portfolio managers."
     }
   ];
+
+  const handleJoinWaitlist = () => {
+    const subject = encodeURIComponent("Tezaoro Waitlist - Join Request");
+    const body = encodeURIComponent(
+      "Hello Tezaoro team,\n\nI would like to join the waitlist for Tezaoro's AI-powered algorithmic trading platform.\n\nPlease let me know when access becomes available.\n\nThank you!"
+    );
+    window.location.href = `mailto:office@tezaoro.com?subject=${subject}&body=${body}`;
+  };
 
   return (
     <PageLayout title="Platform">
@@ -89,9 +98,9 @@ const Platform = () => {
           <p className="text-lg text-muted-foreground mb-8">
             Our platform is currently in MVP testing phase. Join our waitlist to be among the first to access Tezaoro when we launch.
           </p>
-          <div className="inline-block bg-primary hover:bg-primary/90 text-white font-medium py-3 px-6 rounded-md cursor-not-allowed opacity-70">
-            Join Waitlist (Coming Soon)
-          </div>
+          <Button onClick={handleJoinWaitlist} className="bg-primary hover:bg-primary/90">
+            Join Waitlist
+          </Button>
         </div>
       </section>
     </PageLayout>
