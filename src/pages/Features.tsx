@@ -129,6 +129,14 @@ const Features = () => {
     );
     window.location.href = `mailto:office@tezaoro.com?subject=${subject}&body=${body}`;
   };
+  
+  const handleCustomAlgorithms = () => {
+    const subject = encodeURIComponent("Tezaoro Custom Algorithms Inquiry");
+    const body = encodeURIComponent(
+      "Hello Tezaoro team,\n\nI am interested in discussing custom algorithmic solutions for my specific trading requirements.\n\nPlease contact me to explore how your team of quants and machine learning engineers can develop algorithms tailored to my needs.\n\nThank you!"
+    );
+    window.location.href = `mailto:office@tezaoro.com?subject=${subject}&body=${body}`;
+  };
 
   return (
     <PageLayout title="Features">
@@ -188,6 +196,18 @@ const Features = () => {
               Request Custom Features
             </Button>
           </div>
+        </div>
+      </section>
+      
+      <section className="py-16 md:py-24">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-3xl text-center">
+          <h2 className="text-3xl font-bold mb-6">Custom <span className="text-gradient">Algorithm Development</span></h2>
+          <p className="text-lg text-muted-foreground mb-8">
+            Need a specialized algorithm for your unique trading requirements? Our team of quants and machine learning engineers can develop custom algorithms tailored to your specific needs.
+          </p>
+          <Button onClick={handleCustomAlgorithms} className="bg-primary hover:bg-primary/90">
+            Inquire About Custom Algorithms
+          </Button>
         </div>
       </section>
     </PageLayout>
