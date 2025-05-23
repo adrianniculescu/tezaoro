@@ -1,4 +1,3 @@
-
 import React from 'react';
 import PageLayout from '@/components/PageLayout';
 import PageHeader from '@/components/PageHeader';
@@ -144,8 +143,7 @@ const Pricing = () => {
           <Alert className="bg-amber-500/10 border-amber-500/50 text-amber-200 max-w-3xl mx-auto mb-16">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Tezaoro is currently in testing mode. The platform is not yet open for customers. 
-              Join our waitlist to be notified when we launch.
+              Tezaoro is currently in MVP mode. The platform is open for customers by invitation only!
             </AlertDescription>
           </Alert>
           
