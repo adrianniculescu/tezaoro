@@ -3,9 +3,10 @@ import React from 'react';
 import PageLayout from '@/components/PageLayout';
 import PageHeader from '@/components/PageHeader';
 import { Card } from '@/components/ui/card';
-import { FileText, ArrowRight } from 'lucide-react';
+import { FileText, ArrowRight, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import { Badge } from '@/components/ui/badge';
 
 const Platform = () => {
   const guides = [
@@ -23,6 +24,78 @@ const Platform = () => {
       title: "Deploying Your First Algorithm",
       description: "A step-by-step guide to selecting and deploying your first trading algorithm.",
       url: "/platform/deploying-first-algorithm"
+    }
+  ];
+  
+  const pricingTiers = [
+    {
+      title: "Starter",
+      price: "$99",
+      period: "/month",
+      description: "Perfect for individual traders new to algorithmic trading.",
+      features: [
+        { text: "Access to 3 basic algorithms", available: true },
+        { text: "Daily trading signals", available: true },
+        { text: "Basic performance analytics", available: true },
+        { text: "Email support", available: true },
+        { text: "Custom algorithm deployment", available: false },
+        { text: "Advanced risk management", available: false },
+        { text: "API access", available: false },
+      ],
+      buttonText: "Join Waitlist",
+      action: () => {
+        const subject = encodeURIComponent("Tezaoro Waitlist - Starter Plan");
+        const body = encodeURIComponent(
+          "Hello Tezaoro team,\n\nI would like to join the waitlist for the Starter plan.\n\nThank you!"
+        );
+        window.location.href = `mailto:office@tezaoro.com?subject=${subject}&body=${body}`;
+      }
+    },
+    {
+      title: "Professional",
+      price: "$299",
+      period: "/month",
+      description: "For serious traders looking for advanced capabilities.",
+      features: [
+        { text: "Access to all 12+ algorithms", available: true },
+        { text: "Real-time trading signals", available: true },
+        { text: "Advanced analytics dashboard", available: true },
+        { text: "Priority support", available: true },
+        { text: "Custom algorithm deployment", available: true },
+        { text: "Advanced risk management", available: true },
+        { text: "API access", available: false },
+      ],
+      buttonText: "Join Waitlist",
+      recommended: true,
+      action: () => {
+        const subject = encodeURIComponent("Tezaoro Waitlist - Professional Plan");
+        const body = encodeURIComponent(
+          "Hello Tezaoro team,\n\nI would like to join the waitlist for the Professional plan.\n\nThank you!"
+        );
+        window.location.href = `mailto:office@tezaoro.com?subject=${subject}&body=${body}`;
+      }
+    },
+    {
+      title: "Enterprise",
+      price: "Custom",
+      description: "Tailored solutions for institutional investors and funds.",
+      features: [
+        { text: "Access to all algorithms + exclusives", available: true },
+        { text: "Real-time trading signals", available: true },
+        { text: "Institutional-grade analytics", available: true },
+        { text: "Dedicated account manager", available: true },
+        { text: "Custom algorithm development", available: true },
+        { text: "Enterprise risk controls", available: true },
+        { text: "Full API integration", available: true },
+      ],
+      buttonText: "Contact Sales",
+      action: () => {
+        const subject = encodeURIComponent("Tezaoro Enterprise Solutions Inquiry");
+        const body = encodeURIComponent(
+          "Hello Tezaoro team,\n\nI'm interested in learning more about your Enterprise solutions.\n\nPlease provide information about pricing and features for our organization.\n\nThank you!"
+        );
+        window.location.href = `mailto:office@tezaoro.com?subject=${subject}&body=${body}`;
+      }
     }
   ];
   
@@ -61,6 +134,64 @@ const Platform = () => {
                 </Link>
               </Card>
             ))}
+          </div>
+        </div>
+      </section>
+      
+      <section className="py-16 md:py-24 bg-card/30">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-center mb-12">
+            Pricing <span className="text-gradient">Plans</span>
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+            {pricingTiers.map((tier, index) => (
+              <Card 
+                key={index} 
+                className={`glass-card bg-card p-8 border ${tier.recommended ? 'border-primary' : 'border-border'} relative`}
+              >
+                {tier.recommended && (
+                  <Badge className="absolute top-0 right-0 translate-x-1/4 -translate-y-1/2 bg-primary">
+                    Recommended
+                  </Badge>
+                )}
+                <h3 className="text-2xl font-bold mb-2">{tier.title}</h3>
+                <div className="flex items-end gap-2 mb-4">
+                  <span className="text-4xl font-extrabold">{tier.price}</span>
+                  {tier.period && <span className="text-muted-foreground">{tier.period}</span>}
+                </div>
+                <p className="text-muted-foreground mb-6">{tier.description}</p>
+                
+                <div className="space-y-4 mb-8">
+                  {tier.features.map((feature, idx) => (
+                    <div key={idx} className="flex items-start gap-3">
+                      {feature.available ? (
+                        <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
+                      ) : (
+                        <X className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+                      )}
+                      <span className={feature.available ? '' : 'text-muted-foreground'}>
+                        {feature.text}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                
+                <Button 
+                  className={`w-full ${tier.recommended ? 'bg-primary hover:bg-primary/90' : ''}`}
+                  variant={tier.recommended ? 'default' : 'outline'}
+                  onClick={tier.action}
+                >
+                  {tier.buttonText}
+                </Button>
+              </Card>
+            ))}
+          </div>
+          
+          <div className="text-center">
+            <p className="text-muted-foreground">
+              All plans will include a 14-day free trial once we launch. No credit card required.
+            </p>
           </div>
         </div>
       </section>
