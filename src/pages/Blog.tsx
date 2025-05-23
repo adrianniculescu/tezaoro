@@ -1,4 +1,3 @@
-
 import React from 'react';
 import PageLayout from '@/components/PageLayout';
 import PageHeader from '@/components/PageHeader';
@@ -158,6 +157,14 @@ const Blog = () => {
     "Trading Psychology"
   ];
 
+  const handleNewsletterSignup = () => {
+    const subject = encodeURIComponent("Tezaoro Newsletter Subscription");
+    const body = encodeURIComponent(
+      "Hello Tezaoro team,\n\nI would like to subscribe to your newsletter for the latest updates and insights on algorithmic trading.\n\nPlease add me to your mailing list.\n\nThank you!"
+    );
+    window.location.href = `mailto:office@tezaoro.com?subject=${subject}&body=${body}`;
+  };
+
   return (
     <PageLayout title="Blog">
       <PageHeader 
@@ -243,9 +250,9 @@ const Blog = () => {
             Our blog is currently under development and will be available when Tezaoro launches.
             Subscribe to our newsletter to receive articles and insights on algorithmic trading.
           </p>
-          <div className="inline-block bg-primary hover:bg-primary/90 text-white font-medium py-3 px-6 rounded-md cursor-not-allowed opacity-70">
-            Subscribe to Newsletter (Coming Soon)
-          </div>
+          <Button onClick={handleNewsletterSignup} className="bg-primary hover:bg-primary/90">
+            Subscribe to Newsletter
+          </Button>
         </div>
       </section>
     </PageLayout>

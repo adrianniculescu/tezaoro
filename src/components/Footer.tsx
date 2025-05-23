@@ -7,6 +7,14 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Link } from 'react-router-dom';
 
 const Footer = () => {
+  const handleNewsletterSignup = () => {
+    const subject = encodeURIComponent("Tezaoro Newsletter Subscription");
+    const body = encodeURIComponent(
+      "Hello Tezaoro team,\n\nI would like to subscribe to your newsletter for the latest updates on Tezaoro's AI-powered algorithmic trading platform.\n\nPlease add me to your mailing list.\n\nThank you!"
+    );
+    window.location.href = `mailto:office@tezaoro.com?subject=${subject}&body=${body}`;
+  };
+
   return (
     <footer className="bg-background border-t border-border">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -90,8 +98,8 @@ const Footer = () => {
               Subscribe to our newsletter for the latest updates.
             </p>
             <div className="flex gap-2">
-              <Input placeholder="Enter your email" className="bg-background" />
-              <Button className="bg-primary hover:bg-primary/90">
+              <Input placeholder="Enter your email" className="bg-background" disabled />
+              <Button onClick={handleNewsletterSignup} className="bg-primary hover:bg-primary/90">
                 Subscribe
               </Button>
             </div>
