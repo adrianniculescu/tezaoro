@@ -26,6 +26,11 @@ const PerformanceDashboardGuide = lazy(() => import('@/pages/guides/PerformanceD
 const ReportingFeatures = lazy(() => import('@/pages/guides/ReportingFeatures'));
 const OptimizationTechniques = lazy(() => import('@/pages/guides/OptimizationTechniques'));
 
+// Import blog posts
+const ChooseAlgorithmicTradingPlatform = lazy(() => import('@/pages/blog/ChooseAlgorithmicTradingPlatform'));
+const CryptoAlgorithmicTradingStrategies = lazy(() => import('@/pages/blog/CryptoAlgorithmicTradingStrategies'));
+const RiskManagementAlgorithmicTrading = lazy(() => import('@/pages/blog/RiskManagementAlgorithmicTrading'));
+
 function App() {
   return (
     <TooltipProvider>
@@ -54,6 +59,11 @@ function App() {
             <Route path="/performance/dashboard-guide" element={<PerformanceDashboardGuide />} />
             <Route path="/performance/reporting-features" element={<ReportingFeatures />} />
             <Route path="/performance/optimization-techniques" element={<OptimizationTechniques />} />
+
+            {/* Blog post routes */}
+            <Route path="/guide/choose-algorithmic-trading-platform" element={<ChooseAlgorithmicTradingPlatform />} />
+            <Route path="/guide/top-crypto-algorithmic-trading-strategies" element={<CryptoAlgorithmicTradingStrategies />} />
+            <Route path="/guide/risk-management-algorithmic-trading" element={<RiskManagementAlgorithmicTrading />} />
           </Routes>
         </Suspense>
       </Router>
