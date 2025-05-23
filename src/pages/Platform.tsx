@@ -1,5 +1,6 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet';
 import PageLayout from '@/components/PageLayout';
 import PageHeader from '@/components/PageHeader';
 import { Card } from '@/components/ui/card';
@@ -12,6 +13,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 
 const Platform = () => {
+  // Add useEffect for title
+  useEffect(() => {
+    document.title = "Build & Deploy Trading Algorithms – AI Backtesting, Risk Management Tools | Tezaoro";
+  }, []);
+
   // Form state
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -161,6 +167,45 @@ const Platform = () => {
   
   return (
     <PageLayout title="Platform">
+      <Helmet>
+        <title>Build & Deploy Trading Algorithms – AI Backtesting, Risk Management Tools | Tezaoro</title>
+        <meta name="description" content="Deploy powerful trading algorithms with Tezaoro's comprehensive platform. Access AI backtesting, risk management tools, and real-time analytics for optimized trading performance." />
+        <meta name="keywords" content="trading algorithms, AI backtesting, risk management tools, automated trading platform, algo trading software" />
+        <link rel="canonical" href="https://tezaoro.com/platform" />
+        
+        {/* Schema Markup for HowTo */}
+        <script type="application/ld+json">
+          {`{
+            "@context": "https://schema.org",
+            "@type": "HowTo",
+            "name": "How to Use the Tezaoro Trading Platform",
+            "description": "Learn how to set up and use the Tezaoro algorithmic trading platform effectively",
+            "step": [
+              {
+                "@type": "HowToStep",
+                "name": "Platform Overview",
+                "text": "Get familiar with the Tezaoro platform interface and key features."
+              },
+              {
+                "@type": "HowToStep",
+                "name": "Account Setup",
+                "text": "Learn how to set up your account, security settings, and preferences."
+              },
+              {
+                "@type": "HowToStep",
+                "name": "Select an Algorithm",
+                "text": "Choose from our library of trading algorithms based on your strategy."
+              },
+              {
+                "@type": "HowToStep",
+                "name": "Deploy Your Algorithm",
+                "text": "Configure and deploy your selected algorithm to start trading."
+              }
+            ]
+          }`}
+        </script>
+      </Helmet>
+      
       <PageHeader 
         title="Tezaoro Platform" 
         description="Everything you need to know about using our advanced algorithmic trading platform"
