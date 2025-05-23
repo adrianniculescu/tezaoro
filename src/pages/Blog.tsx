@@ -1,3 +1,4 @@
+
 import React from 'react';
 import PageLayout from '@/components/PageLayout';
 import PageHeader from '@/components/PageHeader';
@@ -82,7 +83,7 @@ const Blog = () => {
     {
       title: "How to Choose an Algorithmic Trading Platform: Expert Guide",
       excerpt: "Discover the essential factors to consider when selecting the perfect algorithmic trading platform for your trading goals and experience level.",
-      date: "December 2024",
+      date: "January 2025",
       author: "Tezaoro Team",
       readTime: "12 min read",
       category: "Expert Guide",
@@ -93,7 +94,7 @@ const Blog = () => {
     {
       title: "Top Algorithmic Trading Strategies for Cryptocurrency",
       excerpt: "Explore the most effective crypto algorithmic trading strategies including mean reversion, momentum trading, arbitrage, and more.",
-      date: "December 2024",
+      date: "January 2025",
       author: "Tezaoro Team",
       readTime: "10 min read",
       category: "Crypto Strategies",
@@ -104,100 +105,142 @@ const Blog = () => {
     {
       title: "Risk Management in Algorithmic Trading: Essential Strategies",
       excerpt: "Master the essential risk management techniques to protect your capital and trade with confidence in algorithmic trading.",
-      date: "December 2024",
+      date: "January 2025",
       author: "Tezaoro Team",
       readTime: "8 min read",
       category: "Risk Management",
       image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
       slug: "/guide/risk-management-algorithmic-trading",
       isPublished: true
+    },
+    {
+      title: "Backtesting 101: How to Validate Your Trading Algorithm",
+      excerpt: "Learn how to backtest trading algorithms effectively. Avoid overfitting and ensure your strategy works in real markets.",
+      date: "January 2025",
+      author: "Tezaoro Team",
+      readTime: "8 min read",
+      category: "Strategy Testing",
+      image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
+      slug: "/guide/backtesting-trading-algorithm",
+      isPublished: true
+    },
+    {
+      title: "Algorithmic Trading vs. Manual Trading: Pros, Cons, and Use Cases",
+      excerpt: "Compare algorithmic and manual trading. Discover the benefits and best scenarios for each approach.",
+      date: "January 2025",
+      author: "Tezaoro Team",
+      readTime: "7 min read",
+      category: "Trading Comparison",
+      image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
+      slug: "/guide/algorithmic-vs-manual-trading",
+      isPublished: true
+    },
+    {
+      title: "Building Your First Trading Bot Without Coding Skills",
+      excerpt: "Create your first crypto trading bot with no coding experience. Step-by-step guide using intuitive platforms.",
+      date: "January 2025",
+      author: "Tezaoro Team",
+      readTime: "9 min read",
+      category: "Getting Started",
+      image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
+      slug: "/guide/building-first-trading-bot",
+      isPublished: true
+    },
+    {
+      title: "Access Institutional Trading Algorithms as a Retail Investor",
+      excerpt: "Discover how retail traders can use institutional-grade algorithms with advanced trading tools.",
+      date: "January 2025",
+      author: "Tezaoro Team",
+      readTime: "6 min read",
+      category: "Professional Tools",
+      image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
+      slug: "/guide/institutional-trading-algorithms",
+      isPublished: true
+    },
+    {
+      title: "How AI Is Transforming Algorithmic Trading",
+      excerpt: "Explore AI's impact on trading algorithms, from predictive analytics to sentiment analysis.",
+      date: "January 2025",
+      author: "Tezaoro Team",
+      readTime: "8 min read",
+      category: "AI & Technology",
+      image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
+      slug: "/guide/ai-algorithmic-trading",
+      isPublished: true
+    },
+    {
+      title: "How to Reduce Slippage in Algorithmic Trading",
+      excerpt: "Minimize slippage and improve trade execution with smart order routing and liquidity analysis.",
+      date: "January 2025",
+      author: "Tezaoro Team",
+      readTime: "7 min read",
+      category: "Trade Execution",
+      image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
+      slug: "/guide/reduce-slippage-trading",
+      isPublished: true
+    },
+    {
+      title: "Algorithmic Trading Regulations: A Compliance Guide",
+      excerpt: "Stay compliant with global algo trading regulations. Learn best practices for KYC, reporting, and audits.",
+      date: "January 2025",
+      author: "Tezaoro Team",
+      readTime: "9 min read",
+      category: "Compliance",
+      image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
+      slug: "/guide/trading-regulations-compliance",
+      isPublished: true
+    },
+    {
+      title: "Scalping vs. Swing Trading: Algorithmic Strategies Compared",
+      excerpt: "Compare scalping and swing trading algorithms. Learn which approach suits your risk tolerance and goals.",
+      date: "January 2025",
+      author: "Tezaoro Team",
+      readTime: "8 min read",
+      category: "Strategy Comparison",
+      image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
+      slug: "/guide/scalping-vs-swing-trading",
+      isPublished: true
+    },
+    {
+      title: "The Future of Algorithmic Trading: Emerging Technologies",
+      excerpt: "Explore next-gen trends in algorithmic trading, from quantum computing to decentralized AI models.",
+      date: "January 2025",
+      author: "Tezaoro Team",
+      readTime: "10 min read",
+      category: "Future Tech",
+      image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
+      slug: "/guide/future-algorithmic-trading",
+      isPublished: true
     }
   ];
 
   const upcomingPosts = [
     {
-      title: "The Future of Algorithmic Trading: AI and Beyond",
-      excerpt: "Explore how artificial intelligence is revolutionizing algorithmic trading strategies and what the future holds for automated trading systems.",
+      title: "Advanced Portfolio Optimization Techniques",
+      excerpt: "Learn sophisticated portfolio management strategies used by institutional traders and how to apply them to your algorithmic trading.",
       date: "Coming Soon",
       author: "Alex Chen",
-      readTime: "8 min read",
-      category: "Industry Trends",
-      image: "/images/blog/ai-trading.jpg"
+      readTime: "11 min read",
+      category: "Portfolio Management",
+      image: "/images/blog/portfolio-optimization.jpg"
     },
     {
-      title: "Understanding Risk Management in Algorithmic Trading",
-      excerpt: "A comprehensive guide to implementing effective risk management strategies in your algorithmic trading operations.",
+      title: "Cross-Exchange Arbitrage: Capturing Price Differences",
+      excerpt: "Master the art of arbitrage trading across multiple exchanges to capture risk-free profits in volatile markets.",
       date: "Coming Soon",
       author: "Maria Rodriguez",
-      readTime: "12 min read",
-      category: "Risk Management",
-      image: "/images/blog/risk-management.jpg"
+      readTime: "9 min read",
+      category: "Arbitrage",
+      image: "/images/blog/arbitrage.jpg"
     },
     {
-      title: "Backtesting Strategies: Common Pitfalls to Avoid",
-      excerpt: "Learn how to properly backtest your trading algorithms and avoid the mistakes that can lead to misleading performance results.",
+      title: "Market Making Strategies for Crypto Traders",
+      excerpt: "Understand how market making works and how you can provide liquidity while earning consistent profits.",
       date: "Coming Soon",
       author: "James Wilson",
-      readTime: "10 min read",
-      category: "Strategy Development",
-      image: "/images/blog/backtesting.jpg"
-    }
-  ];
-  
-  const recentPosts = [
-    {
-      title: "Crypto Algorithmic Trading: Opportunities and Challenges",
-      excerpt: "An in-depth look at the unique considerations when developing trading algorithms for cryptocurrency markets.",
-      date: "Coming Soon",
-      author: "Sarah Johnson",
-      readTime: "9 min read",
-      category: "Crypto",
-      image: "/images/blog/crypto-trading.jpg"
-    },
-    {
-      title: "How to Choose the Right Trading Algorithm for Your Goals",
-      excerpt: "A practical guide to selecting and customizing algorithms based on your trading objectives, risk tolerance, and timeline.",
-      date: "Coming Soon",
-      author: "David Park",
-      readTime: "7 min read",
-      category: "Getting Started",
-      image: "/images/blog/algorithm-selection.jpg"
-    },
-    {
-      title: "The Psychology of Algorithmic Trading: Removing Emotion from Trading",
-      excerpt: "How algorithmic trading helps overcome common psychological biases that affect traditional trading approaches.",
-      date: "Coming Soon",
-      author: "Emma Roberts",
-      readTime: "11 min read",
-      category: "Trading Psychology",
-      image: "/images/blog/trading-psychology.jpg"
-    },
-    {
-      title: "Machine Learning Models for Market Prediction",
-      excerpt: "Exploring different machine learning techniques and their effectiveness in predicting market movements.",
-      date: "April 28, 2024",
-      author: "Michael Chen",
-      readTime: "14 min read",
-      category: "Machine Learning",
-      image: "/images/blog/ml-prediction.jpg"
-    },
-    {
-      title: "Regulatory Landscape for Algorithmic Trading in 2024",
-      excerpt: "An overview of current and upcoming regulations affecting algorithmic trading across different jurisdictions.",
-      date: "April 20, 2024",
-      author: "Jennifer Kim",
-      readTime: "10 min read",
-      category: "Regulation",
-      image: "/images/blog/regulations.jpg"
-    },
-    {
-      title: "High-Frequency Trading vs. Quantitative Strategies",
-      excerpt: "Comparing two different approaches to algorithmic trading and helping you decide which suits your resources and goals.",
-      date: "April 15, 2024",
-      author: "Thomas Brown",
-      readTime: "8 min read",
-      category: "Strategy Comparison",
-      image: "/images/blog/hft-quant.jpg"
+      readTime: "12 min read",
+      category: "Market Making",
+      image: "/images/blog/market-making.jpg"
     }
   ];
   
@@ -206,13 +249,15 @@ const Blog = () => {
     "Expert Guide",
     "Crypto Strategies", 
     "Risk Management",
-    "Industry Trends",
-    "Strategy Development",
-    "Crypto",
+    "Strategy Testing",
+    "Trading Comparison",
     "Getting Started",
-    "Machine Learning",
-    "Regulation",
-    "Trading Psychology"
+    "Professional Tools",
+    "AI & Technology",
+    "Trade Execution",
+    "Compliance",
+    "Strategy Comparison",
+    "Future Tech"
   ];
 
   const handleNewsletterSignup = () => {
@@ -258,7 +303,7 @@ const Blog = () => {
           <div className="mb-16">
             <h2 className="text-2xl md:text-3xl font-bold mb-8">Published <span className="text-gradient">Articles</span></h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {publishedPosts.map((post, index) => (
                 <BlogPostCard
                   key={index}
@@ -281,25 +326,6 @@ const Blog = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {upcomingPosts.map((post, index) => (
-                <BlogPostCard
-                  key={index}
-                  title={post.title}
-                  excerpt={post.excerpt}
-                  date={post.date}
-                  author={post.author}
-                  readTime={post.readTime}
-                  category={post.category}
-                  image={post.image}
-                />
-              ))}
-            </div>
-          </div>
-          
-          <div>
-            <h2 className="text-2xl md:text-3xl font-bold mb-8">More <span className="text-gradient">Articles</span></h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {recentPosts.map((post, index) => (
                 <BlogPostCard
                   key={index}
                   title={post.title}

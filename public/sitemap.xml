@@ -3,121 +3,175 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://tezaoro.com/</loc>
-    <lastmod>2025-05-23</lastmod>
+    <lastmod>2025-01-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://tezaoro.com/platform</loc>
-    <lastmod>2025-05-23</lastmod>
+    <lastmod>2025-01-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://tezaoro.com/features</loc>
-    <lastmod>2025-05-23</lastmod>
+    <lastmod>2025-01-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://tezaoro.com/algorithms</loc>
-    <lastmod>2025-05-23</lastmod>
+    <lastmod>2025-01-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://tezaoro.com/performance</loc>
-    <lastmod>2025-05-23</lastmod>
+    <lastmod>2025-01-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://tezaoro.com/pricing</loc>
-    <lastmod>2025-05-23</lastmod>
+    <lastmod>2025-01-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://tezaoro.com/how-it-works</loc>
-    <lastmod>2025-05-23</lastmod>
+    <lastmod>2025-01-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://tezaoro.com/blog</loc>
-    <lastmod>2025-05-23</lastmod>
+    <lastmod>2025-01-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://tezaoro.com/support</loc>
-    <lastmod>2025-05-23</lastmod>
+    <lastmod>2025-01-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://tezaoro.com/documentation</loc>
-    <lastmod>2025-05-23</lastmod>
+    <lastmod>2025-01-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://tezaoro.com/platform/platform-overview</loc>
-    <lastmod>2025-05-23</lastmod>
+    <lastmod>2025-01-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://tezaoro.com/platform/account-setup</loc>
-    <lastmod>2025-05-23</lastmod>
+    <lastmod>2025-01-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://tezaoro.com/platform/deploying-first-algorithm</loc>
-    <lastmod>2025-05-23</lastmod>
+    <lastmod>2025-01-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://tezaoro.com/performance/metrics-explained</loc>
-    <lastmod>2025-05-23</lastmod>
+    <lastmod>2025-01-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://tezaoro.com/performance/dashboard-guide</loc>
-    <lastmod>2025-05-23</lastmod>
+    <lastmod>2025-01-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://tezaoro.com/performance/reporting-features</loc>
-    <lastmod>2025-05-23</lastmod>
+    <lastmod>2025-01-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://tezaoro.com/performance/optimization-techniques</loc>
-    <lastmod>2025-05-23</lastmod>
+    <lastmod>2025-01-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://tezaoro.com/guide/choose-algorithmic-trading-platform</loc>
-    <lastmod>2025-05-23</lastmod>
+    <lastmod>2025-01-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://tezaoro.com/guide/top-crypto-algorithmic-trading-strategies</loc>
-    <lastmod>2025-05-23</lastmod>
+    <lastmod>2025-01-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://tezaoro.com/guide/risk-management-algorithmic-trading</loc>
-    <lastmod>2025-05-23</lastmod>
+    <lastmod>2025-01-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tezaoro.com/guide/backtesting-trading-algorithm</loc>
+    <lastmod>2025-01-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tezaoro.com/guide/algorithmic-vs-manual-trading</loc>
+    <lastmod>2025-01-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tezaoro.com/guide/building-first-trading-bot</loc>
+    <lastmod>2025-01-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tezaoro.com/guide/institutional-trading-algorithms</loc>
+    <lastmod>2025-01-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tezaoro.com/guide/ai-algorithmic-trading</loc>
+    <lastmod>2025-01-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tezaoro.com/guide/reduce-slippage-trading</loc>
+    <lastmod>2025-01-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tezaoro.com/guide/trading-regulations-compliance</loc>
+    <lastmod>2025-01-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tezaoro.com/guide/scalping-vs-swing-trading</loc>
+    <lastmod>2025-01-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tezaoro.com/guide/future-algorithmic-trading</loc>
+    <lastmod>2025-01-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>

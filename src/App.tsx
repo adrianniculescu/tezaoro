@@ -26,10 +26,21 @@ const PerformanceDashboardGuide = lazy(() => import('@/pages/guides/PerformanceD
 const ReportingFeatures = lazy(() => import('@/pages/guides/ReportingFeatures'));
 const OptimizationTechniques = lazy(() => import('@/pages/guides/OptimizationTechniques'));
 
-// Import blog posts
+// Import blog posts - existing
 const ChooseAlgorithmicTradingPlatform = lazy(() => import('@/pages/blog/ChooseAlgorithmicTradingPlatform'));
 const CryptoAlgorithmicTradingStrategies = lazy(() => import('@/pages/blog/CryptoAlgorithmicTradingStrategies'));
 const RiskManagementAlgorithmicTrading = lazy(() => import('@/pages/blog/RiskManagementAlgorithmicTrading'));
+
+// Import new blog posts
+const BacktestingTradingAlgorithm = lazy(() => import('@/pages/blog/BacktestingTradingAlgorithm'));
+const AlgorithmicVsManualTrading = lazy(() => import('@/pages/blog/AlgorithmicVsManualTrading'));
+const BuildingFirstTradingBot = lazy(() => import('@/pages/blog/BuildingFirstTradingBot'));
+const InstitutionalTradingAlgorithms = lazy(() => import('@/pages/blog/InstitutionalTradingAlgorithms'));
+const AIAlgorithmicTrading = lazy(() => import('@/pages/blog/AIAlgorithmicTrading'));
+const ReduceSlippageTrading = lazy(() => import('@/pages/blog/ReduceSlippageTrading'));
+const TradingRegulationsCompliance = lazy(() => import('@/pages/blog/TradingRegulationsCompliance'));
+const ScalpingVsSwingTrading = lazy(() => import('@/pages/blog/ScalpingVsSwingTrading'));
+const FutureAlgorithmicTrading = lazy(() => import('@/pages/blog/FutureAlgorithmicTrading'));
 
 function App() {
   return (
@@ -64,6 +75,17 @@ function App() {
             <Route path="/guide/choose-algorithmic-trading-platform" element={<ChooseAlgorithmicTradingPlatform />} />
             <Route path="/guide/top-crypto-algorithmic-trading-strategies" element={<CryptoAlgorithmicTradingStrategies />} />
             <Route path="/guide/risk-management-algorithmic-trading" element={<RiskManagementAlgorithmicTrading />} />
+
+            {/* New blog post routes */}
+            <Route path="/guide/backtesting-trading-algorithm" element={<BacktestingTradingAlgorithm />} />
+            <Route path="/guide/algorithmic-vs-manual-trading" element={<AlgorithmicVsManualTrading />} />
+            <Route path="/guide/building-first-trading-bot" element={<BuildingFirstTradingBot />} />
+            <Route path="/guide/institutional-trading-algorithms" element={<InstitutionalTradingAlgorithms />} />
+            <Route path="/guide/ai-algorithmic-trading" element={<AIAlgorithmicTrading />} />
+            <Route path="/guide/reduce-slippage-trading" element={<ReduceSlippageTrading />} />
+            <Route path="/guide/trading-regulations-compliance" element={<TradingRegulationsCompliance />} />
+            <Route path="/guide/scalping-vs-swing-trading" element={<ScalpingVsSwingTrading />} />
+            <Route path="/guide/future-algorithmic-trading" element={<FutureAlgorithmicTrading />} />
           </Routes>
         </Suspense>
       </Router>
