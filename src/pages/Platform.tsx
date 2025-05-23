@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import PageLayout from '@/components/PageLayout';
 import PageHeader from '@/components/PageHeader';
 import { Card } from '@/components/ui/card';
@@ -7,8 +7,50 @@ import { FileText, ArrowRight, Check, X, Video, Users, Book } from 'lucide-react
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
 
 const Platform = () => {
+  // Form state
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [subject, setSubject] = useState('');
+  const [message, setMessage] = useState('');
+  const { toast } = useToast();
+  
+  // Handle contact form submission
+  const handleContactSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!name || !email || !subject || !message) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all fields before sending your message.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    const mailtoSubject = encodeURIComponent(`Tezaoro Contact: ${subject}`);
+    const mailtoBody = encodeURIComponent(
+      `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`
+    );
+    
+    window.location.href = `mailto:office@tezaoro.com?subject=${mailtoSubject}&body=${mailtoBody}`;
+    
+    // Reset form
+    setName('');
+    setEmail('');
+    setSubject('');
+    setMessage('');
+    
+    toast({
+      title: "Email client opened",
+      description: "Your message has been prepared to send to our team.",
+    });
+  };
+  
   const guides = [
     {
       title: "Platform Overview",
@@ -136,7 +178,7 @@ const Platform = () => {
                 <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
               </svg>
             </div>
-            <input 
+            <Input 
               type="search" 
               id="default-search" 
               className="block w-full p-4 pl-10 text-sm bg-card border border-border rounded-lg focus:ring-primary focus:border-primary" 
@@ -306,24 +348,125 @@ const Platform = () => {
       </section>
       
       <section className="py-16 md:py-24 bg-card/30">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-3xl text-center">
-          <h2 className="text-3xl font-bold mb-6">Need <span className="text-gradient">Help?</span></h2>
-          <p className="text-lg text-muted-foreground mb-8">
-            Our support team is available to assist you with any questions about the Tezaoro platform.
-            Feel free to reach out for personalized guidance.
-          </p>
-          <Button 
-            onClick={() => {
-              const subject = encodeURIComponent("Tezaoro Platform Support Request");
-              const body = encodeURIComponent(
-                "Hello Tezaoro team,\n\nI need assistance with the platform.\n\nMy question/issue is:\n\n\nThank you!"
-              );
-              window.location.href = `mailto:office@tezaoro.com?subject=${subject}&body=${body}`;
-            }}
-            className="bg-primary hover:bg-primary/90"
-          >
-            Contact Support
-          </Button>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-center mb-12">
+            Contact <span className="text-gradient">Us</span>
+          </h2>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start max-w-6xl mx-auto">
+            <div className="lg:col-span-2">
+              <Card className="glass-card bg-card p-8">
+                <h3 className="text-xl font-bold mb-6">Send us a message</h3>
+                
+                <form onSubmit={handleContactSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label htmlFor="name" className="text-sm font-medium">Name</label>
+                      <Input 
+                        id="name" 
+                        placeholder="Your name" 
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label htmlFor="email" className="text-sm font-medium">Email</label>
+                      <Input 
+                        id="email" 
+                        type="email" 
+                        placeholder="Your email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label htmlFor="subject" className="text-sm font-medium">Subject</label>
+                    <Input 
+                      id="subject" 
+                      placeholder="What is your message about?"
+                      value={subject}
+                      onChange={(e) => setSubject(e.target.value)}
+                      required
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label htmlFor="message" className="text-sm font-medium">Message</label>
+                    <Textarea 
+                      id="message" 
+                      placeholder="How can we help you?" 
+                      rows={6}
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      required
+                    />
+                  </div>
+                  
+                  <Button type="submit" className="w-full">Send Message</Button>
+                </form>
+              </Card>
+            </div>
+            
+            <div className="lg:col-span-1">
+              <Card className="glass-card bg-card p-8">
+                <h3 className="text-xl font-bold mb-6">Contact Information</h3>
+                
+                <div className="space-y-6">
+                  <div className="flex items-start gap-3">
+                    <svg className="h-5 w-5 text-primary shrink-0 mt-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <rect width="20" height="16" x="2" y="4" rx="2" strokeWidth="2" strokeLinejoin="round" />
+                      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <div>
+                      <h4 className="text-base font-medium">Email</h4>
+                      <p className="text-muted-foreground">office@tezaoro.com</p>
+                      <p className="text-xs text-muted-foreground">(Available after launch)</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <svg className="h-5 w-5 text-primary shrink-0 mt-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M12 6v6l4 2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <div>
+                      <h4 className="text-base font-medium">Support Hours</h4>
+                      <p className="text-muted-foreground">Monday - Friday</p>
+                      <p className="text-muted-foreground">9:00 AM - 5:00 PM EST</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <svg className="h-5 w-5 text-primary shrink-0 mt-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path d="M12 6v6l4 2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <circle cx="12" cy="12" r="10" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <div>
+                      <h4 className="text-base font-medium">Response Time</h4>
+                      <p className="text-muted-foreground">Standard: Within 24 hours</p>
+                      <p className="text-muted-foreground">Priority: Within 4 hours</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <svg className="h-5 w-5 text-primary shrink-0 mt-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <circle cx="12" cy="12" r="10" strokeWidth="2" />
+                      <path d="M12 8v8m-4-4h8" strokeWidth="2" strokeLinecap="round" />
+                    </svg>
+                    <div>
+                      <h4 className="text-base font-medium">Emergency Support</h4>
+                      <p className="text-muted-foreground">Available for Enterprise customers</p>
+                      <p className="text-muted-foreground">24/7 critical issue resolution</p>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </div>
         </div>
       </section>
     </PageLayout>
