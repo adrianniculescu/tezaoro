@@ -1,11 +1,11 @@
-
 import React from 'react';
 import PageLayout from '@/components/PageLayout';
 import PageHeader from '@/components/PageHeader';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from 'recharts';
-import { AlertTriangle, HelpCircle } from 'lucide-react';
+import { AlertTriangle, HelpCircle, ArrowRight, FileText } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import {
   Alert,
   AlertDescription,
@@ -16,6 +16,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Button } from '@/components/ui/button';
 
 const Performance = () => {
   const monthlyPerformance = [
@@ -60,6 +61,29 @@ const Performance = () => {
     { title: 'Recovery Time', value: '21 days' },
   ];
   
+  const performanceGuides = [
+    {
+      title: "Performance Metrics Explained",
+      description: "Learn about the key metrics used to evaluate algorithm performance and what they mean.",
+      url: "/performance/metrics-explained"
+    },
+    {
+      title: "Performance Dashboard Guide",
+      description: "How to use and customize the performance dashboard to monitor your algorithms.",
+      url: "/performance/dashboard-guide"
+    },
+    {
+      title: "Reporting Features",
+      description: "Generate, customize, and share performance reports for your algorithms.",
+      url: "/performance/reporting-features"
+    },
+    {
+      title: "Optimization Techniques",
+      description: "Strategies for improving algorithm performance based on historical data.",
+      url: "/performance/optimization-techniques"
+    }
+  ];
+  
   return (
     <PageLayout title="Performance">
       <PageHeader 
@@ -76,6 +100,37 @@ const Performance = () => {
               Actual trading may result in different outcomes based on market conditions and other factors.
             </AlertDescription>
           </Alert>
+          
+          {/* Performance guides section */}
+          <div className="mb-16">
+            <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center">
+              Performance <span className="text-gradient">Guides</span>
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {performanceGuides.map((guide, index) => (
+                <Card key={index} className="glass-card bg-card p-6 flex flex-col">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-primary/10 rounded-full">
+                      <FileText className="h-5 w-5 text-primary" />
+                    </div>
+                    <h3 className="text-lg font-bold">{guide.title}</h3>
+                  </div>
+                  
+                  <p className="text-muted-foreground mb-6 flex-grow">
+                    {guide.description}
+                  </p>
+                  
+                  <Link to={guide.url}>
+                    <Button variant="outline" className="w-full flex items-center justify-between">
+                      <span>Read guide</span>
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                </Card>
+              ))}
+            </div>
+          </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
             {keyMetrics.map((metric, index) => (

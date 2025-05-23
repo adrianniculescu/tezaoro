@@ -20,6 +20,12 @@ const PlatformOverview = lazy(() => import('@/pages/guides/PlatformOverview'));
 const AccountSetup = lazy(() => import('@/pages/guides/AccountSetup'));
 const DeployingFirstAlgorithm = lazy(() => import('@/pages/guides/DeployingFirstAlgorithm'));
 
+// Import new guide pages
+const PerformanceMetricsExplained = lazy(() => import('@/pages/guides/PerformanceMetricsExplained'));
+const PerformanceDashboardGuide = lazy(() => import('@/pages/guides/PerformanceDashboardGuide'));
+const ReportingFeatures = lazy(() => import('@/pages/guides/ReportingFeatures'));
+const OptimizationTechniques = lazy(() => import('@/pages/guides/OptimizationTechniques'));
+
 function App() {
   return (
     <TooltipProvider>
@@ -38,10 +44,16 @@ function App() {
             <Route path="/support" element={<Support />} />
             <Route path="/api" element={<Api />} />
 
-            {/* Add these routes */}
+            {/* Platform guide routes */}
             <Route path="/platform/platform-overview" element={<PlatformOverview />} />
             <Route path="/platform/account-setup" element={<AccountSetup />} />
             <Route path="/platform/deploying-first-algorithm" element={<DeployingFirstAlgorithm />} />
+            
+            {/* Performance guide routes */}
+            <Route path="/performance/metrics-explained" element={<PerformanceMetricsExplained />} />
+            <Route path="/performance/dashboard-guide" element={<PerformanceDashboardGuide />} />
+            <Route path="/performance/reporting-features" element={<ReportingFeatures />} />
+            <Route path="/performance/optimization-techniques" element={<OptimizationTechniques />} />
           </Routes>
         </Suspense>
       </Router>
