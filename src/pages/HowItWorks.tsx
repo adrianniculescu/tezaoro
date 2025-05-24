@@ -165,6 +165,12 @@ const HowItWorks = () => {
               <h2 className="text-3xl font-bold mb-8 text-center">Frequently Asked <span className="text-gradient">Questions</span></h2>
               <div className="space-y-6">
                 <Card className="glass-card p-6">
+                  <h3 className="text-xl font-bold mb-2">How can I sign-up to the platform?</h3>
+                  <p className="text-muted-foreground">
+                    Tezaoro is currently in MVP mode. The platform is open for customers by invitation only!
+                  </p>
+                </Card>
+                <Card className="glass-card p-6">
                   <h3 className="text-xl font-bold mb-2">How much capital do I need to start?</h3>
                   <p className="text-muted-foreground">
                     We recommend starting with at least $5,000 to properly diversify across multiple strategies, though you can begin with as little as $1,000 for select algorithms.
