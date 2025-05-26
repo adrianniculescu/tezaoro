@@ -1,3 +1,4 @@
+
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import './App.css';
@@ -16,6 +17,10 @@ const Blog = lazy(() => import('@/pages/Blog'));
 const Support = lazy(() => import('@/pages/Support'));
 const Api = lazy(() => import('@/pages/Api'));
 const TokenomicsConsulting = lazy(() => import('@/pages/TokenomicsConsulting'));
+
+// Import service pages
+const TokenListing = lazy(() => import('@/pages/TokenListing'));
+const MarketMaking = lazy(() => import('@/pages/MarketMaking'));
 
 // Import Changelly-powered pages
 const Exchange = lazy(() => import('@/pages/Exchange'));
@@ -87,6 +92,10 @@ function App() {
             <Route path="/support" element={<Support />} />
             <Route path="/api" element={<Api />} />
             <Route path="/tokenomics-consulting" element={<TokenomicsConsulting />} />
+
+            {/* Service pages */}
+            <Route path="/token-listing" element={<TokenListing />} />
+            <Route path="/market-making" element={<MarketMaking />} />
 
             {/* Trading pages */}
             <Route path="/exchange" element={<Exchange />} />

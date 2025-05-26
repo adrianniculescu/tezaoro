@@ -73,12 +73,12 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4">Platform</h3>
             <ul className="space-y-3">
-              <li><a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a></li>
-              <li><a href="#algorithms" className="text-muted-foreground hover:text-foreground transition-colors">Algorithms</a></li>
-              <li><a href="#performance" className="text-muted-foreground hover:text-foreground transition-colors">Performance</a></li>
+              <li><Link to="/features" className="text-muted-foreground hover:text-foreground transition-colors">Features</Link></li>
+              <li><Link to="/algorithms" className="text-muted-foreground hover:text-foreground transition-colors">Algorithms</Link></li>
+              <li><Link to="/performance" className="text-muted-foreground hover:text-foreground transition-colors">Performance</Link></li>
               <li><Link to="/token-listing" className="text-muted-foreground hover:text-foreground transition-colors">Token Listing</Link></li>
               <li><Link to="/market-making" className="text-muted-foreground hover:text-foreground transition-colors">Market Making</Link></li>
-              <li><a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">Pricing</a></li>
+              <li><Link to="/pricing" className="text-muted-foreground hover:text-foreground transition-colors">Pricing</Link></li>
             </ul>
           </div>
           
@@ -86,10 +86,10 @@ const Footer = () => {
             <h3 className="text-lg font-semibold mb-4">Services</h3>
             <ul className="space-y-3">
               <li><Link to="/tokenomics-consulting" className="text-muted-foreground hover:text-foreground transition-colors">Tokenomics Consulting</Link></li>
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Documentation</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">API</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Blog</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Support</a></li>
+              <li><Link to="/documentation" className="text-muted-foreground hover:text-foreground transition-colors">Documentation</Link></li>
+              <li><Link to="/api" className="text-muted-foreground hover:text-foreground transition-colors">API</Link></li>
+              <li><Link to="/blog" className="text-muted-foreground hover:text-foreground transition-colors">Blog</Link></li>
+              <li><Link to="/support" className="text-muted-foreground hover:text-foreground transition-colors">Support</Link></li>
             </ul>
           </div>
           
