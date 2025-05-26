@@ -18,7 +18,7 @@ const Support = lazy(() => import('@/pages/Support'));
 const Api = lazy(() => import('@/pages/Api'));
 const TokenomicsConsulting = lazy(() => import('@/pages/TokenomicsConsulting'));
 
-// Import remaining Changelly-powered pages
+// Import Changelly-powered pages
 const Exchange = lazy(() => import('@/pages/Exchange'));
 const FiatGateway = lazy(() => import('@/pages/FiatGateway'));
 
@@ -69,7 +69,7 @@ function App() {
             <Route path="/api" element={<Api />} />
             <Route path="/tokenomics-consulting" element={<TokenomicsConsulting />} />
 
-            {/* Remaining Changelly-powered trading pages */}
+            {/* Trading pages */}
             <Route path="/exchange" element={<Exchange />} />
             <Route path="/fiat-gateway" element={<FiatGateway />} />
 
