@@ -58,9 +58,6 @@ const Testimonials = () => {
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             What Our <span className="text-gradient">Clients</span> Say
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Join thousands of traders already benefiting from our platform.
-          </p>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
