@@ -83,8 +83,9 @@ const Footer = () => {
           </div>
           
           <div>
-            <h3 className="text-lg font-semibold mb-4">Resources</h3>
+            <h3 className="text-lg font-semibold mb-4">Services</h3>
             <ul className="space-y-3">
+              <li><Link to="/tokenomics-consulting" className="text-muted-foreground hover:text-foreground transition-colors">Tokenomics Consulting</Link></li>
               <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Documentation</a></li>
               <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">API</a></li>
               <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Blog</a></li>

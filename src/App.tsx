@@ -16,6 +16,7 @@ const HowItWorks = lazy(() => import('@/pages/HowItWorks'));
 const Blog = lazy(() => import('@/pages/Blog'));
 const Support = lazy(() => import('@/pages/Support'));
 const Api = lazy(() => import('@/pages/Api'));
+const TokenomicsConsulting = lazy(() => import('@/pages/TokenomicsConsulting'));
 const PlatformOverview = lazy(() => import('@/pages/guides/PlatformOverview'));
 const AccountSetup = lazy(() => import('@/pages/guides/AccountSetup'));
 const DeployingFirstAlgorithm = lazy(() => import('@/pages/guides/DeployingFirstAlgorithm'));
@@ -59,6 +60,7 @@ function App() {
             <Route path="/blog" element={<Blog />} />
             <Route path="/support" element={<Support />} />
             <Route path="/api" element={<Api />} />
+            <Route path="/tokenomics-consulting" element={<TokenomicsConsulting />} />
 
             {/* Platform guide routes */}
             <Route path="/platform/platform-overview" element={<PlatformOverview />} />
