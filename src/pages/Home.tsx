@@ -16,7 +16,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { ArrowRightLeft, CreditCard, TrendingUp, Zap, Code, Building } from 'lucide-react';
+import { ArrowRightLeft, CreditCard, TrendingUp, Zap } from 'lucide-react';
 
 const Home = () => {
   useEffect(() => {
@@ -69,11 +69,11 @@ const Home = () => {
                 Integrated <span className="text-gradient">Trading Solutions</span>
               </h2>
               <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                Access powerful trading tools, payment solutions, and enterprise services seamlessly integrated into Tezaoro
+                Access powerful trading tools and payment solutions seamlessly integrated into Tezaoro
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
               <Card className="glass-card bg-card p-6 text-center">
                 <div className="mb-6">
                   <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -128,64 +128,6 @@ const Home = () => {
                 <Link to="/fiat-gateway">
                   <Button className="w-full bg-primary hover:bg-primary/90">
                     Buy Crypto
-                  </Button>
-                </Link>
-              </Card>
-
-              <Card className="glass-card bg-card p-6 text-center">
-                <div className="mb-6">
-                  <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Code className="h-8 w-8 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-bold mb-3">Payment Widget</h3>
-                  <p className="text-muted-foreground mb-4 text-sm">
-                    Accept crypto payments on your website with our widget
-                  </p>
-                </div>
-                
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center justify-center gap-2 text-xs">
-                    <Zap className="h-3 w-3 text-green-500" />
-                    <span>Easy embed</span>
-                  </div>
-                  <div className="flex items-center justify-center gap-2 text-xs">
-                    <Code className="h-3 w-3 text-blue-500" />
-                    <span>Customizable</span>
-                  </div>
-                </div>
-
-                <Link to="/payment-widget">
-                  <Button className="w-full bg-primary hover:bg-primary/90">
-                    Get Widget
-                  </Button>
-                </Link>
-              </Card>
-
-              <Card className="glass-card bg-card p-6 text-center">
-                <div className="mb-6">
-                  <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Building className="h-8 w-8 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-bold mb-3">B2B Exchange</h3>
-                  <p className="text-muted-foreground mb-4 text-sm">
-                    Enterprise-grade exchange solutions for businesses
-                  </p>
-                </div>
-                
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center justify-center gap-2 text-xs">
-                    <Building className="h-3 w-3 text-green-500" />
-                    <span>Enterprise</span>
-                  </div>
-                  <div className="flex items-center justify-center gap-2 text-xs">
-                    <TrendingUp className="h-3 w-3 text-blue-500" />
-                    <span>High volume</span>
-                  </div>
-                </div>
-
-                <Link to="/b2b-exchange">
-                  <Button className="w-full bg-primary hover:bg-primary/90">
-                    Learn More
                   </Button>
                 </Link>
               </Card>
