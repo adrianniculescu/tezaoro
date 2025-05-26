@@ -1,4 +1,3 @@
-
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import './App.css';
@@ -18,10 +17,13 @@ const Support = lazy(() => import('@/pages/Support'));
 const Api = lazy(() => import('@/pages/Api'));
 const TokenomicsConsulting = lazy(() => import('@/pages/TokenomicsConsulting'));
 
-// Import new Changelly-powered pages
+// Import Changelly-powered pages
 const Exchange = lazy(() => import('@/pages/Exchange'));
 const FiatGateway = lazy(() => import('@/pages/FiatGateway'));
+const PaymentWidget = lazy(() => import('@/pages/PaymentWidget'));
+const B2BExchange = lazy(() => import('@/pages/B2BExchange'));
 
+// Import platform guide pages
 const PlatformOverview = lazy(() => import('@/pages/guides/PlatformOverview'));
 const AccountSetup = lazy(() => import('@/pages/guides/AccountSetup'));
 const DeployingFirstAlgorithm = lazy(() => import('@/pages/guides/DeployingFirstAlgorithm'));
@@ -71,6 +73,8 @@ function App() {
             {/* Changelly-powered trading pages */}
             <Route path="/exchange" element={<Exchange />} />
             <Route path="/fiat-gateway" element={<FiatGateway />} />
+            <Route path="/payment-widget" element={<PaymentWidget />} />
+            <Route path="/b2b-exchange" element={<B2BExchange />} />
 
             {/* Platform guide routes */}
             <Route path="/platform/platform-overview" element={<PlatformOverview />} />
