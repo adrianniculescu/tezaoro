@@ -1,4 +1,3 @@
-
 import React from 'react';
 import PageLayout from '@/components/PageLayout';
 import PageHeader from '@/components/PageHeader';
@@ -80,6 +79,17 @@ const BlogPostCard = ({
 
 const Blog = () => {
   const publishedPosts = [
+    {
+      title: "Unlocking Liquidity and Growth: How Nano-Cap Crypto Projects Can Thrive with Tezaoro",
+      excerpt: "Discover how nano-cap crypto projects ($1M-$10M market cap) can overcome liquidity challenges with specialized market making and tokenomics consulting services.",
+      date: "January 2025",
+      author: "Tezaoro Team",
+      readTime: "8 min read",
+      category: "Crypto Growth",
+      image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
+      slug: "/guide/nano-cap-crypto-liquidity-growth",
+      isPublished: true
+    },
     {
       title: "How to Choose an Algorithmic Trading Platform: Expert Guide",
       excerpt: "Discover the essential factors to consider when selecting the perfect algorithmic trading platform for your trading goals and experience level.",
@@ -246,6 +256,7 @@ const Blog = () => {
   
   const categories = [
     "All Categories",
+    "Crypto Growth",
     "Expert Guide",
     "Crypto Strategies", 
     "Risk Management",

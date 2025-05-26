@@ -42,6 +42,7 @@ const ReduceSlippageTrading = lazy(() => import('@/pages/blog/ReduceSlippageTrad
 const TradingRegulationsCompliance = lazy(() => import('@/pages/blog/TradingRegulationsCompliance'));
 const ScalpingVsSwingTrading = lazy(() => import('@/pages/blog/ScalpingVsSwingTrading'));
 const FutureAlgorithmicTrading = lazy(() => import('@/pages/blog/FutureAlgorithmicTrading'));
+const NanoCapCryptoLiquidity = lazy(() => import('@/pages/blog/NanoCapCryptoLiquidity'));
 
 function App() {
   return (
@@ -88,6 +89,7 @@ function App() {
             <Route path="/guide/trading-regulations-compliance" element={<TradingRegulationsCompliance />} />
             <Route path="/guide/scalping-vs-swing-trading" element={<ScalpingVsSwingTrading />} />
             <Route path="/guide/future-algorithmic-trading" element={<FutureAlgorithmicTrading />} />
+            <Route path="/guide/nano-cap-crypto-liquidity-growth" element={<NanoCapCryptoLiquidity />} />
           </Routes>
         </Suspense>
       </Router>
