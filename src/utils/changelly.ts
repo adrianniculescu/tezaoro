@@ -41,32 +41,6 @@ export const CHANGELLY_PRODUCTS: ChangellyProduct[] = [
       'Secure transactions'
     ],
     apiEndpoint: '/v2/fiat'
-  },
-  {
-    id: 'payment-widget',
-    name: 'Payment Widget',
-    description: 'Accept cryptocurrency payments directly on your platform',
-    features: [
-      'Easy integration',
-      'Multiple payment options',
-      'Real-time notifications',
-      'Customizable UI',
-      'Low fees'
-    ],
-    apiEndpoint: '/v2/payments'
-  },
-  {
-    id: 'b2b-exchange',
-    name: 'B2B Exchange',
-    description: 'Enterprise-grade exchange solutions for businesses',
-    features: [
-      'High-volume trading',
-      'Dedicated support',
-      'Custom integrations',
-      'Advanced analytics',
-      'Institutional rates'
-    ],
-    apiEndpoint: '/v2/b2b'
   }
 ];
 
