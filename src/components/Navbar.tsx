@@ -1,197 +1,255 @@
 
 import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ChevronDown } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import Logo from './Logo';
+import { Button } from './ui/button';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import Logo from '@/components/Logo';
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from './ui/navigation-menu';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
 
-  const toggleMenu = () => {
-    setIsOpen(!isOpen);
-  };
-
-  const navLinks = [
-    { name: 'Platform', url: '/platform' },
-    { name: 'Features', url: '/features' },
-    { name: 'Algorithms', url: '/algorithms' },
-    { name: 'Performance', url: '/performance' },
-    {
-      name: 'Trading',
-      url: '/trading',
-      submenu: [
-        { name: 'Instant Exchange', url: '/exchange' },
-        { name: 'Fiat Gateway', url: '/fiat-gateway' },
-      ]
-    },
-    { name: 'Pricing', url: '/pricing' },
-    {
-      name: 'Resources',
-      url: '/resources',
-      submenu: [
-        { name: 'Documentation', url: '/documentation' },
-        { name: 'API', url: '/api' },
-        { name: 'Blog', url: '/blog' },
-        { name: 'Support', url: '/support' },
-      ]
-    },
-  ];
+  const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-lg border-b border-border">
+    <nav className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b border-border/40">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center">
-            <NavLink to="/" className="flex items-center">
-              <Logo />
-            </NavLink>
-          </div>
+        <div className="flex justify-between items-center h-16">
+          <Link to="/" className="flex items-center space-x-2">
+            <Logo />
+          </Link>
 
-          {/* Desktop nav links */}
-          <div className="hidden md:block">
-            <div className="ml-10 flex items-center space-x-4">
-              {navLinks.map((link) => {
-                if (link.submenu) {
-                  return (
-                    <DropdownMenu key={link.name}>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="flex items-center gap-1">
-                          {link.name}
-                          <ChevronDown className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        {link.submenu.map((sublink) => (
-                          <DropdownMenuItem key={sublink.name} asChild>
-                            <NavLink 
-                              to={sublink.url}
-                              className="w-full cursor-pointer"
-                            >
-                              {sublink.name}
-                            </NavLink>
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  );
-                }
-                return (
-                  <NavLink
-                    key={link.name}
-                    to={link.url}
-                    className={({ isActive }) => `${
-                      isActive ? 'text-primary' : 'text-foreground'
-                    } hover:text-primary px-3 py-2 text-sm font-medium`}
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-8">
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger>Platform</NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <div className="grid gap-3 p-6 w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
+                      <div className="row-span-3">
+                        <NavigationMenuLink asChild>
+                          <Link
+                            className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
+                            to="/platform"
+                          >
+                            <div className="mb-2 mt-4 text-lg font-medium">
+                              Tezaoro Platform
+                            </div>
+                            <p className="text-sm leading-tight text-muted-foreground">
+                              Advanced algorithmic trading platform for nano-cap cryptocurrencies
+                            </p>
+                          </Link>
+                        </NavigationMenuLink>
+                      </div>
+                      <NavigationMenuLink asChild>
+                        <Link to="/features" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                          <div className="text-sm font-medium leading-none">Features</div>
+                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                            Explore our comprehensive trading features
+                          </p>
+                        </Link>
+                      </NavigationMenuLink>
+                      <NavigationMenuLink asChild>
+                        <Link to="/algorithms" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                          <div className="text-sm font-medium leading-none">Algorithms</div>
+                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                            AI-powered trading algorithms
+                          </p>
+                        </Link>
+                      </NavigationMenuLink>
+                      <NavigationMenuLink asChild>
+                        <Link to="/performance" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                          <div className="text-sm font-medium leading-none">Performance</div>
+                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                            Track and analyze your trading performance
+                          </p>
+                        </Link>
+                      </NavigationMenuLink>
+                    </div>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger>Trading</NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <div className="grid gap-3 p-6 w-[400px]">
+                      <NavigationMenuLink asChild>
+                        <Link to="/exchange" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                          <div className="text-sm font-medium leading-none">Instant Exchange</div>
+                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                            Swap between 500+ cryptocurrencies instantly
+                          </p>
+                        </Link>
+                      </NavigationMenuLink>
+                      <NavigationMenuLink asChild>
+                        <Link to="/fiat-gateway" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                          <div className="text-sm font-medium leading-none">Fiat Gateway</div>
+                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                            Buy and sell crypto with credit cards
+                          </p>
+                        </Link>
+                      </NavigationMenuLink>
+                    </div>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+
+                <NavigationMenuItem>
+                  <Link
+                    to="/pricing"
+                    className={`group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 ${
+                      isActive('/pricing') ? 'text-foreground' : 'text-foreground/60'
+                    }`}
                   >
-                    {link.name}
-                  </NavLink>
-                );
-              })}
-            </div>
-          </div>
+                    Pricing
+                  </Link>
+                </NavigationMenuItem>
 
-          <div className="hidden md:block">
-            <div className="flex items-center gap-2">
-              <NavLink to="/how-it-works">
-                <Button variant="outline">How It Works</Button>
-              </NavLink>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button disabled={true}>Sign Up</Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Registration available by invitation only</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger>Resources</NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <div className="grid gap-3 p-6 w-[400px]">
+                      <NavigationMenuLink asChild>
+                        <Link to="/documentation" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                          <div className="text-sm font-medium leading-none">Documentation</div>
+                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                            Comprehensive guides and API documentation
+                          </p>
+                        </Link>
+                      </NavigationMenuLink>
+                      <NavigationMenuLink asChild>
+                        <Link to="/blog" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                          <div className="text-sm font-medium leading-none">Blog</div>
+                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                            Latest insights and trading strategies
+                          </p>
+                        </Link>
+                      </NavigationMenuLink>
+                      <NavigationMenuLink asChild>
+                        <Link to="/support" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                          <div className="text-sm font-medium leading-none">Support</div>
+                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                            Get help and contact our team
+                          </p>
+                        </Link>
+                      </NavigationMenuLink>
+                    </div>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
+
+            <Button variant="outline" asChild>
+              <Link to="/api">API Access</Link>
+            </Button>
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
-            <button
-              onClick={toggleMenu}
-              className="inline-flex items-center justify-center p-2 rounded-md text-foreground focus:outline-none"
+          <div className="md:hidden">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsOpen(!isOpen)}
+              aria-label="Toggle menu"
             >
-              {isOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
-            </button>
+              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </Button>
           </div>
         </div>
-      </div>
 
-      {/* Mobile menu */}
-      {isOpen && (
-        <div className="md:hidden">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-background border-b border-border">
-            {navLinks.map((link) => {
-              if (link.submenu) {
-                return (
-                  <React.Fragment key={link.name}>
-                    <div className="text-foreground px-3 py-2 text-base font-medium">
-                      {link.name}
-                    </div>
-                    <div className="pl-6 space-y-1">
-                      {link.submenu.map((sublink) => (
-                        <NavLink
-                          key={sublink.name}
-                          to={sublink.url}
-                          className={({ isActive }) => `${
-                            isActive ? 'text-primary' : 'text-muted-foreground'
-                          } hover:text-primary block px-3 py-2 text-sm font-medium`}
-                          onClick={toggleMenu}
-                        >
-                          {sublink.name}
-                        </NavLink>
-                      ))}
-                    </div>
-                  </React.Fragment>
-                );
-              }
-              return (
-                <NavLink
-                  key={link.name}
-                  to={link.url}
-                  className={({ isActive }) => `${
-                    isActive ? 'text-primary' : 'text-foreground'
-                  } hover:text-primary block px-3 py-2 text-base font-medium`}
-                  onClick={toggleMenu}
-                >
-                  {link.name}
-                </NavLink>
-              );
-            })}
-            <div className="pt-4 flex flex-col gap-2 px-3">
-              <NavLink to="/how-it-works" onClick={toggleMenu}>
-                <Button variant="outline" className="w-full">How It Works</Button>
-              </NavLink>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button className="w-full" disabled={true}>Sign Up</Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Registration available by invitation only</p>
-                </TooltipContent>
-              </Tooltip>
+        {/* Mobile Navigation */}
+        {isOpen && (
+          <div className="md:hidden">
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-background border-t border-border/40">
+              <Link
+                to="/platform"
+                className="block px-3 py-2 text-base font-medium text-foreground/60 hover:text-foreground hover:bg-accent rounded-md"
+                onClick={() => setIsOpen(false)}
+              >
+                Platform
+              </Link>
+              <Link
+                to="/features"
+                className="block px-3 py-2 text-base font-medium text-foreground/60 hover:text-foreground hover:bg-accent rounded-md"
+                onClick={() => setIsOpen(false)}
+              >
+                Features
+              </Link>
+              <Link
+                to="/algorithms"
+                className="block px-3 py-2 text-base font-medium text-foreground/60 hover:text-foreground hover:bg-accent rounded-md"
+                onClick={() => setIsOpen(false)}
+              >
+                Algorithms
+              </Link>
+              <Link
+                to="/performance"
+                className="block px-3 py-2 text-base font-medium text-foreground/60 hover:text-foreground hover:bg-accent rounded-md"
+                onClick={() => setIsOpen(false)}
+              >
+                Performance
+              </Link>
+              <Link
+                to="/exchange"
+                className="block px-3 py-2 text-base font-medium text-foreground/60 hover:text-foreground hover:bg-accent rounded-md"
+                onClick={() => setIsOpen(false)}
+              >
+                Exchange
+              </Link>
+              <Link
+                to="/fiat-gateway"
+                className="block px-3 py-2 text-base font-medium text-foreground/60 hover:text-foreground hover:bg-accent rounded-md"
+                onClick={() => setIsOpen(false)}
+              >
+                Fiat Gateway
+              </Link>
+              <Link
+                to="/pricing"
+                className="block px-3 py-2 text-base font-medium text-foreground/60 hover:text-foreground hover:bg-accent rounded-md"
+                onClick={() => setIsOpen(false)}
+              >
+                Pricing
+              </Link>
+              <Link
+                to="/documentation"
+                className="block px-3 py-2 text-base font-medium text-foreground/60 hover:text-foreground hover:bg-accent rounded-md"
+                onClick={() => setIsOpen(false)}
+              >
+                Documentation
+              </Link>
+              <Link
+                to="/blog"
+                className="block px-3 py-2 text-base font-medium text-foreground/60 hover:text-foreground hover:bg-accent rounded-md"
+                onClick={() => setIsOpen(false)}
+              >
+                Blog
+              </Link>
+              <Link
+                to="/support"
+                className="block px-3 py-2 text-base font-medium text-foreground/60 hover:text-foreground hover:bg-accent rounded-md"
+                onClick={() => setIsOpen(false)}
+              >
+                Support
+              </Link>
+              <Link
+                to="/api"
+                className="block px-3 py-2 text-base font-medium text-foreground/60 hover:text-foreground hover:bg-accent rounded-md"
+                onClick={() => setIsOpen(false)}
+              >
+                API Access
+              </Link>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </nav>
   );
 };

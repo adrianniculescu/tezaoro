@@ -51,6 +51,8 @@ const FutureAlgorithmicTrading = lazy(() => import('@/pages/blog/FutureAlgorithm
 const NanoCapCryptoLiquidity = lazy(() => import('@/pages/blog/NanoCapCryptoLiquidity'));
 
 function App() {
+  console.log('App component rendering, current pathname:', window.location.pathname);
+  
   return (
     <TooltipProvider>
       <Router>
