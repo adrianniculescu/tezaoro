@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ChevronDown } from 'lucide-react';
@@ -18,6 +17,11 @@ const Navbar = () => {
   const location = useLocation();
 
   const isActive = (path: string) => location.pathname === path;
+
+  const handleLinkClick = (path: string) => {
+    console.log(`Navbar: Attempting to navigate to ${path}`);
+    setIsOpen(false);
+  };
 
   return (
     <nav className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b border-border/40">
@@ -83,7 +87,11 @@ const Navbar = () => {
                   <NavigationMenuContent>
                     <div className="grid gap-3 p-6 w-[400px]">
                       <NavigationMenuLink asChild>
-                        <Link to="/exchange" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                        <Link 
+                          to="/exchange" 
+                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                          onClick={() => handleLinkClick('/exchange')}
+                        >
                           <div className="text-sm font-medium leading-none">Instant Exchange</div>
                           <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
                             Swap between 500+ cryptocurrencies instantly
@@ -91,7 +99,11 @@ const Navbar = () => {
                         </Link>
                       </NavigationMenuLink>
                       <NavigationMenuLink asChild>
-                        <Link to="/fiat-gateway" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                        <Link 
+                          to="/fiat-gateway" 
+                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                          onClick={() => handleLinkClick('/fiat-gateway')}
+                        >
                           <div className="text-sm font-medium leading-none">Fiat Gateway</div>
                           <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
                             Buy and sell crypto with credit cards
@@ -200,14 +212,14 @@ const Navbar = () => {
               <Link
                 to="/exchange"
                 className="block px-3 py-2 text-base font-medium text-foreground/60 hover:text-foreground hover:bg-accent rounded-md"
-                onClick={() => setIsOpen(false)}
+                onClick={() => handleLinkClick('/exchange')}
               >
                 Exchange
               </Link>
               <Link
                 to="/fiat-gateway"
                 className="block px-3 py-2 text-base font-medium text-foreground/60 hover:text-foreground hover:bg-accent rounded-md"
-                onClick={() => setIsOpen(false)}
+                onClick={() => handleLinkClick('/fiat-gateway')}
               >
                 Fiat Gateway
               </Link>

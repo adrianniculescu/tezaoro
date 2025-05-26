@@ -6,6 +6,10 @@ import { Link } from 'react-router-dom';
 import { ArrowRightLeft, CreditCard, TrendingUp, Zap } from 'lucide-react';
 
 const TradingSolutionsSection = () => {
+  const handleLinkClick = (path: string) => {
+    console.log(`TradingSolutionsSection: Attempting to navigate to ${path}`);
+  };
+
   return (
     <section className="py-16 md:py-24 bg-card/30">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -41,7 +45,7 @@ const TradingSolutionsSection = () => {
               </div>
             </div>
 
-            <Link to="/exchange">
+            <Link to="/exchange" onClick={() => handleLinkClick('/exchange')}>
               <Button className="w-full bg-primary hover:bg-primary/90">
                 Start Trading
               </Button>
@@ -70,7 +74,7 @@ const TradingSolutionsSection = () => {
               </div>
             </div>
 
-            <Link to="/fiat-gateway">
+            <Link to="/fiat-gateway" onClick={() => handleLinkClick('/fiat-gateway')}>
               <Button className="w-full bg-primary hover:bg-primary/90">
                 Buy Crypto
               </Button>

@@ -1,6 +1,5 @@
-
 import React, { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import './App.css';
 import Loader from '@/components/Loader';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -21,6 +20,7 @@ const TokenomicsConsulting = lazy(() => import('@/pages/TokenomicsConsulting'));
 // Import Changelly-powered pages
 const Exchange = lazy(() => import('@/pages/Exchange'));
 const FiatGateway = lazy(() => import('@/pages/FiatGateway'));
+const NotFound = lazy(() => import('@/pages/NotFound'));
 
 // Import platform guide pages
 const PlatformOverview = lazy(() => import('@/pages/guides/PlatformOverview'));
@@ -50,12 +50,24 @@ const ScalpingVsSwingTrading = lazy(() => import('@/pages/blog/ScalpingVsSwingTr
 const FutureAlgorithmicTrading = lazy(() => import('@/pages/blog/FutureAlgorithmicTrading'));
 const NanoCapCryptoLiquidity = lazy(() => import('@/pages/blog/NanoCapCryptoLiquidity'));
 
+function LocationLogger() {
+  const location = useLocation();
+  
+  React.useEffect(() => {
+    console.log('Route changed to:', location.pathname);
+    console.log('Full location object:', location);
+  }, [location]);
+
+  return null;
+}
+
 function App() {
   console.log('App component rendering, current pathname:', window.location.pathname);
   
   return (
     <TooltipProvider>
       <Router>
+        <LocationLogger />
         <Suspense fallback={<Loader />}>
           <Routes>
             <Route path="/" element={<Home />} />
@@ -102,6 +114,9 @@ function App() {
             <Route path="/guide/scalping-vs-swing-trading" element={<ScalpingVsSwingTrading />} />
             <Route path="/guide/future-algorithmic-trading" element={<FutureAlgorithmicTrading />} />
             <Route path="/guide/nano-cap-crypto-liquidity-growth" element={<NanoCapCryptoLiquidity />} />
+
+            {/* Catch all route */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
       </Router>
