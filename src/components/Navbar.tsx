@@ -29,6 +29,14 @@ const Navbar = () => {
     { name: 'Features', url: '/features' },
     { name: 'Algorithms', url: '/algorithms' },
     { name: 'Performance', url: '/performance' },
+    {
+      name: 'Trading',
+      url: '/trading',
+      submenu: [
+        { name: 'Instant Exchange', url: '/exchange' },
+        { name: 'Fiat Gateway', url: '/fiat-gateway' },
+      ]
+    },
     { name: 'Pricing', url: '/pricing' },
     {
       name: 'Resources',
