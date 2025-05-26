@@ -1,3 +1,4 @@
+
 import React from 'react';
 import PageLayout from '@/components/PageLayout';
 import PageHeader from '@/components/PageHeader';
@@ -226,31 +227,31 @@ const Blog = () => {
 
   const upcomingPosts = [
     {
-      title: "Advanced Portfolio Optimization Techniques",
-      excerpt: "Learn sophisticated portfolio management strategies used by institutional traders and how to apply them to your algorithmic trading.",
-      date: "Coming Soon",
-      author: "Alex Chen",
-      readTime: "11 min read",
-      category: "Portfolio Management",
-      image: "/images/blog/portfolio-optimization.jpg"
+      title: "How to Survive as a Nano-Cap Token: Liquidity Strategies for Sub-$10M Projects",
+      excerpt: "Discover proven liquidity strategies for nano-cap crypto projects ($1M–$10M). Learn how to attract investors, reduce volatility, and ensure long-term growth.",
+      date: "February 2, 2025",
+      author: "Tezaoro Team",
+      readTime: "10 min read",
+      category: "Nano-Cap Strategy",
+      image: "/images/blog/nano-cap-liquidity.jpg"
     },
     {
-      title: "Cross-Exchange Arbitrage: Capturing Price Differences",
-      excerpt: "Master the art of arbitrage trading across multiple exchanges to capture risk-free profits in volatile markets.",
-      date: "Coming Soon",
-      author: "Maria Rodriguez",
-      readTime: "9 min read",
-      category: "Arbitrage",
-      image: "/images/blog/arbitrage.jpg"
+      title: "DEX vs. CEX vs. Hybrid: Which Exchange Model Fits Your Token?",
+      excerpt: "Choosing the right exchange model for your crypto project? Compare DEX, CEX, and hybrid platforms—pros, cons, and best use cases.",
+      date: "February 9, 2025",
+      author: "Tezaoro Team",
+      readTime: "8 min read",
+      category: "Exchange Strategy",
+      image: "/images/blog/exchange-comparison.jpg"
     },
     {
-      title: "Market Making Strategies for Crypto Traders",
-      excerpt: "Understand how market making works and how you can provide liquidity while earning consistent profits.",
-      date: "Coming Soon",
-      author: "James Wilson",
-      readTime: "12 min read",
-      category: "Market Making",
-      image: "/images/blog/market-making.jpg"
+      title: "Non-Custodial Trading: Why Security Matters for Small-Cap Crypto",
+      excerpt: "Protect your crypto assets with non-custodial trading. Learn why security is critical for small-cap projects and how to mitigate risks.",
+      date: "February 16, 2025",
+      author: "Tezaoro Team",
+      readTime: "7 min read",
+      category: "Security",
+      image: "/images/blog/non-custodial-security.jpg"
     }
   ];
   
