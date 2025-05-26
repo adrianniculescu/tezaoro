@@ -22,6 +22,11 @@ const Exchange = lazy(() => import('@/pages/Exchange'));
 const FiatGateway = lazy(() => import('@/pages/FiatGateway'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 
+// Import legal pages
+const PrivacyPolicy = lazy(() => import('@/pages/PrivacyPolicy'));
+const TermsOfService = lazy(() => import('@/pages/TermsOfService'));
+const Contact = lazy(() => import('@/pages/Contact'));
+
 // Import platform guide pages
 const PlatformOverview = lazy(() => import('@/pages/guides/PlatformOverview'));
 const AccountSetup = lazy(() => import('@/pages/guides/AccountSetup'));
@@ -86,6 +91,11 @@ function App() {
             {/* Trading pages */}
             <Route path="/exchange" element={<Exchange />} />
             <Route path="/fiat-gateway" element={<FiatGateway />} />
+
+            {/* Legal pages */}
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms-of-service" element={<TermsOfService />} />
+            <Route path="/contact" element={<Contact />} />
 
             {/* Platform guide routes */}
             <Route path="/platform/platform-overview" element={<PlatformOverview />} />
