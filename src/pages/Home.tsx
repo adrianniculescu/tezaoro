@@ -18,15 +18,15 @@ import { Link } from 'react-router-dom';
 
 const Home = () => {
   useEffect(() => {
-    document.title = "Tezaoro – Algorithmic Trading Platform for Crypto & Stocks | Automated Strategies";
+    document.title = "Nano-Cap Crypto Market Making & Algorithmic Trading Platform | Tezaoro";
   }, []);
 
   return (
     <div className="min-h-screen flex flex-col dark">
       <Helmet>
-        <title>Tezaoro – Algorithmic Trading Platform for Crypto & Stocks | Automated Strategies</title>
-        <meta name="description" content="Advanced algorithmic trading platform with AI-powered strategies for cryptocurrency and stock markets. Deploy automated trading algorithms with powerful backtesting and risk management tools." />
-        <meta name="keywords" content="algorithmic trading platform, automated trading software, crypto trading bots, stock market algorithms, trading automation" />
+        <title>Nano-Cap Crypto Market Making & Algorithmic Trading Platform | Tezaoro</title>
+        <meta name="description" content="Boost liquidity for nano-cap tokens ($1M–$10M) with AI-powered market making, DEX aggregation, and secure non-custodial trading. Regulatory-ready infrastructure." />
+        <meta name="keywords" content="nano-cap crypto, market making, algorithmic trading, DEX aggregation, token liquidity, non-custodial trading" />
         <link rel="canonical" href="https://tezaoro.com/" />
         
         {/* Schema Markup for SoftwareApplication */}
@@ -37,7 +37,7 @@ const Home = () => {
             "name": "Tezaoro",
             "applicationCategory": "FinanceApplication",
             "operatingSystem": "Web",
-            "description": "AI-powered algorithmic trading platform for cryptocurrency and stock markets",
+            "description": "AI-powered market making and algorithmic trading platform for nano-cap cryptocurrency tokens",
             "offers": {
               "@type": "Offer",
               "price": "99",
