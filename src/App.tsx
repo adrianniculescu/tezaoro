@@ -17,6 +17,11 @@ const Blog = lazy(() => import('@/pages/Blog'));
 const Support = lazy(() => import('@/pages/Support'));
 const Api = lazy(() => import('@/pages/Api'));
 const TokenomicsConsulting = lazy(() => import('@/pages/TokenomicsConsulting'));
+
+// Import new Changelly-powered pages
+const Exchange = lazy(() => import('@/pages/Exchange'));
+const FiatGateway = lazy(() => import('@/pages/FiatGateway'));
+
 const PlatformOverview = lazy(() => import('@/pages/guides/PlatformOverview'));
 const AccountSetup = lazy(() => import('@/pages/guides/AccountSetup'));
 const DeployingFirstAlgorithm = lazy(() => import('@/pages/guides/DeployingFirstAlgorithm'));
@@ -62,6 +67,10 @@ function App() {
             <Route path="/support" element={<Support />} />
             <Route path="/api" element={<Api />} />
             <Route path="/tokenomics-consulting" element={<TokenomicsConsulting />} />
+
+            {/* Changelly-powered trading pages */}
+            <Route path="/exchange" element={<Exchange />} />
+            <Route path="/fiat-gateway" element={<FiatGateway />} />
 
             {/* Platform guide routes */}
             <Route path="/platform/platform-overview" element={<PlatformOverview />} />
