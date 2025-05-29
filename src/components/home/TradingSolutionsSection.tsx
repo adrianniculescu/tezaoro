@@ -3,7 +3,7 @@ import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { ArrowRightLeft, CreditCard, TrendingUp, Zap } from 'lucide-react';
+import { ArrowRightLeft, CreditCard, TrendingUp, Zap, BarChart3 } from 'lucide-react';
 
 const TradingSolutionsSection = () => {
   const handleLinkClick = (path: string) => {
@@ -22,7 +22,7 @@ const TradingSolutionsSection = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
           <Card className="glass-card bg-card p-6 text-center">
             <div className="mb-6">
               <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -77,6 +77,35 @@ const TradingSolutionsSection = () => {
             <Link to="/fiat-gateway" onClick={() => handleLinkClick('/fiat-gateway')}>
               <Button className="w-full bg-primary hover:bg-primary/90">
                 Buy Crypto
+              </Button>
+            </Link>
+          </Card>
+
+          <Card className="glass-card bg-card p-6 text-center">
+            <div className="mb-6">
+              <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <BarChart3 className="h-8 w-8 text-primary" />
+              </div>
+              <h3 className="text-xl font-bold mb-3">DEX Aggregator</h3>
+              <p className="text-muted-foreground mb-4 text-sm">
+                Access the best prices across 200+ decentralized exchanges
+              </p>
+            </div>
+            
+            <div className="space-y-2 mb-4">
+              <div className="flex items-center justify-center gap-2 text-xs">
+                <BarChart3 className="h-3 w-3 text-green-500" />
+                <span>200+ DEXs</span>
+              </div>
+              <div className="flex items-center justify-center gap-2 text-xs">
+                <Zap className="h-3 w-3 text-blue-500" />
+                <span>MEV protection</span>
+              </div>
+            </div>
+
+            <Link to="/dex-aggregator" onClick={() => handleLinkClick('/dex-aggregator')}>
+              <Button className="w-full bg-primary hover:bg-primary/90">
+                Swap Now
               </Button>
             </Link>
           </Card>

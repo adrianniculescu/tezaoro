@@ -1,10 +1,12 @@
 // Changelly API configuration and utilities
 export const CHANGELLY_CONFIG = {
   publicKey: '73d9d3418a4bf0ab06b7088c56e20c4bba233c1f4311758f6732fc1da2fbf794',
-  privateKey: '308204be020100300d06092a864886f70d0101010500048204a8308204a40201000282010100b717bea53e423c11614730b1baa3fcbe22d4fb7646b9815ecc7ba218459d4c8b00f43edc5e2c9fcdfe3d67da9ba4d28cf198a08887ba95a9495a334bf97e1e82fa9a7a5e715304f78117dd07427d80fd9d0a110891c3e5ee5f2655366221e22e326c26462750911c1f7e4f10c4cabfec4e1856f3a657b4c817a24cb2444805c9a59d28921adf53b042dc9a7059eba008303e4b0c03bbc0d7c7b11a7d423c583d208a83f1030e66d60f0bf9b692fc2e613449f1df916f7494597faa6136561479bb2fdd25ca6873a5e9e6be079e34717017518bf33ce0055f42ebbce6864e9d3e47169ee078a08455159a61e2bbf2f119f80aa182900a4e735761fa4e98c2ac33020301000102820100123dbf5f5f308cce2924453f051a9ec24d5e181f7f34597b4461723e2626b720323178ac793020f6639a0d3ac3bef6c0816174bcfad37ab8544d344721783b39f96b0d3dfe345de3a56ce73723476063e412c357ade36d33ae84772b8fe352fc1f473f18f0d9ca05ef42a4f09abff31716961388facd9f7e953c34ea9dd03f2332dcb1729b76d6440b99a4e36c781a94aa5773f1cb5a437690fdb8c5aa97f48e95a780fe4ee6177bc4a40e6248bbdd36b50a253bff603f2139724a1aca50d914bc937724ce2fc62934c1a1c7a6eb880187f84d5803454579349a6eea3090873f11795c285d9c0127a17ddfbf06bbd50b8d18a7bcc1c2d24170199b506879be8102818100fed5ef0a2bf1294968e8ee47e2236f9d50a5ae1ecf5cf2d9fd35d882db499f6dcb7c19a611e18e617aa5b5d9a80c76203bd4ccbc81ca0d8dbf12d6ad79cb63ec2485bfd241347e69ed3b3d095e221b475bf19e7dce7096328587b2e573ea515e7cfc366f320a236b55d542ceb123eac40551a62c3ac594adf59e50b17faec0e302818100b7ede5c22fb27329aaa095d8a3deb4987999697d4ea9d0f049231a1d667761b8b6d637e10886fb68725262c57ae00338fd0647f951f9d601177030b6703b4e0052da7b4f3fd5f3505d7ae437774edcf089033069bfe27771242109fad1abc42ddce7f2f5fd629ee02185664be19b624340ebb5c0eb51d8b5731afcea94a0d8710281804d543fd0375b5beaf1d1d514ad1391b80c13ea8d60e154b43f790a7552f3b95448ee249e5748b9baeccbc22e05279ae4d72310e996fce835fe284a4aa3edcb298a3fa7e0b676a671a0525c882e2f6d55af19d7bd575aa4c939e9dea8700f4797c39789311edf22b65c7a7566612c83fded9b4430a1b8f90ffcbb88c303fad47f02818100b4cef7831a72594587878f66c548c3cdf413bca0c338aabddb97d72f39b077ef264595eef0fc089f576ae7cfec07d5032bb10605f0f121d036e341efc68a7616595c8fc58b225eab0d0a26d8e3bf31f07f3014629090270ca1109d87e49fef1d8ac0b595de3e19a28931632b8b1fbdcc1140e58e3d865afb9ca8d6222073b1f102818100cff8e31374d2ea81080f8d1ad6f97c0346ce6a3393668dac574fae83d1c4e0dcd2076bf11765cca6960f1aa8ab4b1781103b76979779437c601283ffd8fc5fb57a0efb0a36bd11ed30dd9091334a8ea2ed78cb40eda936cb122b0b5d1e9f03ea02ea7fcc4555000fcbb4cc8295fbb6947f72dc59986ef4e99abb5e72567d8830',
+  privateKey: '308204be020100300d06092a864886f70d0101010500048204a8308204a40201000282010100b717bea53e423c11614730b1baa3fcbe22d4fb7646b9815ecc7ba218459d4c8b00f43edc5e2c9fcdfe3d67da9ba4d28cf198a08887ba95a9495a334bf97e1e82fa9a7a5e715304f78117dd07427d80fd9d0a110891c3e5ee5f2655366221e22e326c26462750911c1f7e4f10c4cabfec4e1856f3a657b4c817a24cb2444805c9a59d28921adf53b042dc9a7059eba008303e4b0c03bbc0d7c7b11a7d423c583d208a83f1030e66d60f0bf9b692fc2e613449f1df916f7494597faa6136561479bb2fdd25ca6873a5e9e6be079e34717017518bf33ce0055f42ebbce6864e9d3e47169ee078a08455159a61e2bbf2f119f80aa182900a4e735761fa4e98c2ac33020301000102820100123dbf5f5f308cce2924453f051a9ec24d5e181f7f34597b4461723e2626b720323178ac793020f6639a0d3ac3bef6c0816174bcfad37ab8544d344721783b39f96b0d3dfe345de3a56ce73723476063e412c357ade36d33ae84772b8fe352fc1f473f18f0d9ca05ef42a4f09abff31716961388facd9f7e953c34ea9dd03f2332dcb1729b76d6440b99a4e36c781a94aa5773f1cb5a437690fdb8c5aa97f48e95a780fe4ee6177bc4a40e6248bbdd36b50a253bff603f2139724aaca50d914bc937724ce2fc62934c1a1c7a6eb880187f84d5803454579349a6eea3090873f11795c285d9c0127a17ddfbf06bbd50b8d18a7bcc1c2d24170199b506879be8102818100fed5ef0a2bf1294968e8ee47e2236f9d50a5ae1ecf5cf2d9fd35d882db499f6dcb7c19a611e18e617aa5b5d9a80c76203bd4ccbc81ca0d8dbf12d6ad79cb63ec2485bfd241347e69ed3b3d095e221b475bf19e7dce7096328587b2e573ea515e7cfc366f320a236b55d542ceb123eac40551a62c3ac594adf59e50b17faec0e302818100b7ede5c22fb27329aaa095d8a3deb4987999697d4ea9d0f049231a1d667761b8b6d637e10886fb68725262c57ae00338fd0647f951f9d601177030b6703b4e0052da7b4f3fd5f3505d7ae437774edcf089033069bfe27771242109fad1abc42ddce7f2f5fd629ee02185664be19b624340ebb5c0eb51d8b5731afcea94a0d8710281804d543fd0375b5beaf1d1d514ad1391b80c13ea8d60e154b43f790a7552f3b95448ee249e5748b9baeccbc22e05279ae4d72310e996fce835fe284a4aa3edcb298a3fa7e0b676a671a0525c882e2f6d55af19d7bd575aa4c939e9dea8700f4797c39789311edf22b65c7a7566612c83fded9b4430a1b8f90ffcbb88c303fad47f02818100b4cef7831a72594587878f66c548c3cdf413bca0c338aabddb97d72f39b077ef264595eef0fc089f576ae7cfec07d5032bb10605f0f121d036e341efc68a7616595c8fc58b225eab0d0a26d8e3bf31f07f3014629090270ca1109d87e49fef1d8ac0b595de3e19a28931632b8b1fbdcc1140e58e3d865afb9ca8d6222073b1f102818100cff8e31374d2ea81080f8d1ad6f97c0346ce6a3393668dac574fae83d1c4e0dcd2076bf11765cca6960f1aa8ab4b1781103b76979779437c601283ffd8fc5fb57a0efb0a36bd11ed30dd9091334a8ea2ed78cb40eda936cb122b0b5d1e9f03ea02ea7fcc4555000fcbb4cc8295fbb6947f72dc59986ef4e99abb5e72567d8830',
   baseUrl: 'https://api.changelly.com',
   sandboxUrl: 'https://api-sandbox.changelly.com',
-  fiatApiUrl: 'https://fiat-api.changelly.com'
+  fiatApiUrl: 'https://fiat-api.changelly.com',
+  dexApiUrl: 'https://api.changelly.com/dex',
+  dexApiKey: '68b30788-35d6-4729-bb94-db87ba9b709e'
 };
 
 export interface ChangellyProduct {
@@ -228,6 +230,19 @@ export const CHANGELLY_PRODUCTS: ChangellyProduct[] = [
       'Global coverage with 40+ fiat currencies'
     ],
     apiEndpoint: '/v2/fiat'
+  },
+  {
+    id: 'dex-aggregator',
+    name: 'DEX Aggregator',
+    description: 'Access the best prices across multiple decentralized exchanges',
+    features: [
+      'Aggregated liquidity from 200+ DEXs',
+      'Best execution prices across chains',
+      'MEV protection and gas optimization',
+      'Multi-chain support (Ethereum, BSC, Polygon, etc.)',
+      'Smart routing algorithms'
+    ],
+    apiEndpoint: '/dex/v1'
   }
 ];
 
@@ -236,19 +251,25 @@ export class ChangellyAPI {
   private privateKey: string;
   private baseUrl: string;
   private fiatApiUrl: string;
+  private dexApiUrl: string;
+  private dexApiKey: string;
 
   constructor(sandbox = false) {
     this.publicKey = CHANGELLY_CONFIG.publicKey;
     this.privateKey = CHANGELLY_CONFIG.privateKey;
     this.baseUrl = sandbox ? CHANGELLY_CONFIG.sandboxUrl : CHANGELLY_CONFIG.baseUrl;
     this.fiatApiUrl = CHANGELLY_CONFIG.fiatApiUrl;
+    this.dexApiUrl = CHANGELLY_CONFIG.dexApiUrl;
+    this.dexApiKey = CHANGELLY_CONFIG.dexApiKey;
     
     console.log('Changelly API initialized:', {
       sandbox,
       baseUrl: this.baseUrl,
       fiatApiUrl: this.fiatApiUrl,
+      dexApiUrl: this.dexApiUrl,
       publicKeyLength: this.publicKey.length,
-      privateKeyLength: this.privateKey.length
+      privateKeyLength: this.privateKey.length,
+      dexApiKeyLength: this.dexApiKey.length
     });
   }
 
@@ -296,6 +317,48 @@ export class ChangellyAPI {
       
       if (error instanceof TypeError && error.message.includes('fetch')) {
         throw new Error('Network error: Unable to connect to Changelly API. Please check your internet connection.');
+      }
+      
+      throw error;
+    }
+  }
+
+  private async makeDexRequest(endpoint: string, params: any = {}) {
+    const url = `${this.dexApiUrl}${endpoint}`;
+    console.log('Making Changelly DEX API request:', { endpoint, params, url });
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': this.dexApiKey
+        },
+        body: JSON.stringify(params)
+      });
+
+      console.log('Changelly DEX API response status:', response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Changelly DEX API HTTP error:', { status: response.status, statusText: response.statusText, body: errorText });
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('Changelly DEX API response data:', data);
+
+      if (data.error) {
+        console.error('Changelly DEX API error response:', data.error);
+        throw new Error(`DEX API Error: ${data.error.message || 'Unknown error'}`);
+      }
+
+      return data.result || data;
+    } catch (error) {
+      console.error('Changelly DEX API request failed:', error);
+      
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('Network error: Unable to connect to Changelly DEX API. Please check your internet connection.');
       }
       
       throw error;
@@ -358,6 +421,47 @@ export class ChangellyAPI {
     return this.makeRequest('getOrderStatus', { orderId }, true);
   }
 
+  // DEX Aggregator Methods
+  async getDexQuote(params: {
+    fromToken: string;
+    toToken: string;
+    amount: string;
+    chainId: number;
+    slippage?: number;
+    userAddress?: string;
+  }) {
+    console.log('Getting DEX quote:', params);
+    return this.makeDexRequest('/quote', params);
+  }
+
+  async getDexSwapTransaction(params: {
+    fromToken: string;
+    toToken: string;
+    amount: string;
+    chainId: number;
+    userAddress: string;
+    slippage?: number;
+    gasPrice?: string;
+  }) {
+    console.log('Getting DEX swap transaction:', params);
+    return this.makeDexRequest('/swap', params);
+  }
+
+  async getDexTokens(chainId?: number) {
+    console.log('Fetching DEX supported tokens:', { chainId });
+    return this.makeDexRequest('/tokens', chainId ? { chainId } : {});
+  }
+
+  async getDexChains() {
+    console.log('Fetching DEX supported chains...');
+    return this.makeDexRequest('/chains', {});
+  }
+
+  async getDexProtocols(chainId?: number) {
+    console.log('Fetching DEX protocols:', { chainId });
+    return this.makeDexRequest('/protocols', chainId ? { chainId } : {});
+  }
+
   // Utility Methods
   getBestProvider(currency: string, paymentMethod: string, amount: number): FiatProvider | null {
     const availableProviders = FIAT_PROVIDERS.filter(provider => 
@@ -407,6 +511,24 @@ export class ChangellyAPI {
       return {
         success: false,
         message: error instanceof Error ? error.message : 'Unknown fiat connection error',
+        data: null
+      };
+    }
+  }
+
+  async testDexConnection() {
+    console.log('Testing Changelly DEX API connection...');
+    try {
+      const chains = await this.getDexChains();
+      return {
+        success: true,
+        message: `Successfully connected to Changelly DEX API. Retrieved ${chains?.length || 0} supported chains.`,
+        data: chains
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Unknown DEX connection error',
         data: null
       };
     }

@@ -25,6 +25,7 @@ const MarketMaking = lazy(() => import('@/pages/MarketMaking'));
 // Import Changelly-powered pages
 const Exchange = lazy(() => import('@/pages/Exchange'));
 const FiatGateway = lazy(() => import('@/pages/FiatGateway'));
+const DexAggregator = lazy(() => import('@/pages/DexAggregator'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 
 // Import legal pages
@@ -100,6 +101,7 @@ function App() {
             {/* Trading pages */}
             <Route path="/exchange" element={<Exchange />} />
             <Route path="/fiat-gateway" element={<FiatGateway />} />
+            <Route path="/dex-aggregator" element={<DexAggregator />} />
 
             {/* Legal pages */}
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
