@@ -6,9 +6,10 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowRightLeft, TrendingUp, Shield, Zap, DollarSign } from 'lucide-react';
+import { ArrowRightLeft, TrendingUp, Shield, Zap, DollarSign, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { ChangellyAPI } from '@/utils/changelly';
+import { useToast } from '@/hooks/use-toast';
 
 const Exchange = () => {
   const [fromCurrency, setFromCurrency] = useState('btc');
@@ -17,34 +18,116 @@ const Exchange = () => {
   const [exchangeAmount, setExchangeAmount] = useState('');
   const [loading, setLoading] = useState(false);
   const [currencies, setCurrencies] = useState<string[]>([]);
+  const [apiStatus, setApiStatus] = useState<'unknown' | 'connected' | 'error'>('unknown');
+  const [connectionTest, setConnectionTest] = useState<string>('');
+  const { toast } = useToast();
 
   const api = new ChangellyAPI(true); // Using sandbox for development
 
+  // Test API connection on component mount
   useEffect(() => {
-    const loadCurrencies = async () => {
-      try {
-        const currencyList = await api.getCurrencies();
-        setCurrencies(currencyList.slice(0, 20)); // Limit to top 20 for demo
-      } catch (error) {
-        console.error('Failed to load currencies:', error);
-        // Fallback currencies
-        setCurrencies(['btc', 'eth', 'usdt', 'bnb', 'ada', 'dot', 'ltc', 'bch']);
-      }
-    };
-
-    loadCurrencies();
+    testApiConnection();
   }, []);
 
+  const testApiConnection = async () => {
+    console.log('Testing Changelly API connection...');
+    setConnectionTest('Testing connection...');
+    
+    try {
+      // Test basic connectivity with getCurrencies endpoint
+      const currencyList = await api.getCurrencies();
+      console.log('Changelly API Response:', currencyList);
+      
+      if (currencyList && Array.isArray(currencyList)) {
+        setApiStatus('connected');
+        setConnectionTest(`✅ Connected successfully! Retrieved ${currencyList.length} currencies`);
+        setCurrencies(currencyList.slice(0, 20)); // Limit to top 20 for demo
+        
+        toast({
+          title: "API Connection Successful",
+          description: "Successfully connected to Changelly API",
+        });
+      } else {
+        throw new Error('Invalid response format');
+      }
+    } catch (error) {
+      console.error('Changelly API Connection Error:', error);
+      setApiStatus('error');
+      setConnectionTest(`❌ Connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      
+      // Fallback currencies for testing UI
+      setCurrencies(['btc', 'eth', 'usdt', 'bnb', 'ada', 'dot', 'ltc', 'bch']);
+      
+      toast({
+        title: "API Connection Failed",
+        description: "Could not connect to Changelly API. Using fallback data.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const validateApiKeys = async () => {
+    console.log('Validating API keys...');
+    setLoading(true);
+    
+    try {
+      // Test with a simple API call that requires authentication
+      const minAmount = await api.getMinAmount('btc', 'eth');
+      console.log('API Key validation successful:', minAmount);
+      
+      toast({
+        title: "API Keys Valid",
+        description: "Your Changelly API keys are working correctly",
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('API Key validation failed:', error);
+      
+      toast({
+        title: "API Keys Invalid",
+        description: "Please check your Changelly API keys configuration",
+        variant: "destructive",
+      });
+      
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleExchange = async () => {
-    if (!amount || !fromCurrency || !toCurrency) return;
+    if (!amount || !fromCurrency || !toCurrency) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setLoading(true);
+    console.log(`Calculating exchange: ${amount} ${fromCurrency} to ${toCurrency}`);
+    
     try {
       const result = await api.getExchangeAmount(fromCurrency, toCurrency, amount);
+      console.log('Exchange calculation result:', result);
+      
       setExchangeAmount(result.toString());
+      
+      toast({
+        title: "Exchange Rate Calculated",
+        description: `${amount} ${fromCurrency.toUpperCase()} = ${result} ${toCurrency.toUpperCase()}`,
+      });
     } catch (error) {
       console.error('Exchange calculation failed:', error);
       setExchangeAmount('Error calculating exchange');
+      
+      toast({
+        title: "Calculation Failed",
+        description: "Could not calculate exchange rate. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -57,6 +140,17 @@ const Exchange = () => {
     setExchangeAmount('');
   };
 
+  const getStatusIcon = () => {
+    switch (apiStatus) {
+      case 'connected':
+        return <CheckCircle className="h-5 w-5 text-green-500" />;
+      case 'error':
+        return <XCircle className="h-5 w-5 text-red-500" />;
+      default:
+        return <AlertCircle className="h-5 w-5 text-yellow-500" />;
+    }
+  };
+
   return (
     <PageLayout title="Crypto Exchange">
       <PageHeader 
@@ -66,6 +160,33 @@ const Exchange = () => {
       
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
+          {/* API Status Card */}
+          <Card className="glass-card bg-card p-6 mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">API Connection Status</h3>
+              {getStatusIcon()}
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">{connectionTest}</p>
+            <div className="flex gap-2">
+              <Button 
+                onClick={testApiConnection} 
+                variant="outline" 
+                size="sm"
+                disabled={loading}
+              >
+                Test Connection
+              </Button>
+              <Button 
+                onClick={validateApiKeys} 
+                variant="outline" 
+                size="sm"
+                disabled={loading}
+              >
+                Validate API Keys
+              </Button>
+            </div>
+          </Card>
+
           {/* Features Banner */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
             <Card className="glass-card bg-card p-4 text-center">
@@ -171,7 +292,7 @@ const Exchange = () => {
                 <div className="space-y-3">
                   <Button
                     onClick={handleExchange}
-                    disabled={!amount || loading}
+                    disabled={!amount || loading || apiStatus === 'error'}
                     className="w-full"
                     variant="outline"
                   >
@@ -179,7 +300,7 @@ const Exchange = () => {
                   </Button>
                   
                   <Button
-                    disabled={!exchangeAmount || exchangeAmount.includes('Error')}
+                    disabled={!exchangeAmount || exchangeAmount.includes('Error') || apiStatus === 'error'}
                     className="w-full bg-primary hover:bg-primary/90"
                   >
                     Start Exchange
