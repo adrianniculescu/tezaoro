@@ -1,4 +1,3 @@
-
 // Changelly API configuration and utilities
 export const CHANGELLY_CONFIG = {
   publicKey: '73d9d3418a4bf0ab06b7088c56e20c4bba233c1f4311758f6732fc1da2fbf794',
@@ -16,6 +15,15 @@ export interface ChangellyProduct {
   apiEndpoint: string;
 }
 
+export interface PaymentMethod {
+  id: string;
+  name: string;
+  type: 'card' | 'bank' | 'wallet' | 'instant';
+  icon: string;
+  processingTime: string;
+  currencies: string[];
+}
+
 export interface FiatProvider {
   id: string;
   name: string;
@@ -27,18 +35,14 @@ export interface FiatProvider {
     pix?: string;
     ach?: string;
     skrill?: string;
+    fasterPayments?: string;
+    payid?: string;
+    ideal?: string;
   };
   supportedMethods: string[];
   available: boolean;
-}
-
-export interface PaymentMethod {
-  id: string;
-  name: string;
-  type: 'card' | 'bank' | 'wallet' | 'instant';
-  icon: string;
-  processingTime: string;
-  currencies: string[];
+  offRampAvailable?: boolean;
+  offRampMethods?: string[];
 }
 
 export const FIAT_PROVIDERS: FiatProvider[] = [
@@ -52,7 +56,9 @@ export const FIAT_PROVIDERS: FiatProvider[] = [
       sepa: '2.9%'
     },
     supportedMethods: ['Visa/Mastercard', 'Apple Pay', 'Google Pay', 'SEPA'],
-    available: true
+    available: true,
+    offRampAvailable: true,
+    offRampMethods: ['SEPA (EUR)', 'ACH (USD)']
   },
   {
     id: 'banxa',
@@ -169,6 +175,22 @@ export const PAYMENT_METHODS: PaymentMethod[] = [
     icon: 'Building',
     processingTime: '2-3 business days',
     currencies: ['USD']
+  },
+  {
+    id: 'payid',
+    name: 'PayID',
+    type: 'instant',
+    icon: 'Zap',
+    processingTime: 'Instant',
+    currencies: ['AUD']
+  },
+  {
+    id: 'ideal',
+    name: 'iDEAL',
+    type: 'bank',
+    icon: 'Building',
+    processingTime: 'Instant',
+    currencies: ['EUR']
   },
   {
     id: 'skrill',
