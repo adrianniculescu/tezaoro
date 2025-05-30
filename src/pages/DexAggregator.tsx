@@ -32,6 +32,7 @@ const DexAggregator = () => {
   const [userAddress, setUserAddress] = useState('');
   const [apiError, setApiError] = useState<string | null>(null);
   const [useMockData, setUseMockData] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   console.log('DexAggregator: Component rendering with state:', {
     fromAmount,
@@ -39,39 +40,48 @@ const DexAggregator = () => {
     toToken,
     selectedChain,
     useMockData,
-    apiError
+    apiError,
+    isInitialized
   });
 
-  // Properly memoize the ChangellyAPI instance
+  // Safely create the ChangellyAPI instance with error handling
   const changelly = useMemo(() => {
     try {
-      console.log('DexAggregator: Creating ChangellyAPI instance...');
+      console.log('DexAggregator: Attempting to create ChangellyAPI instance...');
       const api = new ChangellyAPI();
       console.log('DexAggregator: ChangellyAPI instance created successfully');
       return api;
     } catch (error) {
       console.error('DexAggregator: Failed to create ChangellyAPI instance:', error);
       setApiError('Failed to initialize API connection');
+      setUseMockData(true);
       return null;
     }
   }, []);
 
-  // Test connection on mount
+  // Test connection on mount with better error handling
   useEffect(() => {
+    let isMounted = true;
+    
     const testConnection = async () => {
-      console.log('DexAggregator: Testing connection...');
-      
-      if (!changelly) {
-        console.log('DexAggregator: No changelly instance, using mock data');
-        setUseMockData(true);
-        setApiError('API initialization failed');
-        return;
-      }
-
       try {
+        console.log('DexAggregator: Starting connection test...');
+        
+        if (!changelly) {
+          console.log('DexAggregator: No changelly instance, using mock data');
+          if (isMounted) {
+            setUseMockData(true);
+            setApiError('API initialization failed');
+            setIsInitialized(true);
+          }
+          return;
+        }
+
         console.log('DexAggregator: Testing DEX connection...');
         const result = await changelly.testDexConnection();
         console.log('DexAggregator: DEX connection test result:', result);
+        
+        if (!isMounted) return;
         
         if (result.success) {
           console.log('DexAggregator: DEX connection successful');
@@ -94,17 +104,29 @@ const DexAggregator = () => {
         }
       } catch (error) {
         console.error('DexAggregator: Connection test failed:', error);
-        setUseMockData(true);
-        setApiError(error instanceof Error ? error.message : 'Connection failed');
-        toast({
-          title: "Demo Mode Active",
-          description: "Using demo data due to API connection issues",
-          variant: "default",
-        });
+        if (isMounted) {
+          setUseMockData(true);
+          setApiError(error instanceof Error ? error.message : 'Connection failed');
+          toast({
+            title: "Demo Mode Active",
+            description: "Using demo data due to API connection issues",
+            variant: "default",
+          });
+        }
+      } finally {
+        if (isMounted) {
+          setIsInitialized(true);
+        }
       }
     };
 
-    testConnection();
+    // Add a small delay to ensure the component is fully mounted
+    const timer = setTimeout(testConnection, 100);
+    
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
   }, [changelly]);
 
   // Fetch supported chains with fallback
@@ -126,6 +148,7 @@ const DexAggregator = () => {
         return MOCK_CHAINS;
       }
     },
+    enabled: isInitialized,
     retry: false,
     staleTime: 5 * 60 * 1000,
   });
@@ -149,7 +172,7 @@ const DexAggregator = () => {
         return MOCK_TOKENS;
       }
     },
-    enabled: !!selectedChain,
+    enabled: !!selectedChain && isInitialized,
     retry: false,
     staleTime: 5 * 60 * 1000,
   });
@@ -201,7 +224,7 @@ const DexAggregator = () => {
         };
       }
     },
-    enabled: !!(fromToken && toToken && fromAmount && parseFloat(fromAmount) > 0),
+    enabled: !!(fromToken && toToken && fromAmount && parseFloat(fromAmount) > 0 && isInitialized),
     retry: false,
   });
 
@@ -277,8 +300,29 @@ const DexAggregator = () => {
     apiError,
     chainsCount: chains?.length,
     tokensCount: tokens?.length,
-    hasQuote: !!quote
+    hasQuote: !!quote,
+    isInitialized
   });
+
+  // Show loading state during initialization
+  if (!isInitialized) {
+    return (
+      <PageLayout title="DEX Aggregator">
+        <PageHeader 
+          title="DEX Aggregator" 
+          description="Access the best prices across 200+ decentralized exchanges with MEV protection and gas optimization"
+        />
+        
+        <section className="py-16 md:py-24">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
+            <div className="text-center">
+              <p className="text-muted-foreground">Initializing DEX aggregator...</p>
+            </div>
+          </div>
+        </section>
+      </PageLayout>
+    );
+  }
 
   return (
     <PageLayout title="DEX Aggregator">
