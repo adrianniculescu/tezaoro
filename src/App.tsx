@@ -1,9 +1,9 @@
-
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import './App.css';
 import Loader from '@/components/Loader';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { Toaster } from '@/components/ui/toaster';
 
 const Home = lazy(() => import('@/pages/Home'));
 const Platform = lazy(() => import('@/pages/Platform'));
@@ -140,6 +140,7 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
+        <Toaster />
       </Router>
     </TooltipProvider>
   );
