@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import PageLayout from '@/components/PageLayout';
@@ -24,7 +25,7 @@ const MOCK_TOKENS = [
 ];
 
 const DexAggregatorContent = () => {
-  console.log('DexAggregatorContent: Component starting to render...');
+  console.log('DexAggregatorContent: Starting render');
   
   const [fromAmount, setFromAmount] = useState('');
   const [fromToken, setFromToken] = useState('');
@@ -34,146 +35,83 @@ const DexAggregatorContent = () => {
   const [userAddress, setUserAddress] = useState('');
   const [apiError, setApiError] = useState<string | null>(null);
   const [useMockData, setUseMockData] = useState(true);
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [hasError, setHasError] = useState(false);
 
-  // Create the Supabase-based API instance
+  // Create the API instance safely
   const api = useMemo(() => {
-    console.log('DexAggregatorContent: Creating API instance...');
+    console.log('DexAggregatorContent: Creating API instance');
     try {
       return new SupabaseChangellyAPI();
     } catch (error) {
-      console.error('DexAggregatorContent: Failed to create API instance:', error);
-      setHasError(true);
+      console.error('DexAggregatorContent: API creation failed:', error);
       return null;
     }
   }, []);
 
   // Test connection on mount
   useEffect(() => {
-    console.log('DexAggregatorContent: useEffect triggered for connection test');
-    let isMounted = true;
+    console.log('DexAggregatorContent: Testing API connection');
     
     const testConnection = async () => {
-      console.log('DexAggregatorContent: Starting connection test, api:', !!api);
-      
       if (!api) {
-        console.error('DexAggregatorContent: No API instance available');
-        if (isMounted) {
-          setUseMockData(true);
-          setApiError('Failed to initialize API');
-          setIsInitialized(true);
-        }
+        console.log('DexAggregatorContent: No API, using mock data');
+        setUseMockData(true);
+        setApiError('Failed to initialize API');
         return;
       }
 
       try {
-        console.log('DexAggregatorContent: Testing DEX connection...');
-        
         const result = await api.testDexConnection();
-        console.log('DexAggregatorContent: DEX connection test result:', result);
-        
-        if (!isMounted) return;
+        console.log('DexAggregatorContent: Connection test result:', result);
         
         if (result.success) {
-          console.log('DexAggregatorContent: DEX connection successful via Supabase');
           setUseMockData(false);
           setApiError(null);
           toast({
             title: "Connected",
-            description: "DEX API connected successfully via Supabase",
+            description: "DEX API connected successfully",
             variant: "default",
           });
         } else {
-          console.warn('DexAggregatorContent: DEX connection failed, using mock data');
           setUseMockData(true);
           setApiError(result.message);
           toast({
             title: "Demo Mode",
-            description: result.message || "DEX API unavailable, showing demo interface",
+            description: "Using demo data",
             variant: "default",
           });
         }
       } catch (error) {
         console.error('DexAggregatorContent: Connection test failed:', error);
-        if (isMounted) {
-          setUseMockData(true);
-          setApiError(error instanceof Error ? error.message : 'Connection failed');
-          toast({
-            title: "Demo Mode Active",
-            description: "Using demo data due to API connection issues",
-            variant: "default",
-          });
-        }
-      } finally {
-        if (isMounted) {
-          console.log('DexAggregatorContent: Setting initialized to true');
-          setIsInitialized(true);
-        }
+        setUseMockData(true);
+        setApiError('Connection failed');
+        toast({
+          title: "Demo Mode",
+          description: "Using demo data due to connection issues",
+          variant: "default",
+        });
       }
     };
 
-    const timer = setTimeout(() => {
-      console.log('DexAggregatorContent: Timer executing connection test');
-      testConnection();
-    }, 100);
-    
-    return () => {
-      console.log('DexAggregatorContent: Cleanup - setting isMounted to false');
-      isMounted = false;
-      clearTimeout(timer);
-    };
+    testConnection();
   }, [api]);
-
-  // Show error state if API creation failed
-  if (hasError) {
-    console.log('DexAggregatorContent: Showing error state');
-    return (
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-red-600 mb-4">Error Loading DEX Aggregator</h2>
-            <p className="text-muted-foreground">There was an error initializing the DEX aggregator. Please refresh the page and try again.</p>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  // Show loading state during initialization
-  if (!isInitialized) {
-    console.log('DexAggregatorContent: Showing loading state');
-    return (
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
-          <div className="text-center">
-            <p className="text-muted-foreground">Initializing DEX aggregator...</p>
-          </div>
-        </div>
-      </section>
-    );
-  }
 
   // Fetch supported chains
   const { data: chains, isLoading: chainsLoading } = useQuery({
     queryKey: ['dex-chains'],
     queryFn: async () => {
-      console.log('DexAggregatorContent: Fetching chains...');
-      if (useMockData) {
-        console.log('DexAggregatorContent: Using mock chains data');
+      console.log('DexAggregatorContent: Fetching chains');
+      if (useMockData || !api) {
         return MOCK_CHAINS;
       }
       
       try {
         const result = await api.getDexChains();
-        console.log('DexAggregatorContent: Chains result:', result);
         return result || MOCK_CHAINS;
       } catch (error) {
-        console.warn('DexAggregatorContent: Chains API failed, using mock data:', error);
+        console.warn('DexAggregatorContent: Chains API failed:', error);
         return MOCK_CHAINS;
       }
     },
-    enabled: isInitialized,
     retry: false,
     staleTime: 5 * 60 * 1000,
   });
@@ -183,21 +121,19 @@ const DexAggregatorContent = () => {
     queryKey: ['dex-tokens', selectedChain],
     queryFn: async () => {
       console.log('DexAggregatorContent: Fetching tokens for chain:', selectedChain);
-      if (useMockData) {
-        console.log('DexAggregatorContent: Using mock tokens data');
+      if (useMockData || !api) {
         return MOCK_TOKENS;
       }
       
       try {
         const result = await api.getDexTokens(parseInt(selectedChain));
-        console.log('DexAggregatorContent: Tokens result:', result);
         return result || MOCK_TOKENS;
       } catch (error) {
-        console.warn('DexAggregatorContent: Tokens API failed, using mock data:', error);
+        console.warn('DexAggregatorContent: Tokens API failed:', error);
         return MOCK_TOKENS;
       }
     },
-    enabled: !!selectedChain && isInitialized,
+    enabled: !!selectedChain,
     retry: false,
     staleTime: 5 * 60 * 1000,
   });
@@ -206,17 +142,9 @@ const DexAggregatorContent = () => {
   const { data: quote, isLoading: quoteLoading, refetch: refetchQuote } = useQuery({
     queryKey: ['dex-quote', fromToken, toToken, fromAmount, selectedChain, slippage],
     queryFn: async () => {
-      console.log('DexAggregatorContent: Fetching quote with params:', {
-        fromToken,
-        toToken,
-        amount: fromAmount,
-        chainId: parseInt(selectedChain),
-        slippage: parseFloat(slippage),
-        userAddress: userAddress || undefined
-      });
+      console.log('DexAggregatorContent: Fetching quote');
       
-      if (useMockData) {
-        console.log('DexAggregatorContent: Using mock quote data');
+      if (useMockData || !api) {
         return {
           toAmount: (parseFloat(fromAmount) * 0.95).toString(),
           rate: '0.95',
@@ -236,10 +164,9 @@ const DexAggregatorContent = () => {
           userAddress: userAddress || undefined
         });
         
-        console.log('DexAggregatorContent: Quote result:', result);
         return result;
       } catch (error) {
-        console.warn('DexAggregatorContent: Quote API failed, using mock data:', error);
+        console.warn('DexAggregatorContent: Quote API failed:', error);
         return {
           toAmount: (parseFloat(fromAmount) * 0.95).toString(),
           rate: '0.95',
@@ -249,7 +176,7 @@ const DexAggregatorContent = () => {
         };
       }
     },
-    enabled: !!(fromToken && toToken && fromAmount && parseFloat(fromAmount) > 0 && isInitialized),
+    enabled: !!(fromToken && toToken && fromAmount && parseFloat(fromAmount) > 0),
     retry: false,
   });
 
@@ -283,7 +210,7 @@ const DexAggregatorContent = () => {
       return;
     }
 
-    if (useMockData) {
+    if (useMockData || !api) {
       toast({
         title: "Demo Mode",
         description: "This is a demo. In production, your swap transaction would be prepared here.",
@@ -293,7 +220,7 @@ const DexAggregatorContent = () => {
     }
 
     try {
-      console.log('DexAggregatorContent: Creating swap transaction...');
+      console.log('DexAggregatorContent: Creating swap transaction');
       
       const swapData = await api.getDexSwapTransaction({
         fromToken,
@@ -319,7 +246,8 @@ const DexAggregatorContent = () => {
     }
   };
 
-  console.log('DexAggregatorContent: Rendering main content');
+  console.log('DexAggregatorContent: Rendering content');
+  
   return (
     <section className="py-16 md:py-24">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
@@ -369,29 +297,17 @@ const DexAggregatorContent = () => {
 const DexAggregator = () => {
   console.log('DexAggregator: Main component rendering');
   
-  try {
-    return (
-      <ErrorBoundary>
-        <PageLayout title="DEX Aggregator">
-          <PageHeader 
-            title="DEX Aggregator" 
-            description="Access the best prices across 200+ decentralized exchanges with MEV protection and gas optimization"
-          />
-          <DexAggregatorContent />
-        </PageLayout>
-      </ErrorBoundary>
-    );
-  } catch (error) {
-    console.error('DexAggregator: Error in main component:', error);
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Error Loading Page</h1>
-          <p className="text-muted-foreground">There was an error loading the DEX aggregator page.</p>
-        </div>
-      </div>
-    );
-  }
+  return (
+    <ErrorBoundary>
+      <PageLayout title="DEX Aggregator">
+        <PageHeader 
+          title="DEX Aggregator" 
+          description="Access the best prices across 200+ decentralized exchanges with MEV protection and gas optimization"
+        />
+        <DexAggregatorContent />
+      </PageLayout>
+    </ErrorBoundary>
+  );
 };
 
 export default DexAggregator;
