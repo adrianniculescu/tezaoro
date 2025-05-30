@@ -33,19 +33,42 @@ const DexAggregatorContent = () => {
   const [slippage, setSlippage] = useState('1.0');
   const [userAddress, setUserAddress] = useState('');
   const [apiError, setApiError] = useState<string | null>(null);
-  const [useMockData, setUseMockData] = useState(false);
+  const [useMockData, setUseMockData] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   // Create the Supabase-based API instance
-  const api = useMemo(() => new SupabaseChangellyAPI(), []);
+  const api = useMemo(() => {
+    console.log('DexAggregatorContent: Creating API instance...');
+    try {
+      return new SupabaseChangellyAPI();
+    } catch (error) {
+      console.error('DexAggregatorContent: Failed to create API instance:', error);
+      setHasError(true);
+      return null;
+    }
+  }, []);
 
   // Test connection on mount
   useEffect(() => {
+    console.log('DexAggregatorContent: useEffect triggered for connection test');
     let isMounted = true;
     
     const testConnection = async () => {
+      console.log('DexAggregatorContent: Starting connection test, api:', !!api);
+      
+      if (!api) {
+        console.error('DexAggregatorContent: No API instance available');
+        if (isMounted) {
+          setUseMockData(true);
+          setApiError('Failed to initialize API');
+          setIsInitialized(true);
+        }
+        return;
+      }
+
       try {
-        console.log('DexAggregatorContent: Starting connection test...');
+        console.log('DexAggregatorContent: Testing DEX connection...');
         
         const result = await api.testDexConnection();
         console.log('DexAggregatorContent: DEX connection test result:', result);
@@ -84,18 +107,52 @@ const DexAggregatorContent = () => {
         }
       } finally {
         if (isMounted) {
+          console.log('DexAggregatorContent: Setting initialized to true');
           setIsInitialized(true);
         }
       }
     };
 
-    const timer = setTimeout(testConnection, 100);
+    const timer = setTimeout(() => {
+      console.log('DexAggregatorContent: Timer executing connection test');
+      testConnection();
+    }, 100);
     
     return () => {
+      console.log('DexAggregatorContent: Cleanup - setting isMounted to false');
       isMounted = false;
       clearTimeout(timer);
     };
   }, [api]);
+
+  // Show error state if API creation failed
+  if (hasError) {
+    console.log('DexAggregatorContent: Showing error state');
+    return (
+      <section className="py-16 md:py-24">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-red-600 mb-4">Error Loading DEX Aggregator</h2>
+            <p className="text-muted-foreground">There was an error initializing the DEX aggregator. Please refresh the page and try again.</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Show loading state during initialization
+  if (!isInitialized) {
+    console.log('DexAggregatorContent: Showing loading state');
+    return (
+      <section className="py-16 md:py-24">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
+          <div className="text-center">
+            <p className="text-muted-foreground">Initializing DEX aggregator...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   // Fetch supported chains
   const { data: chains, isLoading: chainsLoading } = useQuery({
@@ -262,20 +319,6 @@ const DexAggregatorContent = () => {
     }
   };
 
-  // Show loading state during initialization
-  if (!isInitialized) {
-    console.log('DexAggregatorContent: Showing loading state');
-    return (
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
-          <div className="text-center">
-            <p className="text-muted-foreground">Initializing DEX aggregator...</p>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
   console.log('DexAggregatorContent: Rendering main content');
   return (
     <section className="py-16 md:py-24">
@@ -326,17 +369,29 @@ const DexAggregatorContent = () => {
 const DexAggregator = () => {
   console.log('DexAggregator: Main component rendering');
   
-  return (
-    <ErrorBoundary>
-      <PageLayout title="DEX Aggregator">
-        <PageHeader 
-          title="DEX Aggregator" 
-          description="Access the best prices across 200+ decentralized exchanges with MEV protection and gas optimization"
-        />
-        <DexAggregatorContent />
-      </PageLayout>
-    </ErrorBoundary>
-  );
+  try {
+    return (
+      <ErrorBoundary>
+        <PageLayout title="DEX Aggregator">
+          <PageHeader 
+            title="DEX Aggregator" 
+            description="Access the best prices across 200+ decentralized exchanges with MEV protection and gas optimization"
+          />
+          <DexAggregatorContent />
+        </PageLayout>
+      </ErrorBoundary>
+    );
+  } catch (error) {
+    console.error('DexAggregator: Error in main component:', error);
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Error Loading Page</h1>
+          <p className="text-muted-foreground">There was an error loading the DEX aggregator page.</p>
+        </div>
+      </div>
+    );
+  }
 };
 
 export default DexAggregator;

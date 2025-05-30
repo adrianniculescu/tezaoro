@@ -29,11 +29,14 @@ class ErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('ErrorBoundary: Component stack trace:', errorInfo.componentStack);
     console.error('ErrorBoundary: Error details:', error);
+    console.error('ErrorBoundary: Full error info:', errorInfo);
     this.setState({ errorInfo });
   }
 
   render() {
     if (this.state.hasError) {
+      console.log('ErrorBoundary: Rendering error state');
+      
       if (this.props.fallback) {
         return this.props.fallback;
       }
@@ -53,7 +56,10 @@ class ErrorBoundary extends Component<Props, State> {
                 {this.state.errorInfo?.componentStack}
               </pre>
             </details>
-            <Button onClick={() => this.setState({ hasError: false, error: null, errorInfo: null })}>
+            <Button onClick={() => {
+              console.log('ErrorBoundary: Resetting error state');
+              this.setState({ hasError: false, error: null, errorInfo: null });
+            }}>
               Try Again
             </Button>
           </Card>
