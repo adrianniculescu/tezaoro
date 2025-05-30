@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import PageHeader from '@/components/PageHeader';
@@ -8,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowRightLeft, TrendingUp, Shield, Zap, DollarSign, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { ChangellyAPI } from '@/utils/changelly';
+import { SecureChangellyAPI } from '@/utils/changelly/secureApi';
 import { useToast } from '@/hooks/use-toast';
 
 const Exchange = () => {
@@ -22,7 +21,7 @@ const Exchange = () => {
   const [connectionTest, setConnectionTest] = useState<string>('');
   const { toast } = useToast();
 
-  const api = new ChangellyAPI(true); // Using sandbox for development
+  const secureApi = new SecureChangellyAPI();
 
   // Test API connection on component mount
   useEffect(() => {
@@ -30,63 +29,61 @@ const Exchange = () => {
   }, []);
 
   const testApiConnection = async () => {
-    console.log('Testing Changelly API connection...');
-    setConnectionTest('Testing connection...');
+    console.log('Testing secure Changelly API connection...');
+    setConnectionTest('Testing secure connection...');
     
     try {
-      // Test basic connectivity with getCurrencies endpoint
-      const currencyList = await api.getCurrencies();
-      console.log('Changelly API Response:', currencyList);
+      const result = await secureApi.testConnection();
       
-      if (currencyList && Array.isArray(currencyList)) {
+      if (result.success && result.data) {
         setApiStatus('connected');
-        setConnectionTest(`✅ Connected successfully! Retrieved ${currencyList.length} currencies`);
-        setCurrencies(currencyList.slice(0, 20)); // Limit to top 20 for demo
+        setConnectionTest(`✅ Securely connected! Retrieved ${result.data.length} currencies`);
+        setCurrencies(result.data.slice(0, 20)); // Limit to top 20 for demo
         
         toast({
-          title: "API Connection Successful",
-          description: "Successfully connected to Changelly API",
+          title: "Secure API Connection Successful",
+          description: "Successfully connected to Changelly API via Supabase",
         });
       } else {
-        throw new Error('Invalid response format');
+        throw new Error(result.message || 'Invalid response format');
       }
     } catch (error) {
-      console.error('Changelly API Connection Error:', error);
+      console.error('Secure Changelly API Connection Error:', error);
       setApiStatus('error');
-      setConnectionTest(`❌ Connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setConnectionTest(`❌ Secure connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
       
       // Fallback currencies for testing UI
       setCurrencies(['btc', 'eth', 'usdt', 'bnb', 'ada', 'dot', 'ltc', 'bch']);
       
       toast({
-        title: "API Connection Failed",
-        description: "Could not connect to Changelly API. Using fallback data.",
+        title: "Secure API Connection Failed",
+        description: "Could not connect to Changelly API via Supabase. Using fallback data.",
         variant: "destructive",
       });
     }
   };
 
   const validateApiKeys = async () => {
-    console.log('Validating API keys...');
+    console.log('Validating API keys securely...');
     setLoading(true);
     
     try {
       // Test with a simple API call that requires authentication
-      const minAmount = await api.getMinAmount('btc', 'eth');
-      console.log('API Key validation successful:', minAmount);
+      const minAmount = await secureApi.getMinAmount('btc', 'eth');
+      console.log('Secure API Key validation successful:', minAmount);
       
       toast({
         title: "API Keys Valid",
-        description: "Your Changelly API keys are working correctly",
+        description: "Your Changelly API keys are working correctly via Supabase",
       });
       
       return true;
     } catch (error) {
-      console.error('API Key validation failed:', error);
+      console.error('Secure API Key validation failed:', error);
       
       toast({
         title: "API Keys Invalid",
-        description: "Please check your Changelly API keys configuration",
+        description: "Please check your Changelly API keys in Supabase secrets",
         variant: "destructive",
       });
       
@@ -107,11 +104,11 @@ const Exchange = () => {
     }
 
     setLoading(true);
-    console.log(`Calculating exchange: ${amount} ${fromCurrency} to ${toCurrency}`);
+    console.log(`Calculating exchange securely: ${amount} ${fromCurrency} to ${toCurrency}`);
     
     try {
-      const result = await api.getExchangeAmount(fromCurrency, toCurrency, amount);
-      console.log('Exchange calculation result:', result);
+      const result = await secureApi.getExchangeAmount(fromCurrency, toCurrency, amount);
+      console.log('Secure exchange calculation result:', result);
       
       setExchangeAmount(result.toString());
       
@@ -120,7 +117,7 @@ const Exchange = () => {
         description: `${amount} ${fromCurrency.toUpperCase()} = ${result} ${toCurrency.toUpperCase()}`,
       });
     } catch (error) {
-      console.error('Exchange calculation failed:', error);
+      console.error('Secure exchange calculation failed:', error);
       setExchangeAmount('Error calculating exchange');
       
       toast({
@@ -163,7 +160,7 @@ const Exchange = () => {
           {/* API Status Card */}
           <Card className="glass-card bg-card p-6 mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">API Connection Status</h3>
+              <h3 className="text-lg font-semibold">Secure API Connection Status</h3>
               {getStatusIcon()}
             </div>
             <p className="text-sm text-muted-foreground mb-4">{connectionTest}</p>
@@ -174,7 +171,7 @@ const Exchange = () => {
                 size="sm"
                 disabled={loading}
               >
-                Test Connection
+                Test Secure Connection
               </Button>
               <Button 
                 onClick={validateApiKeys} 
