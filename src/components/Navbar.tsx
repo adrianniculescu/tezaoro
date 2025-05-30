@@ -110,6 +110,18 @@ const Navbar = () => {
                           </p>
                         </Link>
                       </NavigationMenuLink>
+                      <NavigationMenuLink asChild>
+                        <Link 
+                          to="/dex-aggregator" 
+                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                          onClick={() => handleLinkClick('/dex-aggregator')}
+                        >
+                          <div className="text-sm font-medium leading-none">DEX Aggregator</div>
+                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                            Access best prices across 200+ decentralized exchanges
+                          </p>
+                        </Link>
+                      </NavigationMenuLink>
                     </div>
                   </NavigationMenuContent>
                 </NavigationMenuItem>
@@ -222,6 +234,13 @@ const Navbar = () => {
                 onClick={() => handleLinkClick('/fiat-gateway')}
               >
                 Fiat Gateway
+              </Link>
+              <Link
+                to="/dex-aggregator"
+                className="block px-3 py-2 text-base font-medium text-foreground/60 hover:text-foreground hover:bg-accent rounded-md"
+                onClick={() => handleLinkClick('/dex-aggregator')}
+              >
+                DEX Aggregator
               </Link>
               <Link
                 to="/pricing"
