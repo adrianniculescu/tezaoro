@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import PageHeader from '@/components/PageHeader';
@@ -7,7 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowRightLeft, TrendingUp, Shield, Zap, DollarSign, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { SecureChangellyAPI } from '@/utils/changelly/secureApi';
 import { useToast } from '@/components/ui/use-toast';
 import DexStatusBanner from '@/components/dex/DexStatusBanner';
 
@@ -19,89 +19,29 @@ const Exchange = () => {
   const [amount, setAmount] = useState('');
   const [exchangeAmount, setExchangeAmount] = useState('');
   const [loading, setLoading] = useState(false);
-  const [currencies, setCurrencies] = useState<string[]>([]);
-  const [apiStatus, setApiStatus] = useState<'unknown' | 'connected' | 'error'>('unknown');
-  const [connectionTest, setConnectionTest] = useState<string>('');
-  const [apiError, setApiError] = useState<string | null>(null);
-  const [useMockData, setUseMockData] = useState(false);
+  const [currencies] = useState<string[]>(['btc', 'eth', 'usdt', 'bnb', 'ada', 'dot', 'ltc', 'bch', 'xlm', 'xrp']);
+  const [apiStatus] = useState<'connected' | 'error'>('error');
+  const [apiError] = useState<string>('Demo mode - API integration in development');
+  const [useMockData] = useState(true);
   const { toast } = useToast();
 
-  const secureApi = new SecureChangellyAPI();
+  // Mock exchange rates for demo
+  const mockRates: Record<string, Record<string, number>> = {
+    btc: { eth: 15.5, usdt: 45000, bnb: 150, ada: 50000 },
+    eth: { btc: 0.065, usdt: 2900, bnb: 9.5, ada: 3200 },
+    usdt: { btc: 0.000022, eth: 0.00034, bnb: 0.0033, ada: 1.1 },
+    bnb: { btc: 0.0067, eth: 0.105, usdt: 300, ada: 330 },
+    ada: { btc: 0.00002, eth: 0.00031, usdt: 0.91, bnb: 0.003 }
+  };
 
-  // Test API connection on component mount
   useEffect(() => {
     console.log('Exchange useEffect running...');
-    testApiConnection();
-  }, []);
-
-  const testApiConnection = async () => {
-    console.log('Testing secure Changelly API connection...');
-    setConnectionTest('Testing secure connection...');
-    setApiError(null);
-    setUseMockData(false);
-    
-    try {
-      const result = await secureApi.testConnection();
-      
-      if (result.success && result.data) {
-        setApiStatus('connected');
-        setConnectionTest(`✅ Securely connected! Retrieved ${result.data.length} currencies`);
-        setCurrencies(result.data.slice(0, 20)); // Limit to top 20 for demo
-        
-        toast({
-          title: "Secure API Connection Successful",
-          description: "Successfully connected to Changelly API via Supabase",
-        });
-      } else {
-        throw new Error(result.message || 'Invalid response format');
-      }
-    } catch (error) {
-      console.error('Secure Changelly API Connection Error:', error);
-      setApiStatus('error');
-      setApiError(error instanceof Error ? error.message : 'Unknown connection error');
-      setConnectionTest(`❌ Secure connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      
-      // Fallback currencies for testing UI
-      setCurrencies(['btc', 'eth', 'usdt', 'bnb', 'ada', 'dot', 'ltc', 'bch']);
-      setUseMockData(true);
-      
-      toast({
-        title: "Secure API Connection Failed",
-        description: "Could not connect to Changelly API via Supabase. Using fallback data.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const validateApiKeys = async () => {
-    console.log('Validating API keys securely...');
-    setLoading(true);
-    
-    try {
-      // Test with a simple API call that requires authentication
-      const minAmount = await secureApi.getMinAmount('btc', 'eth');
-      console.log('Secure API Key validation successful:', minAmount);
-      
-      toast({
-        title: "API Keys Valid",
-        description: "Your Changelly API keys are working correctly via Supabase",
-      });
-      
-      return true;
-    } catch (error) {
-      console.error('Secure API Key validation failed:', error);
-      
-      toast({
-        title: "API Keys Invalid",
-        description: "Please check your Changelly API keys in Supabase secrets",
-        variant: "destructive",
-      });
-      
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
+    // Component is ready - no API calls needed for demo
+    toast({
+      title: "Demo Mode Active",
+      description: "Explore the exchange interface with sample data",
+    });
+  }, [toast]);
 
   const handleExchange = async () => {
     if (!amount || !fromCurrency || !toCurrency) {
@@ -114,30 +54,32 @@ const Exchange = () => {
     }
 
     setLoading(true);
-    console.log(`Calculating exchange securely: ${amount} ${fromCurrency} to ${toCurrency}`);
+    console.log(`Calculating exchange: ${amount} ${fromCurrency} to ${toCurrency}`);
     
-    try {
-      const result = await secureApi.getExchangeAmount(fromCurrency, toCurrency, amount);
-      console.log('Secure exchange calculation result:', result);
-      
-      setExchangeAmount(result.toString());
-      
-      toast({
-        title: "Exchange Rate Calculated",
-        description: `${amount} ${fromCurrency.toUpperCase()} = ${result} ${toCurrency.toUpperCase()}`,
-      });
-    } catch (error) {
-      console.error('Secure exchange calculation failed:', error);
-      setExchangeAmount('Error calculating exchange');
-      
-      toast({
-        title: "Calculation Failed",
-        description: "Could not calculate exchange rate. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
+    // Simulate API delay
+    setTimeout(() => {
+      try {
+        const rate = mockRates[fromCurrency]?.[toCurrency] || 1;
+        const result = (parseFloat(amount) * rate).toFixed(6);
+        setExchangeAmount(result);
+        
+        toast({
+          title: "Exchange Rate Calculated",
+          description: `${amount} ${fromCurrency.toUpperCase()} = ${result} ${toCurrency.toUpperCase()}`,
+        });
+      } catch (error) {
+        console.error('Exchange calculation failed:', error);
+        setExchangeAmount('Error calculating exchange');
+        
+        toast({
+          title: "Calculation Failed",
+          description: "Could not calculate exchange rate. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    }, 1000);
   };
 
   const swapCurrencies = () => {
@@ -175,26 +117,18 @@ const Exchange = () => {
           {/* API Status Card */}
           <Card className="glass-card bg-card p-6 mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Secure API Connection Status</h3>
+              <h3 className="text-lg font-semibold">Exchange API Status</h3>
               {getStatusIcon()}
             </div>
-            <p className="text-sm text-muted-foreground mb-4">{connectionTest}</p>
+            <p className="text-sm text-muted-foreground mb-4">Demo mode - Experience the interface with sample data</p>
             <div className="flex gap-2">
               <Button 
-                onClick={testApiConnection} 
+                onClick={() => toast({ title: "Demo Mode", description: "API integration coming soon" })} 
                 variant="outline" 
                 size="sm"
                 disabled={loading}
               >
-                Test Secure Connection
-              </Button>
-              <Button 
-                onClick={validateApiKeys} 
-                variant="outline" 
-                size="sm"
-                disabled={loading}
-              >
-                Validate API Keys
+                Demo Connection
               </Button>
             </div>
           </Card>
@@ -228,7 +162,7 @@ const Exchange = () => {
             <div className="space-y-6">
               <div className="text-center">
                 <h2 className="text-2xl font-bold mb-2">Exchange Cryptocurrencies</h2>
-                <p className="text-muted-foreground">Swap your crypto instantly with our secure exchange</p>
+                <p className="text-muted-foreground">Swap your crypto instantly with our demo exchange</p>
               </div>
 
               <div className="space-y-4">
@@ -304,7 +238,7 @@ const Exchange = () => {
                 <div className="space-y-3">
                   <Button
                     onClick={handleExchange}
-                    disabled={!amount || loading || apiStatus === 'error'}
+                    disabled={!amount || loading}
                     className="w-full"
                     variant="outline"
                   >
@@ -312,7 +246,7 @@ const Exchange = () => {
                   </Button>
                   
                   <Button
-                    disabled={!exchangeAmount || exchangeAmount.includes('Error') || apiStatus === 'error'}
+                    disabled={!exchangeAmount || exchangeAmount.includes('Error')}
                     className="w-full bg-primary hover:bg-primary/90"
                   >
                     Start Exchange
@@ -321,7 +255,7 @@ const Exchange = () => {
 
                 {/* Info */}
                 <div className="text-center text-sm text-muted-foreground">
-                  <p>Rate updates every 15 seconds • No account required</p>
+                  <p>Demo rates update every 15 seconds • No account required</p>
                   <div className="flex justify-center gap-2 mt-2">
                     <Badge variant="secondary">500+ Coins</Badge>
                     <Badge variant="secondary">0.25% Fee</Badge>

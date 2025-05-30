@@ -1,7 +1,5 @@
 
-// Main exports for Changelly utilities
-export { ChangellyAPI } from './api';
-export { CHANGELLY_CONFIG } from './config';
+// Main exports for Changelly utilities - Demo data only
 export { FIAT_PROVIDERS, PAYMENT_METHODS, CHANGELLY_PRODUCTS } from './providers';
 export type {
   ChangellyProduct,
