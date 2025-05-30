@@ -9,19 +9,31 @@ interface DexStatusBannerProps {
 }
 
 const DexStatusBanner = ({ apiError, useMockData }: DexStatusBannerProps) => {
+  // Don't show banner if everything is working normally
   if (!apiError && !useMockData) return null;
 
+  // Determine the appropriate message and styling
+  let message = '';
+  let description = '';
+  
+  if (useMockData && !apiError) {
+    // Demo mode
+    message = 'Demo Environment - Explore with sample data';
+    description = 'Experience the interface with demo data while we prepare the full functionality.';
+  } else if (apiError) {
+    // Partial issues
+    message = 'Some features temporarily limited';
+    description = apiError;
+  }
+
   return (
-    <Card className="p-4 mb-6 border-yellow-200 bg-yellow-50">
-      <div className="flex items-center gap-2 text-yellow-700">
+    <Card className="p-4 mb-6 border-blue-200 bg-blue-50">
+      <div className="flex items-center gap-2 text-blue-700">
         <AlertCircle className="h-4 w-4" />
-        <span className="font-medium">{useMockData ? 'Demo Mode Active' : 'Service Notice'}</span>
+        <span className="font-medium">{message}</span>
       </div>
-      <p className="text-sm text-yellow-600 mt-1">
-        {useMockData 
-          ? 'Using demo data for interface testing. API connection will be restored soon.'
-          : apiError
-        }
+      <p className="text-sm text-blue-600 mt-1">
+        {description}
       </p>
     </Card>
   );
