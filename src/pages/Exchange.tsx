@@ -8,10 +8,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ArrowRightLeft, TrendingUp, Shield, Zap, DollarSign, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { SecureChangellyAPI } from '@/utils/changelly/secureApi';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 import DexStatusBanner from '@/components/dex/DexStatusBanner';
 
 const Exchange = () => {
+  console.log('Exchange component rendering...');
+  
   const [fromCurrency, setFromCurrency] = useState('btc');
   const [toCurrency, setToCurrency] = useState('eth');
   const [amount, setAmount] = useState('');
@@ -28,6 +30,7 @@ const Exchange = () => {
 
   // Test API connection on component mount
   useEffect(() => {
+    console.log('Exchange useEffect running...');
     testApiConnection();
   }, []);
 
@@ -154,6 +157,8 @@ const Exchange = () => {
         return <AlertCircle className="h-5 w-5 text-yellow-500" />;
     }
   };
+
+  console.log('Exchange component about to render JSX...');
 
   return (
     <PageLayout title="Crypto Exchange">
