@@ -3,13 +3,10 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import PageLayout from '@/components/PageLayout';
 import PageHeader from '@/components/PageHeader';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { ArrowDownUp, BarChart3, Shield, Zap, TrendingUp, ChevronRight, AlertCircle } from 'lucide-react';
+import DexStatusBanner from '@/components/dex/DexStatusBanner';
+import DexSwapInterface from '@/components/dex/DexSwapInterface';
+import DexQuoteDisplay from '@/components/dex/DexQuoteDisplay';
+import DexFeaturesSection from '@/components/dex/DexFeaturesSection';
 import { ChangellyAPI } from '@/utils/changelly';
 import { toast } from '@/hooks/use-toast';
 
@@ -30,11 +27,11 @@ const DexAggregator = () => {
   const [fromAmount, setFromAmount] = useState('');
   const [fromToken, setFromToken] = useState('');
   const [toToken, setToToken] = useState('');
-  const [selectedChain, setSelectedChain] = useState('1'); // Ethereum mainnet
+  const [selectedChain, setSelectedChain] = useState('1');
   const [slippage, setSlippage] = useState('1.0');
   const [userAddress, setUserAddress] = useState('');
   const [apiError, setApiError] = useState<string | null>(null);
-  const [useMockData, setUseMockData] = useState(true); // Start with mock data
+  const [useMockData, setUseMockData] = useState(true);
 
   console.log('DexAggregator: Component rendering with state:', {
     fromAmount,
@@ -195,7 +192,6 @@ const DexAggregator = () => {
         return result;
       } catch (error) {
         console.warn('DexAggregator: Quote API failed, using mock data:', error);
-        // Return mock quote for demo purposes
         return {
           toAmount: (parseFloat(fromAmount) * 0.95).toString(),
           rate: '0.95',
@@ -293,238 +289,38 @@ const DexAggregator = () => {
       
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
-          {/* Status Display */}
-          {(apiError || useMockData) && (
-            <Card className="p-4 mb-6 border-yellow-200 bg-yellow-50">
-              <div className="flex items-center gap-2 text-yellow-700">
-                <AlertCircle className="h-4 w-4" />
-                <span className="font-medium">{useMockData ? 'Demo Mode Active' : 'Service Notice'}</span>
-              </div>
-              <p className="text-sm text-yellow-600 mt-1">
-                {useMockData 
-                  ? 'Using demo data for interface testing. API connection will be restored soon.'
-                  : apiError
-                }
-              </p>
-            </Card>
-          )}
+          <DexStatusBanner apiError={apiError} useMockData={useMockData} />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Swap Interface */}
-            <Card className="p-6">
-              <div className="flex items-center gap-2 mb-6">
-                <BarChart3 className="h-5 w-5 text-primary" />
-                <h3 className="text-xl font-semibold">DEX Swap</h3>
-              </div>
+            <DexSwapInterface
+              fromAmount={fromAmount}
+              setFromAmount={setFromAmount}
+              fromToken={fromToken}
+              setFromToken={setFromToken}
+              toToken={toToken}
+              setToToken={setToToken}
+              selectedChain={selectedChain}
+              setSelectedChain={setSelectedChain}
+              slippage={slippage}
+              setSlippage={setSlippage}
+              userAddress={userAddress}
+              setUserAddress={setUserAddress}
+              chains={chains || []}
+              tokens={tokens || []}
+              quote={quote}
+              chainsLoading={chainsLoading}
+              tokensLoading={tokensLoading}
+              quoteLoading={quoteLoading}
+              useMockData={useMockData}
+              onSwapTokens={handleSwapTokens}
+              onGetQuote={handleGetQuote}
+              onCreateSwap={handleCreateSwap}
+            />
 
-              <div className="space-y-4">
-                {/* Chain Selection */}
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Network</label>
-                  {chainsLoading ? (
-                    <div className="text-sm text-muted-foreground">Loading networks...</div>
-                  ) : (
-                    <Select value={selectedChain} onValueChange={setSelectedChain}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select network" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {chains?.map((chain: any) => (
-                          <SelectItem key={chain.chainId || chain.id} value={(chain.chainId || chain.id).toString()}>
-                            {chain.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                </div>
-
-                {/* From Token */}
-                <div>
-                  <label className="text-sm font-medium mb-2 block">From</label>
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="0.0"
-                      value={fromAmount}
-                      onChange={(e) => setFromAmount(e.target.value)}
-                      type="number"
-                      className="flex-1"
-                    />
-                    {tokensLoading ? (
-                      <div className="w-32 text-xs text-muted-foreground flex items-center justify-center">Loading...</div>
-                    ) : (
-                      <Select value={fromToken} onValueChange={setFromToken}>
-                        <SelectTrigger className="w-32">
-                          <SelectValue placeholder="Token" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {tokens?.map((token: any) => (
-                            <SelectItem key={token.address || token.symbol} value={token.address || token.symbol}>
-                              {token.symbol}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  </div>
-                </div>
-
-                {/* Swap Button */}
-                <div className="flex justify-center">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleSwapTokens}
-                    className="rounded-full"
-                  >
-                    <ArrowDownUp className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                {/* To Token */}
-                <div>
-                  <label className="text-sm font-medium mb-2 block">To</label>
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="0.0"
-                      value={quote?.toAmount || ''}
-                      readOnly
-                      className="flex-1 bg-muted"
-                    />
-                    {tokensLoading ? (
-                      <div className="w-32 text-xs text-muted-foreground flex items-center justify-center">Loading...</div>
-                    ) : (
-                      <Select value={toToken} onValueChange={setToToken}>
-                        <SelectTrigger className="w-32">
-                          <SelectValue placeholder="Token" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {tokens?.map((token: any) => (
-                            <SelectItem key={token.address || token.symbol} value={token.address || token.symbol}>
-                              {token.symbol}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  </div>
-                </div>
-
-                {/* Advanced Settings */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Slippage (%)</label>
-                    <Input
-                      placeholder="1.0"
-                      value={slippage}
-                      onChange={(e) => setSlippage(e.target.value)}
-                      type="number"
-                      step="0.1"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Your Address</label>
-                    <Input
-                      placeholder="0x..."
-                      value={userAddress}
-                      onChange={(e) => setUserAddress(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="space-y-2">
-                  <Button onClick={handleGetQuote} className="w-full" disabled={quoteLoading || !fromToken || !toToken || !fromAmount}>
-                    {quoteLoading ? 'Getting Quote...' : 'Get Quote'}
-                  </Button>
-                  
-                  {quote && (
-                    <Button onClick={handleCreateSwap} className="w-full bg-green-600 hover:bg-green-700">
-                      {useMockData ? 'Demo Swap' : 'Create Swap'} <ChevronRight className="h-4 w-4 ml-2" />
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </Card>
-
-            {/* Quote Information */}
-            <Card className="p-6">
-              <div className="flex items-center gap-2 mb-6">
-                <TrendingUp className="h-5 w-5 text-primary" />
-                <h3 className="text-xl font-semibold">Quote Details</h3>
-              </div>
-
-              {quote ? (
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Exchange Rate</span>
-                    <span className="font-medium">{quote.rate || 'N/A'}</span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Estimated Gas</span>
-                    <span className="font-medium">{quote.estimatedGas || 'N/A'}</span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Price Impact</span>
-                    <Badge variant={parseFloat(quote.priceImpact || '0') > 5 ? 'destructive' : 'secondary'}>
-                      {quote.priceImpact || '0'}%
-                    </Badge>
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Route</span>
-                    <span className="text-xs text-muted-foreground">{quote.protocols?.join(' → ') || 'Direct'}</span>
-                  </div>
-
-                  {useMockData && (
-                    <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                      <p className="text-xs text-blue-600">
-                        Demo data shown for interface testing
-                      </p>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="text-center text-muted-foreground py-8">
-                  <BarChart3 className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Enter swap details to get a quote</p>
-                </div>
-              )}
-            </Card>
+            <DexQuoteDisplay quote={quote} useMockData={useMockData} />
           </div>
 
-          {/* Features Section */}
-          <div className="mt-16">
-            <h3 className="text-2xl font-bold text-center mb-8">DEX Aggregator Features</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="p-6 text-center">
-                <Shield className="h-10 w-10 text-primary mx-auto mb-4" />
-                <h4 className="font-semibold mb-2">MEV Protection</h4>
-                <p className="text-sm text-muted-foreground">
-                  Advanced protection against maximal extractable value attacks
-                </p>
-              </Card>
-              
-              <Card className="p-6 text-center">
-                <Zap className="h-10 w-10 text-primary mx-auto mb-4" />
-                <h4 className="font-semibold mb-2">Gas Optimization</h4>
-                <p className="text-sm text-muted-foreground">
-                  Smart routing to minimize gas fees and maximize efficiency
-                </p>
-              </Card>
-              
-              <Card className="p-6 text-center">
-                <BarChart3 className="h-10 w-10 text-primary mx-auto mb-4" />
-                <h4 className="font-semibold mb-2">200+ DEXs</h4>
-                <p className="text-sm text-muted-foreground">
-                  Access aggregated liquidity from hundreds of decentralized exchanges
-                </p>
-              </Card>
-            </div>
-          </div>
+          <DexFeaturesSection />
         </div>
       </section>
     </PageLayout>
