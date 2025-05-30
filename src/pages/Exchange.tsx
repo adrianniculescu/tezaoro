@@ -9,6 +9,7 @@ import { ArrowRightLeft, TrendingUp, Shield, Zap, DollarSign, CheckCircle, XCirc
 import { Badge } from '@/components/ui/badge';
 import { SecureChangellyAPI } from '@/utils/changelly/secureApi';
 import { useToast } from '@/hooks/use-toast';
+import DexStatusBanner from '@/components/dex/DexStatusBanner';
 
 const Exchange = () => {
   const [fromCurrency, setFromCurrency] = useState('btc');
@@ -19,6 +20,8 @@ const Exchange = () => {
   const [currencies, setCurrencies] = useState<string[]>([]);
   const [apiStatus, setApiStatus] = useState<'unknown' | 'connected' | 'error'>('unknown');
   const [connectionTest, setConnectionTest] = useState<string>('');
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [useMockData, setUseMockData] = useState(false);
   const { toast } = useToast();
 
   const secureApi = new SecureChangellyAPI();
@@ -31,6 +34,8 @@ const Exchange = () => {
   const testApiConnection = async () => {
     console.log('Testing secure Changelly API connection...');
     setConnectionTest('Testing secure connection...');
+    setApiError(null);
+    setUseMockData(false);
     
     try {
       const result = await secureApi.testConnection();
@@ -50,10 +55,12 @@ const Exchange = () => {
     } catch (error) {
       console.error('Secure Changelly API Connection Error:', error);
       setApiStatus('error');
+      setApiError(error instanceof Error ? error.message : 'Unknown connection error');
       setConnectionTest(`❌ Secure connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
       
       // Fallback currencies for testing UI
       setCurrencies(['btc', 'eth', 'usdt', 'bnb', 'ada', 'dot', 'ltc', 'bch']);
+      setUseMockData(true);
       
       toast({
         title: "Secure API Connection Failed",
@@ -157,6 +164,9 @@ const Exchange = () => {
       
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
+          {/* Status Banner */}
+          <DexStatusBanner apiError={apiError} useMockData={useMockData} />
+
           {/* API Status Card */}
           <Card className="glass-card bg-card p-6 mb-8">
             <div className="flex items-center justify-between mb-4">
