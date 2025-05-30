@@ -1,4 +1,3 @@
-
 import { CHANGELLY_CONFIG } from './config';
 import { FiatProvider, DexQuoteParams, DexSwapParams, FiatQuoteParams, FiatOrderParams } from './types';
 import { FIAT_PROVIDERS } from './providers';
@@ -247,16 +246,52 @@ export class ChangellyAPI {
   async testDexConnection() {
     console.log('Testing Changelly DEX API connection...');
     try {
-      const chains = await this.getDexChains();
+      // Try a simpler endpoint first, just to check connectivity
+      const response = await fetch(`${this.dexApiUrl}/chains`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': this.dexApiKey
+        },
+        body: JSON.stringify({})
+      });
+      
+      console.log('Changelly DEX API test response status:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Changelly DEX API test error:', { status: response.status, body: errorText });
+        return {
+          success: false,
+          message: `API error: ${response.status} - ${errorText || 'Unknown error'}`,
+          data: null
+        };
+      }
+      
+      const data = await response.json();
+      console.log('Changelly DEX API test data:', data);
+      
+      if (data.error) {
+        return {
+          success: false,
+          message: `API error: ${data.error.message || 'Unknown error'}`,
+          data: null
+        };
+      }
+      
+      const chains = data.result || [];
       return {
         success: true,
-        message: `Successfully connected to Changelly DEX API. Retrieved ${chains?.length || 0} supported chains.`,
+        message: `Successfully connected to Changelly DEX API. Retrieved ${chains.length} supported chains.`,
         data: chains
       };
     } catch (error) {
+      console.error('Changelly DEX API test failed:', error);
       return {
         success: false,
-        message: error instanceof Error ? error.message : 'Unknown DEX connection error',
+        message: error instanceof Error ? 
+          `Connection error: ${error.message}` : 
+          'Unknown DEX connection error',
         data: null
       };
     }

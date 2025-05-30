@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import PageLayout from '@/components/PageLayout';
 import PageHeader from '@/components/PageHeader';
@@ -34,26 +34,40 @@ const DexAggregator = () => {
   const [slippage, setSlippage] = useState('1.0');
   const [userAddress, setUserAddress] = useState('');
   const [apiError, setApiError] = useState<string | null>(null);
-  const [useMockData, setUseMockData] = useState(false);
+  const [useMockData, setUseMockData] = useState(true); // Start with mock data
 
-  console.log('DexAggregator: Component mounted, starting initialization...');
+  console.log('DexAggregator: Component rendering with state:', {
+    fromAmount,
+    fromToken,
+    toToken,
+    selectedChain,
+    useMockData,
+    apiError
+  });
 
-  let changelly: ChangellyAPI | null = null;
-  
-  try {
-    changelly = new ChangellyAPI();
-    console.log('DexAggregator: ChangellyAPI instance created successfully');
-  } catch (error) {
-    console.error('DexAggregator: Failed to create ChangellyAPI instance:', error);
-    setApiError('Failed to initialize API connection');
-  }
+  // Properly memoize the ChangellyAPI instance
+  const changelly = useMemo(() => {
+    try {
+      console.log('DexAggregator: Creating ChangellyAPI instance...');
+      const api = new ChangellyAPI();
+      console.log('DexAggregator: ChangellyAPI instance created successfully');
+      return api;
+    } catch (error) {
+      console.error('DexAggregator: Failed to create ChangellyAPI instance:', error);
+      setApiError('Failed to initialize API connection');
+      return null;
+    }
+  }, []);
 
-  // Test connection with better error handling
+  // Test connection on mount
   useEffect(() => {
     const testConnection = async () => {
+      console.log('DexAggregator: Testing connection...');
+      
       if (!changelly) {
         console.log('DexAggregator: No changelly instance, using mock data');
         setUseMockData(true);
+        setApiError('API initialization failed');
         return;
       }
 
@@ -62,19 +76,24 @@ const DexAggregator = () => {
         const result = await changelly.testDexConnection();
         console.log('DexAggregator: DEX connection test result:', result);
         
-        if (!result.success) {
-          console.warn('DexAggregator: DEX connection failed, falling back to mock data');
-          setUseMockData(true);
-          setApiError(result.message);
-          toast({
-            title: "Using Demo Mode",
-            description: "DEX API unavailable, showing demo interface",
-            variant: "default",
-          });
-        } else {
+        if (result.success) {
           console.log('DexAggregator: DEX connection successful');
           setUseMockData(false);
           setApiError(null);
+          toast({
+            title: "Connected",
+            description: "DEX API connected successfully",
+            variant: "default",
+          });
+        } else {
+          console.warn('DexAggregator: DEX connection failed, using mock data');
+          setUseMockData(true);
+          setApiError(result.message);
+          toast({
+            title: "Demo Mode",
+            description: "DEX API unavailable, showing demo interface",
+            variant: "default",
+          });
         }
       } catch (error) {
         console.error('DexAggregator: Connection test failed:', error);
@@ -92,7 +111,7 @@ const DexAggregator = () => {
   }, [changelly]);
 
   // Fetch supported chains with fallback
-  const { data: chains, isLoading: chainsLoading, error: chainsError } = useQuery({
+  const { data: chains, isLoading: chainsLoading } = useQuery({
     queryKey: ['dex-chains'],
     queryFn: async () => {
       console.log('DexAggregator: Fetching chains...');
@@ -104,18 +123,18 @@ const DexAggregator = () => {
       try {
         const result = await changelly.getDexChains();
         console.log('DexAggregator: Chains result:', result);
-        return result;
+        return result || MOCK_CHAINS;
       } catch (error) {
         console.warn('DexAggregator: Chains API failed, using mock data:', error);
         return MOCK_CHAINS;
       }
     },
-    retry: 1,
+    retry: false,
     staleTime: 5 * 60 * 1000,
   });
 
   // Fetch tokens for selected chain with fallback
-  const { data: tokens, isLoading: tokensLoading, error: tokensError } = useQuery({
+  const { data: tokens, isLoading: tokensLoading } = useQuery({
     queryKey: ['dex-tokens', selectedChain],
     queryFn: async () => {
       console.log('DexAggregator: Fetching tokens for chain:', selectedChain);
@@ -127,19 +146,19 @@ const DexAggregator = () => {
       try {
         const result = await changelly.getDexTokens(parseInt(selectedChain));
         console.log('DexAggregator: Tokens result:', result);
-        return result;
+        return result || MOCK_TOKENS;
       } catch (error) {
         console.warn('DexAggregator: Tokens API failed, using mock data:', error);
         return MOCK_TOKENS;
       }
     },
     enabled: !!selectedChain,
-    retry: 1,
+    retry: false,
     staleTime: 5 * 60 * 1000,
   });
 
   // Get quote with fallback
-  const { data: quote, isLoading: quoteLoading, error: quoteError, refetch: refetchQuote } = useQuery({
+  const { data: quote, isLoading: quoteLoading, refetch: refetchQuote } = useQuery({
     queryKey: ['dex-quote', fromToken, toToken, fromAmount, selectedChain, slippage],
     queryFn: async () => {
       console.log('DexAggregator: Fetching quote with params:', {
@@ -158,7 +177,7 @@ const DexAggregator = () => {
           rate: '0.95',
           estimatedGas: '21000',
           priceImpact: '0.5',
-          protocols: ['Uniswap V3']
+          protocols: ['Demo Protocol']
         };
       }
       
@@ -175,7 +194,7 @@ const DexAggregator = () => {
         console.log('DexAggregator: Quote result:', result);
         return result;
       } catch (error) {
-        console.warn('DexAggregator: Quote API failed:', error);
+        console.warn('DexAggregator: Quote API failed, using mock data:', error);
         // Return mock quote for demo purposes
         return {
           toAmount: (parseFloat(fromAmount) * 0.95).toString(),
@@ -187,7 +206,7 @@ const DexAggregator = () => {
       }
     },
     enabled: !!(fromToken && toToken && fromAmount && parseFloat(fromAmount) > 0),
-    retry: 1,
+    retry: false,
   });
 
   const handleSwapTokens = () => {
