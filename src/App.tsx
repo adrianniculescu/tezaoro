@@ -1,9 +1,20 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import './App.css';
 import Loader from '@/components/Loader';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from '@/components/ui/toaster';
+
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
 
 const Home = lazy(() => import('@/pages/Home'));
 const Platform = lazy(() => import('@/pages/Platform'));
@@ -76,73 +87,75 @@ function App() {
   console.log('App component rendering, current pathname:', window.location.pathname);
   
   return (
-    <TooltipProvider>
-      <Router>
-        <LocationLogger />
-        <Suspense fallback={<Loader />}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/platform" element={<Platform />} />
-            <Route path="/features" element={<Features />} />
-            <Route path="/algorithms" element={<Algorithms />} />
-            <Route path="/performance" element={<Performance />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/documentation" element={<Documentation />} />
-            <Route path="/how-it-works" element={<HowItWorks />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/support" element={<Support />} />
-            <Route path="/api" element={<Api />} />
-            <Route path="/tokenomics-consulting" element={<TokenomicsConsulting />} />
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Router>
+          <LocationLogger />
+          <Suspense fallback={<Loader />}>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/platform" element={<Platform />} />
+              <Route path="/features" element={<Features />} />
+              <Route path="/algorithms" element={<Algorithms />} />
+              <Route path="/performance" element={<Performance />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/documentation" element={<Documentation />} />
+              <Route path="/how-it-works" element={<HowItWorks />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/support" element={<Support />} />
+              <Route path="/api" element={<Api />} />
+              <Route path="/tokenomics-consulting" element={<TokenomicsConsulting />} />
 
-            {/* Service pages */}
-            <Route path="/token-listing" element={<TokenListing />} />
-            <Route path="/market-making" element={<MarketMaking />} />
+              {/* Service pages */}
+              <Route path="/token-listing" element={<TokenListing />} />
+              <Route path="/market-making" element={<MarketMaking />} />
 
-            {/* Trading pages */}
-            <Route path="/exchange" element={<Exchange />} />
-            <Route path="/fiat-gateway" element={<FiatGateway />} />
-            <Route path="/dex-aggregator" element={<DexAggregator />} />
+              {/* Trading pages */}
+              <Route path="/exchange" element={<Exchange />} />
+              <Route path="/fiat-gateway" element={<FiatGateway />} />
+              <Route path="/dex-aggregator" element={<DexAggregator />} />
 
-            {/* Legal pages */}
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-            <Route path="/terms-of-service" element={<TermsOfService />} />
-            <Route path="/contact" element={<Contact />} />
+              {/* Legal pages */}
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/terms-of-service" element={<TermsOfService />} />
+              <Route path="/contact" element={<Contact />} />
 
-            {/* Platform guide routes */}
-            <Route path="/platform/platform-overview" element={<PlatformOverview />} />
-            <Route path="/platform/account-setup" element={<AccountSetup />} />
-            <Route path="/platform/deploying-first-algorithm" element={<DeployingFirstAlgorithm />} />
-            
-            {/* Performance guide routes */}
-            <Route path="/performance/metrics-explained" element={<PerformanceMetricsExplained />} />
-            <Route path="/performance/dashboard-guide" element={<PerformanceDashboardGuide />} />
-            <Route path="/performance/reporting-features" element={<ReportingFeatures />} />
-            <Route path="/performance/optimization-techniques" element={<OptimizationTechniques />} />
+              {/* Platform guide routes */}
+              <Route path="/platform/platform-overview" element={<PlatformOverview />} />
+              <Route path="/platform/account-setup" element={<AccountSetup />} />
+              <Route path="/platform/deploying-first-algorithm" element={<DeployingFirstAlgorithm />} />
+              
+              {/* Performance guide routes */}
+              <Route path="/performance/metrics-explained" element={<PerformanceMetricsExplained />} />
+              <Route path="/performance/dashboard-guide" element={<PerformanceDashboardGuide />} />
+              <Route path="/performance/reporting-features" element={<ReportingFeatures />} />
+              <Route path="/performance/optimization-techniques" element={<OptimizationTechniques />} />
 
-            {/* Blog post routes */}
-            <Route path="/guide/choose-algorithmic-trading-platform" element={<ChooseAlgorithmicTradingPlatform />} />
-            <Route path="/guide/top-crypto-algorithmic-trading-strategies" element={<CryptoAlgorithmicTradingStrategies />} />
-            <Route path="/guide/risk-management-algorithmic-trading" element={<RiskManagementAlgorithmicTrading />} />
+              {/* Blog post routes */}
+              <Route path="/guide/choose-algorithmic-trading-platform" element={<ChooseAlgorithmicTradingPlatform />} />
+              <Route path="/guide/top-crypto-algorithmic-trading-strategies" element={<CryptoAlgorithmicTradingStrategies />} />
+              <Route path="/guide/risk-management-algorithmic-trading" element={<RiskManagementAlgorithmicTrading />} />
 
-            {/* New blog post routes */}
-            <Route path="/guide/backtesting-trading-algorithm" element={<BacktestingTradingAlgorithm />} />
-            <Route path="/guide/algorithmic-vs-manual-trading" element={<AlgorithmicVsManualTrading />} />
-            <Route path="/guide/building-first-trading-bot" element={<BuildingFirstTradingBot />} />
-            <Route path="/guide/institutional-trading-algorithms" element={<InstitutionalTradingAlgorithms />} />
-            <Route path="/guide/ai-algorithmic-trading" element={<AIAlgorithmicTrading />} />
-            <Route path="/guide/reduce-slippage-trading" element={<ReduceSlippageTrading />} />
-            <Route path="/guide/trading-regulations-compliance" element={<TradingRegulationsCompliance />} />
-            <Route path="/guide/scalping-vs-swing-trading" element={<ScalpingVsSwingTrading />} />
-            <Route path="/guide/future-algorithmic-trading" element={<FutureAlgorithmicTrading />} />
-            <Route path="/guide/nano-cap-crypto-liquidity-growth" element={<NanoCapCryptoLiquidity />} />
+              {/* New blog post routes */}
+              <Route path="/guide/backtesting-trading-algorithm" element={<BacktestingTradingAlgorithm />} />
+              <Route path="/guide/algorithmic-vs-manual-trading" element={<AlgorithmicVsManualTrading />} />
+              <Route path="/guide/building-first-trading-bot" element={<BuildingFirstTradingBot />} />
+              <Route path="/guide/institutional-trading-algorithms" element={<InstitutionalTradingAlgorithms />} />
+              <Route path="/guide/ai-algorithmic-trading" element={<AIAlgorithmicTrading />} />
+              <Route path="/guide/reduce-slippage-trading" element={<ReduceSlippageTrading />} />
+              <Route path="/guide/trading-regulations-compliance" element={<TradingRegulationsCompliance />} />
+              <Route path="/guide/scalping-vs-swing-trading" element={<ScalpingVsSwingTrading />} />
+              <Route path="/guide/future-algorithmic-trading" element={<FutureAlgorithmicTrading />} />
+              <Route path="/guide/nano-cap-crypto-liquidity-growth" element={<NanoCapCryptoLiquidity />} />
 
-            {/* Catch all route */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Suspense>
-        <Toaster />
-      </Router>
-    </TooltipProvider>
+              {/* Catch all route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+          <Toaster />
+        </Router>
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 }
 
