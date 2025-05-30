@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import PageLayout from '@/components/PageLayout';
@@ -8,7 +7,7 @@ import DexSwapInterface from '@/components/dex/DexSwapInterface';
 import DexQuoteDisplay from '@/components/dex/DexQuoteDisplay';
 import DexFeaturesSection from '@/components/dex/DexFeaturesSection';
 import ErrorBoundary from '@/components/ErrorBoundary';
-import { ChangellyAPI } from '@/utils/changelly';
+import { SupabaseChangellyAPI } from '@/utils/changelly/supabaseApi';
 import { toast } from '@/hooks/use-toast';
 
 // Mock data for fallback
@@ -34,35 +33,13 @@ const DexAggregatorContent = () => {
   const [slippage, setSlippage] = useState('1.0');
   const [userAddress, setUserAddress] = useState('');
   const [apiError, setApiError] = useState<string | null>(null);
-  const [useMockData, setUseMockData] = useState(true);
+  const [useMockData, setUseMockData] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  console.log('DexAggregatorContent: State initialized:', {
-    fromAmount,
-    fromToken,
-    toToken,
-    selectedChain,
-    useMockData,
-    apiError,
-    isInitialized
-  });
+  // Create the Supabase-based API instance
+  const api = useMemo(() => new SupabaseChangellyAPI(), []);
 
-  // Safely create the ChangellyAPI instance with error handling
-  const changelly = useMemo(() => {
-    try {
-      console.log('DexAggregatorContent: Creating ChangellyAPI instance...');
-      const api = new ChangellyAPI();
-      console.log('DexAggregatorContent: ChangellyAPI instance created successfully');
-      return api;
-    } catch (error) {
-      console.error('DexAggregatorContent: Failed to create ChangellyAPI instance:', error);
-      setApiError('Failed to initialize API connection');
-      setUseMockData(true);
-      return null;
-    }
-  }, []);
-
-  // Test connection on mount with better error handling
+  // Test connection on mount
   useEffect(() => {
     let isMounted = true;
     
@@ -70,29 +47,18 @@ const DexAggregatorContent = () => {
       try {
         console.log('DexAggregatorContent: Starting connection test...');
         
-        if (!changelly) {
-          console.log('DexAggregatorContent: No changelly instance, using mock data');
-          if (isMounted) {
-            setUseMockData(true);
-            setApiError('API initialization failed');
-            setIsInitialized(true);
-          }
-          return;
-        }
-
-        console.log('DexAggregatorContent: Testing DEX connection...');
-        const result = await changelly.testDexConnection();
+        const result = await api.testDexConnection();
         console.log('DexAggregatorContent: DEX connection test result:', result);
         
         if (!isMounted) return;
         
         if (result.success) {
-          console.log('DexAggregatorContent: DEX connection successful');
+          console.log('DexAggregatorContent: DEX connection successful via Supabase');
           setUseMockData(false);
           setApiError(null);
           toast({
             title: "Connected",
-            description: "DEX API connected successfully",
+            description: "DEX API connected successfully via Supabase",
             variant: "default",
           });
         } else {
@@ -101,7 +67,7 @@ const DexAggregatorContent = () => {
           setApiError(result.message);
           toast({
             title: "Demo Mode",
-            description: "DEX API unavailable, showing demo interface",
+            description: result.message || "DEX API unavailable, showing demo interface",
             variant: "default",
           });
         }
@@ -123,27 +89,26 @@ const DexAggregatorContent = () => {
       }
     };
 
-    // Add a small delay to ensure the component is fully mounted
     const timer = setTimeout(testConnection, 100);
     
     return () => {
       isMounted = false;
       clearTimeout(timer);
     };
-  }, [changelly]);
+  }, [api]);
 
-  // Fetch supported chains with fallback
+  // Fetch supported chains
   const { data: chains, isLoading: chainsLoading } = useQuery({
     queryKey: ['dex-chains'],
     queryFn: async () => {
       console.log('DexAggregatorContent: Fetching chains...');
-      if (useMockData || !changelly) {
+      if (useMockData) {
         console.log('DexAggregatorContent: Using mock chains data');
         return MOCK_CHAINS;
       }
       
       try {
-        const result = await changelly.getDexChains();
+        const result = await api.getDexChains();
         console.log('DexAggregatorContent: Chains result:', result);
         return result || MOCK_CHAINS;
       } catch (error) {
@@ -156,18 +121,18 @@ const DexAggregatorContent = () => {
     staleTime: 5 * 60 * 1000,
   });
 
-  // Fetch tokens for selected chain with fallback
+  // Fetch tokens for selected chain
   const { data: tokens, isLoading: tokensLoading } = useQuery({
     queryKey: ['dex-tokens', selectedChain],
     queryFn: async () => {
       console.log('DexAggregatorContent: Fetching tokens for chain:', selectedChain);
-      if (useMockData || !changelly) {
+      if (useMockData) {
         console.log('DexAggregatorContent: Using mock tokens data');
         return MOCK_TOKENS;
       }
       
       try {
-        const result = await changelly.getDexTokens(parseInt(selectedChain));
+        const result = await api.getDexTokens(parseInt(selectedChain));
         console.log('DexAggregatorContent: Tokens result:', result);
         return result || MOCK_TOKENS;
       } catch (error) {
@@ -180,7 +145,7 @@ const DexAggregatorContent = () => {
     staleTime: 5 * 60 * 1000,
   });
 
-  // Get quote with fallback
+  // Get quote
   const { data: quote, isLoading: quoteLoading, refetch: refetchQuote } = useQuery({
     queryKey: ['dex-quote', fromToken, toToken, fromAmount, selectedChain, slippage],
     queryFn: async () => {
@@ -193,7 +158,7 @@ const DexAggregatorContent = () => {
         userAddress: userAddress || undefined
       });
       
-      if (useMockData || !changelly) {
+      if (useMockData) {
         console.log('DexAggregatorContent: Using mock quote data');
         return {
           toAmount: (parseFloat(fromAmount) * 0.95).toString(),
@@ -205,7 +170,7 @@ const DexAggregatorContent = () => {
       }
       
       try {
-        const result = await changelly.getDexQuote({
+        const result = await api.getDexQuote({
           fromToken,
           toToken,
           amount: fromAmount,
@@ -272,9 +237,8 @@ const DexAggregatorContent = () => {
 
     try {
       console.log('DexAggregatorContent: Creating swap transaction...');
-      if (!changelly) throw new Error('API not available');
       
-      const swapData = await changelly.getDexSwapTransaction({
+      const swapData = await api.getDexSwapTransaction({
         fromToken,
         toToken,
         amount: fromAmount,
@@ -297,15 +261,6 @@ const DexAggregatorContent = () => {
       });
     }
   };
-
-  console.log('DexAggregatorContent: Rendering component with state:', {
-    useMockData,
-    apiError,
-    chainsCount: chains?.length,
-    tokensCount: tokens?.length,
-    hasQuote: !!quote,
-    isInitialized
-  });
 
   // Show loading state during initialization
   if (!isInitialized) {
