@@ -15,20 +15,8 @@ import { useChangellyExchange } from '@/hooks/useChangellyExchange';
 const Exchange = () => {
   console.log('Exchange component rendering...');
   
-  // Hooks must be called at the top level - not in try-catch
   const { toast } = useToast();
-  
-  let hookData;
-  let hookError = null;
-  
-  try {
-    console.log('Exchange: About to call useChangellyExchange hook');
-    hookData = useChangellyExchange();
-    console.log('Exchange: useChangellyExchange hook successful', hookData);
-  } catch (err) {
-    console.error('Exchange: Error in useChangellyExchange hook:', err);
-    hookError = err;
-  }
+  const { loading, error, getCurrencies, getExchangeAmount } = useChangellyExchange();
   
   const [fromCurrency, setFromCurrency] = useState('btc');
   const [toCurrency, setToCurrency] = useState('eth');
@@ -37,32 +25,7 @@ const Exchange = () => {
   const [currencies, setCurrencies] = useState<string[]>(['btc', 'eth', 'usdt', 'bnb', 'ada', 'dot', 'ltc', 'bch', 'xlm', 'xrp']);
   const [apiStatus, setApiStatus] = useState<'connected' | 'error' | 'loading'>('loading');
   const [apiError, setApiError] = useState<string | null>(null);
-  const [useMockData, setUseMockData] = useState(false);
-  
-  // If hook failed, render fallback
-  if (hookError) {
-    console.error('Exchange: Hook error, rendering fallback');
-    return (
-      <PageLayout title="Crypto Exchange">
-        <PageHeader 
-          title="Instant Crypto Exchange" 
-          description="Trade cryptocurrencies instantly with competitive rates and zero hidden fees"
-        />
-        <section className="py-16 md:py-24">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
-            <Card className="p-8 text-center">
-              <h2 className="text-xl font-semibold mb-4">Exchange Temporarily Unavailable</h2>
-              <p className="text-muted-foreground">
-                We're experiencing technical difficulties. Please try again later.
-              </p>
-            </Card>
-          </div>
-        </section>
-      </PageLayout>
-    );
-  }
-  
-  const { loading, error, getCurrencies, getExchangeAmount } = hookData;
+  const [useMockData, setUseMockData] = useState(true);
   
   // Mock exchange rates for fallback
   const mockRates: Record<string, Record<string, number>> = {
@@ -82,6 +45,7 @@ const Exchange = () => {
     try {
       console.log('Exchange: Initializing exchange...');
       setApiStatus('loading');
+      
       const availableCurrencies = await getCurrencies();
       
       if (availableCurrencies && availableCurrencies.length > 0) {
