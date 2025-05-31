@@ -10,6 +10,7 @@ import { ArrowRightLeft, TrendingUp, Shield, Zap, DollarSign, CheckCircle, XCirc
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
 import DexStatusBanner from '@/components/dex/DexStatusBanner';
+import { useChangellyExchange } from '@/hooks/useChangellyExchange';
 
 const Exchange = () => {
   console.log('Exchange component rendering...');
@@ -18,14 +19,14 @@ const Exchange = () => {
   const [toCurrency, setToCurrency] = useState('eth');
   const [amount, setAmount] = useState('');
   const [exchangeAmount, setExchangeAmount] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [currencies] = useState<string[]>(['btc', 'eth', 'usdt', 'bnb', 'ada', 'dot', 'ltc', 'bch', 'xlm', 'xrp']);
-  const [apiStatus] = useState<'connected' | 'error'>('error');
-  const [apiError] = useState<string>('Demo mode - API integration in development');
-  const [useMockData] = useState(true);
+  const [currencies, setCurrencies] = useState<string[]>(['btc', 'eth', 'usdt', 'bnb', 'ada', 'dot', 'ltc', 'bch', 'xlm', 'xrp']);
+  const [apiStatus, setApiStatus] = useState<'connected' | 'error' | 'loading'>('loading');
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [useMockData, setUseMockData] = useState(false);
   const { toast } = useToast();
+  const { loading, error, getCurrencies, getExchangeAmount } = useChangellyExchange();
 
-  // Mock exchange rates for demo
+  // Mock exchange rates for fallback
   const mockRates: Record<string, Record<string, number>> = {
     btc: { eth: 15.5, usdt: 45000, bnb: 150, ada: 50000 },
     eth: { btc: 0.065, usdt: 2900, bnb: 9.5, ada: 3200 },
@@ -36,12 +37,40 @@ const Exchange = () => {
 
   useEffect(() => {
     console.log('Exchange useEffect running...');
-    // Component is ready - no API calls needed for demo
-    toast({
-      title: "Demo Mode Active",
-      description: "Explore the exchange interface with sample data",
-    });
-  }, [toast]);
+    initializeExchange();
+  }, []);
+
+  const initializeExchange = async () => {
+    try {
+      setApiStatus('loading');
+      const availableCurrencies = await getCurrencies();
+      
+      if (availableCurrencies && availableCurrencies.length > 0) {
+        setCurrencies(availableCurrencies);
+        setApiStatus('connected');
+        setUseMockData(false);
+        setApiError(null);
+        
+        toast({
+          title: "Exchange Ready",
+          description: "Connected to live exchange rates",
+        });
+      } else {
+        throw new Error('No currencies received from API');
+      }
+    } catch (err) {
+      console.error('Failed to initialize exchange:', err);
+      setApiStatus('error');
+      setUseMockData(true);
+      setApiError('Live exchange temporarily unavailable - using demo data');
+      
+      toast({
+        title: "Demo Mode",
+        description: "Using sample data while connecting to live rates",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleExchange = async () => {
     if (!amount || !fromCurrency || !toCurrency) {
@@ -53,33 +82,39 @@ const Exchange = () => {
       return;
     }
 
-    setLoading(true);
     console.log(`Calculating exchange: ${amount} ${fromCurrency} to ${toCurrency}`);
     
-    // Simulate API delay
-    setTimeout(() => {
-      try {
+    try {
+      if (useMockData) {
+        // Use mock data as fallback
         const rate = mockRates[fromCurrency]?.[toCurrency] || 1;
         const result = (parseFloat(amount) * rate).toFixed(6);
         setExchangeAmount(result);
         
         toast({
-          title: "Exchange Rate Calculated",
-          description: `${amount} ${fromCurrency.toUpperCase()} = ${result} ${toCurrency.toUpperCase()}`,
+          title: "Demo Exchange Rate",
+          description: `${amount} ${fromCurrency.toUpperCase()} = ${result} ${toCurrency.toUpperCase()} (Demo)`,
         });
-      } catch (error) {
-        console.error('Exchange calculation failed:', error);
-        setExchangeAmount('Error calculating exchange');
+      } else {
+        // Use real API
+        const result = await getExchangeAmount(fromCurrency, toCurrency, amount);
+        setExchangeAmount(result);
         
         toast({
-          title: "Calculation Failed",
-          description: "Could not calculate exchange rate. Please try again.",
-          variant: "destructive",
+          title: "Live Exchange Rate",
+          description: `${amount} ${fromCurrency.toUpperCase()} = ${result} ${toCurrency.toUpperCase()}`,
         });
-      } finally {
-        setLoading(false);
       }
-    }, 1000);
+    } catch (err) {
+      console.error('Exchange calculation failed:', err);
+      setExchangeAmount('Error calculating exchange');
+      
+      toast({
+        title: "Calculation Failed",
+        description: error || "Could not calculate exchange rate. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const swapCurrencies = () => {
@@ -97,6 +132,19 @@ const Exchange = () => {
         return <XCircle className="h-5 w-5 text-red-500" />;
       default:
         return <AlertCircle className="h-5 w-5 text-yellow-500" />;
+    }
+  };
+
+  const getStatusText = () => {
+    switch (apiStatus) {
+      case 'connected':
+        return 'Connected to live exchange rates';
+      case 'error':
+        return apiError || 'Connection failed - using demo data';
+      case 'loading':
+        return 'Connecting to exchange API...';
+      default:
+        return 'Checking connection...';
     }
   };
 
@@ -120,15 +168,15 @@ const Exchange = () => {
               <h3 className="text-lg font-semibold">Exchange API Status</h3>
               {getStatusIcon()}
             </div>
-            <p className="text-sm text-muted-foreground mb-4">Demo mode - Experience the interface with sample data</p>
+            <p className="text-sm text-muted-foreground mb-4">{getStatusText()}</p>
             <div className="flex gap-2">
               <Button 
-                onClick={() => toast({ title: "Demo Mode", description: "API integration coming soon" })} 
+                onClick={initializeExchange} 
                 variant="outline" 
                 size="sm"
-                disabled={loading}
+                disabled={loading || apiStatus === 'loading'}
               >
-                Demo Connection
+                {loading || apiStatus === 'loading' ? 'Connecting...' : 'Reconnect'}
               </Button>
             </div>
           </Card>
@@ -162,7 +210,9 @@ const Exchange = () => {
             <div className="space-y-6">
               <div className="text-center">
                 <h2 className="text-2xl font-bold mb-2">Exchange Cryptocurrencies</h2>
-                <p className="text-muted-foreground">Swap your crypto instantly with our demo exchange</p>
+                <p className="text-muted-foreground">
+                  {useMockData ? 'Demo exchange with sample data' : 'Live exchange with real-time rates'}
+                </p>
               </div>
 
               <div className="space-y-4">
@@ -255,7 +305,7 @@ const Exchange = () => {
 
                 {/* Info */}
                 <div className="text-center text-sm text-muted-foreground">
-                  <p>Demo rates update every 15 seconds • No account required</p>
+                  <p>{useMockData ? 'Demo rates update every 15 seconds' : 'Live rates update in real-time'} • No account required</p>
                   <div className="flex justify-center gap-2 mt-2">
                     <Badge variant="secondary">500+ Coins</Badge>
                     <Badge variant="secondary">0.25% Fee</Badge>
