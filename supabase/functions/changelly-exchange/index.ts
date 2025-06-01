@@ -14,20 +14,6 @@ interface ChangellyRequest {
   params: any
 }
 
-interface ExchangeQuoteParams {
-  from: string
-  to: string
-  amount: string
-}
-
-interface CreateTransactionParams {
-  from: string
-  to: string
-  amount: string
-  address: string
-  refundAddress?: string
-}
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -43,7 +29,7 @@ serve(async (req) => {
 
     console.log('Attempting to retrieve Changelly API credentials from vault...')
 
-    // Get Changelly API credentials from Supabase secrets with better error handling
+    // Get Changelly API credentials from Supabase secrets
     const { data: publicKeyData, error: publicKeyError } = await supabase
       .from('vault')
       .select('secret')
@@ -52,7 +38,7 @@ serve(async (req) => {
 
     if (publicKeyError || !publicKeyData) {
       console.error('Failed to retrieve CHANGELLY_PUBLIC_KEY:', publicKeyError)
-      throw new Error('CHANGELLY_PUBLIC_KEY not found in vault. Please add it through the Secret Manager.')
+      throw new Error('CHANGELLY_PUBLIC_KEY not found in vault. Please add it through the Supabase dashboard.')
     }
 
     const { data: privateKeyData, error: privateKeyError } = await supabase
@@ -63,31 +49,25 @@ serve(async (req) => {
 
     if (privateKeyError || !privateKeyData) {
       console.error('Failed to retrieve CHANGELLY_PRIVATE_KEY:', privateKeyError)
-      throw new Error('CHANGELLY_PRIVATE_KEY not found in vault. Please add it through the Secret Manager.')
+      throw new Error('CHANGELLY_PRIVATE_KEY not found in vault. Please add it through the Supabase dashboard.')
     }
-
-    const { data: base64KeyData, error: base64Error } = await supabase
-      .from('vault')
-      .select('secret')
-      .eq('name', 'CHANGELLY_API_KEY_BASE64')
-      .single()
 
     const publicKey = publicKeyData.secret
     const privateKey = privateKeyData.secret
-    const base64ApiKey = base64KeyData?.secret
 
     console.log('Successfully retrieved API credentials')
-    console.log('Public Key length:', publicKey?.length || 0)
+    console.log('Public Key:', publicKey.substring(0, 8) + '...')
     console.log('Private Key length:', privateKey?.length || 0)
-    console.log('Base64 Key available:', !!base64ApiKey)
 
     // Validate that keys are not placeholder values
-    if (publicKey === 'your_public_key_here' || privateKey === 'your_private_key_here') {
-      throw new Error('Please replace placeholder API keys with your actual Changelly API credentials.')
+    if (publicKey === 'your_public_key_here' || privateKey === 'your_private_key_here' || 
+        publicKey.includes('placeholder') || privateKey.includes('placeholder')) {
+      throw new Error('Please replace placeholder API keys with your actual Changelly API credentials in the Supabase vault.')
     }
 
     const { action, ...params } = await req.json()
     console.log('Action requested:', action)
+    console.log('Params:', JSON.stringify(params))
 
     // Create request ID and message
     const requestId = crypto.randomUUID()
@@ -98,7 +78,7 @@ serve(async (req) => {
       params
     })
 
-    console.log('Creating HMAC signature...')
+    console.log('Request message:', message)
 
     // Create HMAC signature for Changelly API
     const encoder = new TextEncoder()
@@ -118,24 +98,16 @@ serve(async (req) => {
       .map(b => b.toString(16).padStart(2, '0'))
       .join('')
 
-    console.log('HMAC signature created successfully')
+    console.log('HMAC signature created:', signatureHex.substring(0, 16) + '...')
 
-    // Prepare headers
+    // Prepare headers for Changelly API v2
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
+      'X-Api-Key': publicKey,
       'X-Api-Signature': signatureHex,
     }
 
-    // Use Base64 API key if available, otherwise fall back to regular API key
-    if (base64ApiKey && base64ApiKey !== 'your_base64_key_here') {
-      headers['Authorization'] = `Basic ${base64ApiKey}`
-      console.log('Using Base64 API key for authorization')
-    } else {
-      headers['X-Api-Key'] = publicKey
-      console.log('Using regular API key')
-    }
-
-    console.log('Making request to Changelly API...')
+    console.log('Making request to Changelly API with headers:', Object.keys(headers))
 
     // Make request to Changelly API
     const response = await fetch('https://api.changelly.com/v2', {
@@ -146,6 +118,7 @@ serve(async (req) => {
 
     const responseText = await response.text()
     console.log('Changelly API response status:', response.status)
+    console.log('Changelly API response headers:', Object.fromEntries(response.headers.entries()))
     console.log('Changelly API response body:', responseText)
 
     if (!response.ok) {
@@ -181,7 +154,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         error: error.message,
-        details: 'Check the edge function logs for more information'
+        details: 'Check the edge function logs for more information. Make sure your Changelly API keys are correct.'
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
