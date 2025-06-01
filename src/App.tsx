@@ -46,6 +46,9 @@ import ReduceSlippageTrading from "./pages/blog/ReduceSlippageTrading";
 import RiskManagementAlgorithmicTrading from "./pages/blog/RiskManagementAlgorithmicTrading";
 import ScalpingVsSwingTrading from "./pages/blog/ScalpingVsSwingTrading";
 import TradingRegulationsCompliance from "./pages/blog/TradingRegulationsCompliance";
+import TezaoroInstantExchangeReview from "./pages/blog/TezaoroInstantExchangeReview";
+import TezaoroFiatGatewayReview from "./pages/blog/TezaoroFiatGatewayReview";
+import TezaoroDexAggregatorReview from "./pages/blog/TezaoroDexAggregatorReview";
 
 // Guides
 import PlatformOverview from "./pages/guides/PlatformOverview";
@@ -106,6 +109,9 @@ const App = () => (
           <Route path="/blog/risk-management-algorithmic-trading" element={<RiskManagementAlgorithmicTrading />} />
           <Route path="/blog/scalping-vs-swing-trading" element={<ScalpingVsSwingTrading />} />
           <Route path="/blog/trading-regulations-compliance" element={<TradingRegulationsCompliance />} />
+          <Route path="/blog/tezaoro-instant-exchange-review" element={<TezaoroInstantExchangeReview />} />
+          <Route path="/blog/tezaoro-fiat-gateway-review" element={<TezaoroFiatGatewayReview />} />
+          <Route path="/blog/tezaoro-dex-aggregator-review" element={<TezaoroDexAggregatorReview />} />
           
           {/* Guide routes */}
           <Route path="/guides/platform-overview" element={<PlatformOverview />} />

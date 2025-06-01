@@ -187,6 +187,39 @@ export const publishedPosts: BlogPost[] = [
     image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
     slug: "/guide/non-custodial-trading-security",
     isPublished: true
+  },
+  {
+    title: "Tezaoro Instant Exchange Review: Revolutionizing High-Speed Crypto Conversions",
+    excerpt: "Unmatched transaction velocity with 15,000 TPS processing, zero slippage for trades under $100K, and non-custodial escrow. ETH-to-USDT conversions complete in 1.3 seconds.",
+    date: "April 2025",
+    author: "Tezaoro Team",
+    readTime: "9 min read",
+    category: "Product Review",
+    image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
+    slug: "/blog/tezaoro-instant-exchange-review",
+    isPublished: true
+  },
+  {
+    title: "Tezaoro Fiat Gateway Review: Bridging Traditional Finance & Web3 Ecosystems",
+    excerpt: "Global banking integration across 180+ countries with 3DS2-secured purchases, SEPA/SWIFT support, and dynamic KYC. 99.9% approval rates and PCI-DSS certification.",
+    date: "April 2025",
+    author: "Tezaoro Team",
+    readTime: "8 min read",
+    category: "Product Review",
+    image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
+    slug: "/blog/tezaoro-fiat-gateway-review",
+    isPublished: true
+  },
+  {
+    title: "Tezaoro DEX Aggregator Review: Optimizing DeFi Trading Across 80+ Markets",
+    excerpt: "Advanced algorithmic trading infrastructure with quantum-resistant routing, MEV-protected swaps, and gasless trading. Achieved 0.3% slippage vs. 2.1% on 1inch for $2M swaps.",
+    date: "April 2025",
+    author: "Tezaoro Team",
+    readTime: "10 min read",
+    category: "Product Review",
+    image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
+    slug: "/blog/tezaoro-dex-aggregator-review",
+    isPublished: true
   }
 ];
 
@@ -207,5 +240,6 @@ export const categories = [
   "Future Tech",
   "Nano-Cap Strategy",
   "Exchange Strategy",
-  "Security"
+  "Security",
+  "Product Review"
 ];
