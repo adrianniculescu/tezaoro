@@ -150,8 +150,6 @@ serve(async (req) => {
     console.log('✅ API credentials retrieved successfully')
     console.log('🔍 Public key length:', publicKey?.length || 0)
     console.log('🔍 Private key length:', privateKey?.length || 0)
-    console.log('🔍 Public key first 10 chars:', publicKey?.substring(0, 10) || 'N/A')
-    console.log('🔍 Private key first 10 chars:', privateKey?.substring(0, 10) || 'N/A')
     console.log('🔍 Public key updated:', publicKeyRecord.updated_at)
     console.log('🔍 Private key updated:', privateKeyRecord.updated_at)
 
@@ -170,47 +168,14 @@ serve(async (req) => {
       )
     }
 
-    // More relaxed placeholder detection - only check for obvious placeholders
-    const isObviousPlaceholder = (key: string) => {
-      const lowerKey = key.toLowerCase()
-      return lowerKey.includes('placeholder') ||
-             lowerKey.includes('your_api_key_here') ||
-             lowerKey.includes('your_public_key_here') || 
-             lowerKey.includes('your_private_key_here') ||
-             lowerKey.includes('example') ||
-             lowerKey.includes('test_key') ||
-             lowerKey.includes('demo_key') ||
-             key === 'your_actual_changelly_public_key_here' ||
-             key === 'your_actual_changelly_private_key_here'
-    }
-
-    if (isObviousPlaceholder(publicKey) || isObviousPlaceholder(privateKey)) {
-      console.error('❌ Obvious placeholder API credentials detected')
-      console.error('🔍 Public key:', publicKey.substring(0, 50))
-      console.error('🔍 Private key:', privateKey.substring(0, 50))
-      
-      return new Response(
-        JSON.stringify({ 
-          error: 'Placeholder API credentials detected',
-          details: 'The API keys appear to contain placeholder text. Please replace them with your actual Changelly API credentials.',
-          public_key_preview: publicKey.substring(0, 50) + '...',
-          private_key_preview: privateKey.substring(0, 50) + '...'
-        }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      )
-    }
-
-    // Basic key format validation - less strict
-    if (publicKey.length < 50) {
+    // Basic key length validation
+    if (publicKey.length < 20) {
       console.error('❌ Public key appears too short')
       console.error('📏 Public key length:', publicKey.length)
       return new Response(
         JSON.stringify({ 
           error: 'Invalid public key format',
-          details: `Public key appears too short (${publicKey.length} characters). Changelly public keys are typically longer.`
+          details: `Public key appears too short (${publicKey.length} characters). Please verify your Changelly public key.`
         }),
         { 
           status: 400, 
@@ -225,7 +190,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           error: 'Invalid private key format',
-          details: `Private key appears too short (${privateKey.length} characters). Changelly private keys are typically longer.`
+          details: `Private key appears too short (${privateKey.length} characters). Please verify your Changelly private key.`
         }),
         { 
           status: 400, 
