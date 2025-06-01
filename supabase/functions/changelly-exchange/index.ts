@@ -17,6 +17,7 @@ serve(async (req) => {
     console.log('=== Changelly Edge Function Started ===')
     console.log('Request method:', req.method)
     console.log('Request URL:', req.url)
+    console.log('Timestamp:', new Date().toISOString())
 
     // Validate request method
     if (req.method !== 'POST') {
@@ -80,12 +81,13 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     console.log('Supabase client initialized')
 
-    // Get API credentials from vault
+    // Get API credentials from vault with timestamp for cache busting
     console.log('Fetching Changelly API credentials from vault...')
+    console.log('Cache-busting timestamp:', Date.now())
 
     const { data: secretsData, error: secretsError } = await supabase
       .from('vault')
-      .select('name, secret')
+      .select('name, secret, updated_at')
       .in('name', ['CHANGELLY_PUBLIC_KEY', 'CHANGELLY_PRIVATE_KEY'])
 
     if (secretsError) {
@@ -101,6 +103,16 @@ serve(async (req) => {
         }
       )
     }
+
+    console.log('Secrets query result:', {
+      count: secretsData?.length || 0,
+      secrets: secretsData?.map(s => ({ 
+        name: s.name, 
+        updated_at: s.updated_at, 
+        secret_length: s.secret?.length || 0,
+        secret_preview: s.secret?.substring(0, 8) || 'null'
+      }))
+    })
 
     if (!secretsData || secretsData.length !== 2) {
       console.error('Missing API credentials in vault. Found:', secretsData?.length || 0, 'credentials')
@@ -137,16 +149,43 @@ serve(async (req) => {
     const privateKey = privateKeyRecord.secret
 
     console.log('API credentials retrieved successfully')
-    console.log('Public key (first 8 chars):', publicKey.substring(0, 8))
-    console.log('Private key length:', privateKey.length)
+    console.log('Public key updated at:', publicKeyRecord.updated_at)
+    console.log('Private key updated at:', privateKeyRecord.updated_at)
+    console.log('Public key (first 8 chars):', publicKey?.substring(0, 8) || 'null')
+    console.log('Private key length:', privateKey?.length || 0)
 
-    // Validate credentials are not placeholder values - STOP if they are placeholders
-    if (publicKey.includes('placeholder') || privateKey.includes('placeholder') ||
-        publicKey.includes('your_') || privateKey.includes('your_') ||
-        publicKey === 'your_public_key_here' || privateKey === 'your_private_key_here' ||
-        publicKey.startsWith('your_act') || privateKey.startsWith('your_sec')) {
-      
+    // Validate credentials are not null or empty
+    if (!publicKey || !privateKey) {
+      console.error('API credentials are null or empty')
+      return new Response(
+        JSON.stringify({ 
+          error: 'API credentials are empty',
+          details: 'Please ensure your Changelly API keys are properly set in the vault'
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
+    // Validate credentials are not placeholder values
+    const isPlaceholder = (
+      publicKey.includes('placeholder') || privateKey.includes('placeholder') ||
+      publicKey.includes('your_') || privateKey.includes('your_') ||
+      publicKey === 'your_public_key_here' || privateKey === 'your_private_key_here' ||
+      publicKey.startsWith('your_act') || privateKey.startsWith('your_sec') ||
+      publicKey.includes('example') || privateKey.includes('example')
+    )
+
+    if (isPlaceholder) {
       console.error('Placeholder API credentials detected - refusing to proceed')
+      console.error('Public key content check:', {
+        contains_placeholder: publicKey.includes('placeholder'),
+        contains_your: publicKey.includes('your_'),
+        starts_with_your_act: publicKey.startsWith('your_act'),
+        full_key_preview: publicKey.substring(0, 20)
+      })
       return new Response(
         JSON.stringify({ 
           error: 'Placeholder API credentials detected',
@@ -159,9 +198,10 @@ serve(async (req) => {
       )
     }
 
-    // Additional validation - check key formats
+    // Additional validation - check key formats (Changelly keys are typically hexadecimal)
     if (publicKey.length < 10 || privateKey.length < 20) {
       console.error('Invalid API key format detected')
+      console.error('Key lengths:', { publicKey: publicKey.length, privateKey: privateKey.length })
       return new Response(
         JSON.stringify({ 
           error: 'Invalid API key format',
