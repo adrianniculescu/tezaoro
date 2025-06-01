@@ -38,87 +38,71 @@ serve(async (req) => {
     
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Get Changelly API credentials from Supabase secrets
-    // First try CHANGELLY_PUBLIC_KEY, then fallback to CHANGELLY_API_KEY
-    let { data: secrets, error: secretsError } = await supabase
+    console.log('Attempting to retrieve Changelly API credentials from vault...')
+
+    // Get Changelly API credentials from Supabase secrets with better error handling
+    const { data: publicKeyData, error: publicKeyError } = await supabase
       .from('vault')
       .select('secret')
       .eq('name', 'CHANGELLY_PUBLIC_KEY')
       .single()
 
-    if (secretsError || !secrets) {
-      console.log('CHANGELLY_PUBLIC_KEY not found, trying CHANGELLY_API_KEY')
-      const { data: fallbackSecrets, error: fallbackError } = await supabase
-        .from('vault')
-        .select('secret')
-        .eq('name', 'CHANGELLY_API_KEY')
-        .single()
-      
-      if (fallbackError || !fallbackSecrets) {
-        throw new Error('Neither CHANGELLY_PUBLIC_KEY nor CHANGELLY_API_KEY found in secrets')
-      }
-      secrets = fallbackSecrets
+    if (publicKeyError || !publicKeyData) {
+      console.error('Failed to retrieve CHANGELLY_PUBLIC_KEY:', publicKeyError)
+      throw new Error('CHANGELLY_PUBLIC_KEY not found in vault. Please add it through the Secret Manager.')
     }
 
-    // First try CHANGELLY_PRIVATE_KEY, then fallback to CHANGELLY_SECRET_KEY
-    let { data: secretKeyData, error: secretKeyError } = await supabase
+    const { data: privateKeyData, error: privateKeyError } = await supabase
       .from('vault')
       .select('secret')
       .eq('name', 'CHANGELLY_PRIVATE_KEY')
       .single()
 
-    if (secretKeyError || !secretKeyData) {
-      console.log('CHANGELLY_PRIVATE_KEY not found, trying CHANGELLY_SECRET_KEY')
-      const { data: fallbackSecretKey, error: fallbackSecretKeyError } = await supabase
-        .from('vault')
-        .select('secret')
-        .eq('name', 'CHANGELLY_SECRET_KEY')
-        .single()
-      
-      if (fallbackSecretKeyError || !fallbackSecretKey) {
-        throw new Error('Neither CHANGELLY_PRIVATE_KEY nor CHANGELLY_SECRET_KEY found in secrets')
-      }
-      secretKeyData = fallbackSecretKey
+    if (privateKeyError || !privateKeyData) {
+      console.error('Failed to retrieve CHANGELLY_PRIVATE_KEY:', privateKeyError)
+      throw new Error('CHANGELLY_PRIVATE_KEY not found in vault. Please add it through the Secret Manager.')
     }
 
-    // Get the Base64 API key
     const { data: base64KeyData, error: base64Error } = await supabase
       .from('vault')
       .select('secret')
       .eq('name', 'CHANGELLY_API_KEY_BASE64')
       .single()
 
-    if (base64Error || !base64KeyData) {
-      console.log('CHANGELLY_API_KEY_BASE64 not found')
-      // Continue without Base64 key for now, but log the warning
+    const publicKey = publicKeyData.secret
+    const privateKey = privateKeyData.secret
+    const base64ApiKey = base64KeyData?.secret
+
+    console.log('Successfully retrieved API credentials')
+    console.log('Public Key length:', publicKey?.length || 0)
+    console.log('Private Key length:', privateKey?.length || 0)
+    console.log('Base64 Key available:', !!base64ApiKey)
+
+    // Validate that keys are not placeholder values
+    if (publicKey === 'your_public_key_here' || privateKey === 'your_private_key_here') {
+      throw new Error('Please replace placeholder API keys with your actual Changelly API credentials.')
     }
 
-    const apiKey = secrets.secret
-    const secretKey = secretKeyData.secret
-    const base64ApiKey = base64KeyData?.secret
-    
-    console.log('API Key found:', !!apiKey)
-    console.log('Secret Key found:', !!secretKey)
-    console.log('Base64 API Key found:', !!base64ApiKey)
-    
     const { action, ...params } = await req.json()
     console.log('Action requested:', action)
 
-    // Create HMAC signature for Changelly API
+    // Create request ID and message
+    const requestId = crypto.randomUUID()
     const message = JSON.stringify({
-      id: crypto.randomUUID(),
+      id: requestId,
       jsonrpc: "2.0",
       method: action,
       params
     })
 
-    console.log('Request message created for Changelly API')
+    console.log('Creating HMAC signature...')
 
+    // Create HMAC signature for Changelly API
     const encoder = new TextEncoder()
-    const keyData = encoder.encode(secretKey)
+    const keyData = encoder.encode(privateKey)
     const messageData = encoder.encode(message)
     
     const cryptoKey = await crypto.subtle.importKey(
@@ -134,22 +118,24 @@ serve(async (req) => {
       .map(b => b.toString(16).padStart(2, '0'))
       .join('')
 
-    console.log('Making request to Changelly API...')
+    console.log('HMAC signature created successfully')
 
-    // Prepare headers - use Base64 key if available, otherwise use regular API key
+    // Prepare headers
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       'X-Api-Signature': signatureHex,
     }
 
     // Use Base64 API key if available, otherwise fall back to regular API key
-    if (base64ApiKey) {
+    if (base64ApiKey && base64ApiKey !== 'your_base64_key_here') {
       headers['Authorization'] = `Basic ${base64ApiKey}`
       console.log('Using Base64 API key for authorization')
     } else {
-      headers['X-Api-Key'] = apiKey
+      headers['X-Api-Key'] = publicKey
       console.log('Using regular API key')
     }
+
+    console.log('Making request to Changelly API...')
 
     // Make request to Changelly API
     const response = await fetch('https://api.changelly.com/v2', {
@@ -158,9 +144,30 @@ serve(async (req) => {
       body: message
     })
 
-    const data = await response.json()
+    const responseText = await response.text()
     console.log('Changelly API response status:', response.status)
-    console.log('Changelly API response:', data)
+    console.log('Changelly API response body:', responseText)
+
+    if (!response.ok) {
+      console.error('Changelly API returned non-OK status:', response.status)
+      throw new Error(`Changelly API error: ${response.status} - ${responseText}`)
+    }
+
+    let data
+    try {
+      data = JSON.parse(responseText)
+    } catch (parseError) {
+      console.error('Failed to parse Changelly API response:', parseError)
+      throw new Error('Invalid response from Changelly API')
+    }
+
+    // Check for API-level errors
+    if (data.error) {
+      console.error('Changelly API returned an error:', data.error)
+      throw new Error(`Changelly API error: ${data.error.message || JSON.stringify(data.error)}`)
+    }
+
+    console.log('Changelly API request completed successfully')
 
     return new Response(
       JSON.stringify(data),
@@ -172,7 +179,10 @@ serve(async (req) => {
   } catch (error) {
     console.error('Changelly API error:', error)
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        details: 'Check the edge function logs for more information'
+      }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,
