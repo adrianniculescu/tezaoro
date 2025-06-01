@@ -33,22 +33,37 @@ const Exchange = () => {
   useEffect(() => {
     const loadCurrencies = async () => {
       try {
+        console.log('🚀 Starting currency load...');
         const availableCurrencies = await getCurrencies();
         if (availableCurrencies && Array.isArray(availableCurrencies)) {
           setCurrencies(availableCurrencies.slice(0, 20)); // Limit to first 20 currencies
           setUseMockData(false);
           setApiError(null);
-          console.log('Successfully loaded currencies from API');
+          console.log('✅ Successfully loaded currencies from API');
+          
+          toast({
+            title: "Live Exchange Rates Active",
+            description: "Connected to Changelly API successfully",
+          });
         }
       } catch (err) {
-        console.log('Failed to load currencies from API, using fallback currencies');
+        console.log('❌ Failed to load currencies from API:', err);
         setUseMockData(true);
-        setApiError('Unable to connect to live exchange rates. Using demo data.');
+        
+        // Use the specific error message from the hook
+        const errorMessage = error || (err instanceof Error ? err.message : 'Unable to connect to live exchange rates');
+        setApiError(errorMessage);
+        
+        toast({
+          title: "Using Demo Mode",
+          description: errorMessage,
+          variant: "destructive",
+        });
       }
     };
 
     loadCurrencies();
-  }, [getCurrencies]);
+  }, [getCurrencies, error, toast]);
 
   const handleExchange = async () => {
     console.log('Exchange: Calculate button clicked');
@@ -86,9 +101,16 @@ const Exchange = () => {
       });
     } catch (err) {
       console.error('Exchange calculation failed:', err);
+      
+      // Fall back to mock data if API fails
+      setUseMockData(true);
+      const rate = mockRates[fromCurrency]?.[toCurrency] || 1;
+      const result = (parseFloat(amount) * rate).toFixed(6);
+      setExchangeAmount(result);
+      
       toast({
-        title: "Rate Calculation Failed",
-        description: "Unable to get current exchange rate. Please try again.",
+        title: "Using Demo Rate",
+        description: "API unavailable - showing sample rate",
         variant: "destructive",
       });
     }

@@ -45,20 +45,37 @@ export const useChangellyExchange = () => {
 
       if (supabaseError) {
         console.error('❌ Supabase function error:', supabaseError);
-        throw new Error(`Function invocation failed: ${supabaseError.message}`);
+        const errorMessage = `API Connection Failed: ${supabaseError.message}`;
+        setError(errorMessage);
+        throw new Error(errorMessage);
       }
       
       if (data?.error) {
         console.error('❌ Changelly API error:', data.error);
-        throw new Error(data.error.details || data.error || 'Failed to get currencies');
+        let errorMessage = 'API Configuration Error';
+        
+        // Check for specific error types
+        if (data.error.includes('401') || data.error.includes('Unauthorized')) {
+          errorMessage = 'Invalid API credentials - please check your Changelly API keys';
+        } else if (data.error.includes('placeholder') || data.error.includes('your_')) {
+          errorMessage = 'Placeholder API credentials detected - please update with real Changelly keys';
+        } else {
+          errorMessage = data.error.details || data.error || 'Failed to get currencies';
+        }
+        
+        setError(errorMessage);
+        throw new Error(errorMessage);
       }
 
       if (!data?.result) {
-        console.warn('⚠️ No currencies returned from API');
+        const errorMessage = 'No currencies returned from Changelly API';
+        console.warn('⚠️', errorMessage);
+        setError(errorMessage);
         return [];
       }
 
       console.log('✅ Successfully retrieved currencies:', data.result?.length || 0);
+      setError(null);
       return data.result;
     } catch (err) {
       console.error('❌ getCurrencies error:', err);
@@ -90,20 +107,37 @@ export const useChangellyExchange = () => {
 
       if (supabaseError) {
         console.error('❌ Supabase function error:', supabaseError);
-        throw new Error(`Function invocation failed: ${supabaseError.message}`);
+        const errorMessage = `API Connection Failed: ${supabaseError.message}`;
+        setError(errorMessage);
+        throw new Error(errorMessage);
       }
       
       if (data?.error) {
         console.error('❌ Changelly API error:', data.error);
-        throw new Error(data.error.details || data.error || 'Failed to get exchange amount');
+        let errorMessage = 'API Configuration Error';
+        
+        // Check for specific error types
+        if (data.error.includes('401') || data.error.includes('Unauthorized')) {
+          errorMessage = 'Invalid API credentials - please check your Changelly API keys';
+        } else if (data.error.includes('placeholder') || data.error.includes('your_')) {
+          errorMessage = 'Placeholder API credentials detected - please update with real Changelly keys';
+        } else {
+          errorMessage = data.error.details || data.error || 'Failed to get exchange amount';
+        }
+        
+        setError(errorMessage);
+        throw new Error(errorMessage);
       }
 
       if (!data?.result) {
-        console.warn('⚠️ No exchange amount returned from API');
+        const errorMessage = 'No exchange amount returned from API';
+        console.warn('⚠️', errorMessage);
+        setError(errorMessage);
         return '0';
       }
 
       console.log('✅ Successfully calculated exchange amount:', data.result);
+      setError(null);
       return data.result;
     } catch (err) {
       console.error('❌ getExchangeAmount error:', err);
