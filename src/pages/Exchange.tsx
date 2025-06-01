@@ -4,13 +4,12 @@ import PageLayout from '@/components/PageLayout';
 import PageHeader from '@/components/PageHeader';
 import { useToast } from '@/hooks/use-toast';
 import { useChangellyExchange } from '@/hooks/useChangellyExchange';
-import { isSupabaseAvailable } from '@/lib/supabase-optional';
 import ExchangeStatusBanner from '@/components/exchange/ExchangeStatusBanner';
 import ExchangeForm from '@/components/exchange/ExchangeForm';
 import ExchangeInfoCards from '@/components/exchange/ExchangeInfoCards';
 
 const Exchange = () => {
-  console.log('Exchange component: Rendering with Supabase available:', isSupabaseAvailable);
+  console.log('Exchange component: Rendering');
   
   const { toast } = useToast();
   const { loading, error, getCurrencies, getExchangeAmount } = useChangellyExchange();
@@ -20,10 +19,8 @@ const Exchange = () => {
   const [amount, setAmount] = useState('');
   const [exchangeAmount, setExchangeAmount] = useState('');
   const [currencies, setCurrencies] = useState(['btc', 'eth', 'usdt', 'bnb', 'ada', 'dot', 'ltc']);
-  const [useMockData, setUseMockData] = useState(!isSupabaseAvailable);
-  const [apiError, setApiError] = useState<string | null>(
-    isSupabaseAvailable ? null : 'Supabase not configured - running in demo mode'
-  );
+  const [useMockData, setUseMockData] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
   
   // Fallback mock rates for when API is unavailable
   const mockRates: Record<string, Record<string, number>> = {
@@ -35,17 +32,13 @@ const Exchange = () => {
   // Load available currencies on component mount
   useEffect(() => {
     const loadCurrencies = async () => {
-      if (!isSupabaseAvailable) {
-        console.log('Supabase not available, using default currencies');
-        return;
-      }
-
       try {
         const availableCurrencies = await getCurrencies();
         if (availableCurrencies && Array.isArray(availableCurrencies)) {
           setCurrencies(availableCurrencies.slice(0, 20)); // Limit to first 20 currencies
           setUseMockData(false);
           setApiError(null);
+          console.log('Successfully loaded currencies from API');
         }
       } catch (err) {
         console.log('Failed to load currencies from API, using fallback currencies');
@@ -69,7 +62,7 @@ const Exchange = () => {
       return;
     }
 
-    if (useMockData || !isSupabaseAvailable) {
+    if (useMockData) {
       // Use mock data
       const rate = mockRates[fromCurrency]?.[toCurrency] || 1;
       const result = (parseFloat(amount) * rate).toFixed(6);
