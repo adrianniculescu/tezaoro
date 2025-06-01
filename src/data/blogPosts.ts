@@ -20,7 +20,7 @@ export const publishedPosts: BlogPost[] = [
     readTime: "8 min read",
     category: "Crypto Growth",
     image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
-    slug: "/guide/nano-cap-crypto-liquidity-growth",
+    slug: "/blog/nano-cap-crypto-liquidity",
     isPublished: true
   },
   {
@@ -31,7 +31,7 @@ export const publishedPosts: BlogPost[] = [
     readTime: "12 min read",
     category: "Expert Guide",
     image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
-    slug: "/guide/choose-algorithmic-trading-platform",
+    slug: "/blog/choose-algorithmic-trading-platform",
     isPublished: true
   },
   {
@@ -42,7 +42,7 @@ export const publishedPosts: BlogPost[] = [
     readTime: "10 min read",
     category: "Crypto Strategies",
     image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
-    slug: "/guide/top-crypto-algorithmic-trading-strategies",
+    slug: "/blog/crypto-algorithmic-trading-strategies",
     isPublished: true
   },
   {
@@ -53,7 +53,7 @@ export const publishedPosts: BlogPost[] = [
     readTime: "8 min read",
     category: "Risk Management",
     image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
-    slug: "/guide/risk-management-algorithmic-trading",
+    slug: "/blog/risk-management-algorithmic-trading",
     isPublished: true
   },
   {
@@ -64,7 +64,7 @@ export const publishedPosts: BlogPost[] = [
     readTime: "8 min read",
     category: "Strategy Testing",
     image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
-    slug: "/guide/backtesting-trading-algorithm",
+    slug: "/blog/backtesting-trading-algorithm",
     isPublished: true
   },
   {
@@ -75,7 +75,7 @@ export const publishedPosts: BlogPost[] = [
     readTime: "7 min read",
     category: "Trading Comparison",
     image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
-    slug: "/guide/algorithmic-vs-manual-trading",
+    slug: "/blog/algorithmic-vs-manual-trading",
     isPublished: true
   },
   {
@@ -86,7 +86,7 @@ export const publishedPosts: BlogPost[] = [
     readTime: "9 min read",
     category: "Getting Started",
     image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
-    slug: "/guide/building-first-trading-bot",
+    slug: "/blog/building-first-trading-bot",
     isPublished: true
   },
   {
@@ -97,7 +97,7 @@ export const publishedPosts: BlogPost[] = [
     readTime: "6 min read",
     category: "Professional Tools",
     image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
-    slug: "/guide/institutional-trading-algorithms",
+    slug: "/blog/institutional-trading-algorithms",
     isPublished: true
   },
   {
@@ -108,7 +108,7 @@ export const publishedPosts: BlogPost[] = [
     readTime: "8 min read",
     category: "AI & Technology",
     image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
-    slug: "/guide/ai-algorithmic-trading",
+    slug: "/blog/ai-algorithmic-trading",
     isPublished: true
   },
   {
@@ -119,7 +119,7 @@ export const publishedPosts: BlogPost[] = [
     readTime: "7 min read",
     category: "Trade Execution",
     image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
-    slug: "/guide/reduce-slippage-trading",
+    slug: "/blog/reduce-slippage-trading",
     isPublished: true
   },
   {
@@ -130,7 +130,7 @@ export const publishedPosts: BlogPost[] = [
     readTime: "9 min read",
     category: "Compliance",
     image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
-    slug: "/guide/trading-regulations-compliance",
+    slug: "/blog/trading-regulations-compliance",
     isPublished: true
   },
   {
@@ -141,7 +141,7 @@ export const publishedPosts: BlogPost[] = [
     readTime: "8 min read",
     category: "Strategy Comparison",
     image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
-    slug: "/guide/scalping-vs-swing-trading",
+    slug: "/blog/scalping-vs-swing-trading",
     isPublished: true
   },
   {
@@ -152,7 +152,7 @@ export const publishedPosts: BlogPost[] = [
     readTime: "10 min read",
     category: "Future Tech",
     image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
-    slug: "/guide/future-algorithmic-trading",
+    slug: "/blog/future-algorithmic-trading",
     isPublished: true
   },
   {
@@ -163,7 +163,7 @@ export const publishedPosts: BlogPost[] = [
     readTime: "10 min read",
     category: "Nano-Cap Strategy",
     image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
-    slug: "/guide/nano-cap-liquidity-strategies",
+    slug: "/blog/nano-cap-crypto-liquidity",
     isPublished: true
   },
   {
@@ -174,7 +174,7 @@ export const publishedPosts: BlogPost[] = [
     readTime: "8 min read",
     category: "Exchange Strategy",
     image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
-    slug: "/guide/dex-cex-hybrid-comparison",
+    slug: "/blog/tezaoro-dex-aggregator-review",
     isPublished: true
   },
   {
@@ -185,7 +185,7 @@ export const publishedPosts: BlogPost[] = [
     readTime: "7 min read",
     category: "Security",
     image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
-    slug: "/guide/non-custodial-trading-security",
+    slug: "/blog/reduce-slippage-trading",
     isPublished: true
   },
   {
