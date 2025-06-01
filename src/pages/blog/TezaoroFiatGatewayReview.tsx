@@ -49,7 +49,7 @@ const TezaoroFiatGatewayReview = () => {
           <div className="prose prose-lg max-w-none">
             <h2>Global Banking Integration & Multi-Channel Support</h2>
             
-            <p>Tezaoro's fiat gateway accommodates <strong>180+ countries</strong> with comprehensive payment infrastructure:</p>
+            <p>Tezaoro&apos;s fiat gateway accommodates <strong>180+ countries</strong> with comprehensive payment infrastructure:</p>
 
             <h3>Payment Methods:</h3>
             <ul>
@@ -58,7 +58,7 @@ const TezaoroFiatGatewayReview = () => {
               <li><strong>Dynamic KYC:</strong> $250/day limits via email verification, scaling to $500K for institutions</li>
             </ul>
 
-            <p>The platform's white-label API lets businesses embed branded fiat ramps, a feature adopted by <strong>73% of European e-commerce platforms</strong>. Chainlink-powered oracles enable decentralized fiat settlements and auto-refund smart contracts.</p>
+            <p>The platform&apos;s white-label API lets businesses embed branded fiat ramps, a feature adopted by <strong>73% of European e-commerce platforms</strong>. Chainlink-powered oracles enable decentralized fiat settlements and auto-refund smart contracts.</p>
 
             <h2>Enterprise Solutions & Fee Transparency</h2>
             
@@ -76,12 +76,12 @@ const TezaoroFiatGatewayReview = () => {
             <ul>
               <li><strong>Card payments:</strong> Starting at 1.9%</li>
               <li><strong>Bank transfers:</strong> 0.5% processing fee</li>
-              <li><strong>Settlement speed:</strong> 90% of EUR deposits in <2 minutes</li>
+              <li><strong>Settlement speed:</strong> 90% of EUR deposits in under 2 minutes</li>
             </ul>
 
             <h2>Regulatory Compliance & Security</h2>
             
-            <p>Tezaoro's fiat gateway maintains the highest security and compliance standards:</p>
+            <p>Tezaoro&apos;s fiat gateway maintains the highest security and compliance standards:</p>
             
             <ul>
               <li><strong>PCI-DSS Level 1:</strong> Highest card security certification</li>
@@ -93,7 +93,7 @@ const TezaoroFiatGatewayReview = () => {
 
             <h2>Technical Infrastructure</h2>
             
-            <p>The gateway's technical architecture ensures reliability and scalability:</p>
+            <p>The gateway&apos;s technical architecture ensures reliability and scalability:</p>
             
             <ul>
               <li><strong>Chainlink Oracles:</strong> Decentralized price feeds and settlements</li>
@@ -105,7 +105,7 @@ const TezaoroFiatGatewayReview = () => {
 
             <h2>Integration Benefits</h2>
             
-            <p>Businesses integrating Tezaoro's fiat gateway experience:</p>
+            <p>Businesses integrating Tezaoro&apos;s fiat gateway experience:</p>
             
             <ul>
               <li><strong>Revenue increase:</strong> Average 34% boost in conversion rates</li>
@@ -117,9 +117,9 @@ const TezaoroFiatGatewayReview = () => {
 
             <h2>Conclusion</h2>
             
-            <p>Tezaoro's Fiat Gateway represents the <strong>top crypto fiat gateway for 2025</strong>, seamlessly bridging traditional finance with Web3 ecosystems. With support for 180+ countries, institutional-grade security, and competitive fee structures, it empowers businesses to integrate crypto payments without sacrificing user experience or regulatory compliance.</p>
+            <p>Tezaoro&apos;s Fiat Gateway represents the <strong>top crypto fiat gateway for 2025</strong>, seamlessly bridging traditional finance with Web3 ecosystems. With support for 180+ countries, institutional-grade security, and competitive fee structures, it empowers businesses to integrate crypto payments without sacrificing user experience or regulatory compliance.</p>
 
-            <p>The platform's combination of SEPA crypto purchases, dynamic KYC thresholds, and white-label fiat ramps makes it an essential infrastructure component for any business entering the crypto space.</p>
+            <p>The platform&apos;s combination of SEPA crypto purchases, dynamic KYC thresholds, and white-label fiat ramps makes it an essential infrastructure component for any business entering the crypto space.</p>
           </div>
         </div>
       </article>
