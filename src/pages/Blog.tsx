@@ -222,36 +222,39 @@ const Blog = () => {
       image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
       slug: "/guide/future-algorithmic-trading",
       isPublished: true
-    }
-  ];
-
-  const upcomingPosts = [
+    },
     {
       title: "How to Survive as a Nano-Cap Token: Liquidity Strategies for Sub-$10M Projects",
       excerpt: "Discover proven liquidity strategies for nano-cap crypto projects ($1M–$10M). Learn how to attract investors, reduce volatility, and ensure long-term growth.",
-      date: "February 2, 2025",
+      date: "March 2025",
       author: "Tezaoro Team",
       readTime: "10 min read",
       category: "Nano-Cap Strategy",
-      image: "/images/blog/nano-cap-liquidity.jpg"
+      image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
+      slug: "/guide/nano-cap-liquidity-strategies",
+      isPublished: true
     },
     {
       title: "DEX vs. CEX vs. Hybrid: Which Exchange Model Fits Your Token?",
       excerpt: "Choosing the right exchange model for your crypto project? Compare DEX, CEX, and hybrid platforms—pros, cons, and best use cases.",
-      date: "February 9, 2025",
+      date: "April 2025",
       author: "Tezaoro Team",
       readTime: "8 min read",
       category: "Exchange Strategy",
-      image: "/images/blog/exchange-comparison.jpg"
+      image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
+      slug: "/guide/dex-cex-hybrid-comparison",
+      isPublished: true
     },
     {
       title: "Non-Custodial Trading: Why Security Matters for Small-Cap Crypto",
       excerpt: "Protect your crypto assets with non-custodial trading. Learn why security is critical for small-cap projects and how to mitigate risks.",
-      date: "February 16, 2025",
+      date: "April 2025",
       author: "Tezaoro Team",
       readTime: "7 min read",
       category: "Security",
-      image: "/images/blog/non-custodial-security.jpg"
+      image: "/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
+      slug: "/guide/non-custodial-trading-security",
+      isPublished: true
     }
   ];
   
@@ -269,7 +272,10 @@ const Blog = () => {
     "Trade Execution",
     "Compliance",
     "Strategy Comparison",
-    "Future Tech"
+    "Future Tech",
+    "Nano-Cap Strategy",
+    "Exchange Strategy",
+    "Security"
   ];
 
   const handleNewsletterSignup = () => {
@@ -328,25 +334,6 @@ const Blog = () => {
                   image={post.image}
                   slug={post.slug}
                   isPublished={post.isPublished}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div className="mb-16">
-            <h2 className="text-2xl md:text-3xl font-bold mb-8">Coming <span className="text-gradient">Soon</span></h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {upcomingPosts.map((post, index) => (
-                <BlogPostCard
-                  key={index}
-                  title={post.title}
-                  excerpt={post.excerpt}
-                  date={post.date}
-                  author={post.author}
-                  readTime={post.readTime}
-                  category={post.category}
-                  image={post.image}
                 />
               ))}
             </div>
