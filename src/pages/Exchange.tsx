@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import PageHeader from '@/components/PageHeader';
@@ -50,8 +49,13 @@ const Exchange = () => {
         console.log('❌ Failed to load currencies from API:', err);
         setUseMockData(true);
         
-        // Use the specific error message from the hook
-        const errorMessage = error || (err instanceof Error ? err.message : 'Unable to connect to live exchange rates');
+        // Provide clearer error messaging for placeholder credentials
+        let errorMessage = error || (err instanceof Error ? err.message : 'Unable to connect to live exchange rates');
+        
+        if (errorMessage.includes('placeholder') || errorMessage.includes('your_')) {
+          errorMessage = 'Please update your Changelly API credentials in the project settings to enable live rates';
+        }
+        
         setApiError(errorMessage);
         
         toast({
