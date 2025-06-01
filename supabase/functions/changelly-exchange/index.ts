@@ -213,25 +213,64 @@ serve(async (req) => {
     const message = JSON.stringify(changellyRequest)
     console.log('📤 Changelly API request:', message)
 
-    // Create HMAC signature
+    // Create HMAC signature - Let's try a different approach
     const encoder = new TextEncoder()
     const keyData = encoder.encode(privateKey)
     const messageData = encoder.encode(message)
     
-    const cryptoKey = await crypto.subtle.importKey(
-      'raw',
-      keyData,
-      { name: 'HMAC', hash: 'SHA-512' },
-      false,
-      ['sign']
-    )
+    console.log('🔐 Creating HMAC signature...')
+    console.log('🔍 Message length:', message.length)
+    console.log('🔍 Private key length for signature:', privateKey.length)
     
-    const signature = await crypto.subtle.sign('HMAC', cryptoKey, messageData)
+    let cryptoKey
+    try {
+      cryptoKey = await crypto.subtle.importKey(
+        'raw',
+        keyData,
+        { name: 'HMAC', hash: 'SHA-512' },
+        false,
+        ['sign']
+      )
+      console.log('✅ Crypto key imported successfully')
+    } catch (keyError) {
+      console.error('❌ Failed to import crypto key:', keyError)
+      return new Response(
+        JSON.stringify({ 
+          error: 'Failed to process API credentials',
+          details: 'Error creating signature key'
+        }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+    
+    let signature
+    try {
+      signature = await crypto.subtle.sign('HMAC', cryptoKey, messageData)
+      console.log('✅ HMAC signature created successfully')
+    } catch (signError) {
+      console.error('❌ Failed to create signature:', signError)
+      return new Response(
+        JSON.stringify({ 
+          error: 'Failed to create request signature',
+          details: 'Error signing request'
+        }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+    
     const signatureHex = Array.from(new Uint8Array(signature))
       .map(b => b.toString(16).padStart(2, '0'))
       .join('')
 
-    console.log('🔐 HMAC signature created')
+    console.log('🔐 HMAC signature details:')
+    console.log('🔍 Signature length:', signatureHex.length)
+    console.log('🔍 Signature first 20 chars:', signatureHex.substring(0, 20))
 
     // Make request to Changelly API
     const changellyHeaders = {
@@ -241,14 +280,35 @@ serve(async (req) => {
     }
 
     console.log('📡 Making request to Changelly API...')
+    console.log('🔍 Headers being sent:')
+    console.log('  - Content-Type: application/json')
+    console.log('  - X-Api-Key length:', publicKey.length)
+    console.log('  - X-Api-Signature length:', signatureHex.length)
 
-    const changellyResponse = await fetch('https://api.changelly.com/v2', {
-      method: 'POST',
-      headers: changellyHeaders,
-      body: message
-    })
+    let changellyResponse
+    try {
+      changellyResponse = await fetch('https://api.changelly.com/v2', {
+        method: 'POST',
+        headers: changellyHeaders,
+        body: message
+      })
+      console.log('📥 Changelly API response received')
+    } catch (fetchError) {
+      console.error('❌ Network error calling Changelly API:', fetchError)
+      return new Response(
+        JSON.stringify({ 
+          error: 'Network error connecting to Changelly API',
+          details: fetchError.message
+        }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
 
     console.log('📥 Changelly API response status:', changellyResponse.status)
+    console.log('📥 Changelly API response headers:', Object.fromEntries(changellyResponse.headers.entries()))
 
     const responseText = await changellyResponse.text()
     console.log('📄 Changelly API response body:', responseText)
@@ -260,12 +320,37 @@ serve(async (req) => {
         body: responseText
       })
       
+      // Let's provide more specific error handling for 401
+      if (changellyResponse.status === 401) {
+        console.error('🔍 401 Error Analysis:')
+        console.error('  - Public key being used:', publicKey.substring(0, 10) + '...')
+        console.error('  - Private key being used:', privateKey.substring(0, 10) + '...')
+        console.error('  - Message being signed:', message)
+        console.error('  - Signature generated:', signatureHex.substring(0, 20) + '...')
+        
+        return new Response(
+          JSON.stringify({ 
+            error: 'Invalid API credentials detected by Changelly',
+            details: 'The Changelly API rejected your credentials. Please verify that:\n1. Your API keys are correct and active\n2. Your API keys have the necessary permissions\n3. Your Changelly account is in good standing',
+            debug_info: {
+              public_key_preview: publicKey.substring(0, 15) + '...',
+              private_key_preview: privateKey.substring(0, 15) + '...',
+              signature_preview: signatureHex.substring(0, 20) + '...',
+              request_id: requestId,
+              message_length: message.length,
+              signature_length: signatureHex.length
+            }
+          }),
+          { 
+            status: 400, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        )
+      }
+      
       let errorMessage = `Changelly API error: ${changellyResponse.status}`
       
-      // Provide specific guidance for common errors
-      if (changellyResponse.status === 401) {
-        errorMessage = 'Invalid API credentials. Please verify your Changelly API keys are correct and have the necessary permissions.'
-      } else if (changellyResponse.status === 403) {
+      if (changellyResponse.status === 403) {
         errorMessage = 'Access forbidden. Please check that your Changelly API keys have the required permissions for this operation.'
       }
       
