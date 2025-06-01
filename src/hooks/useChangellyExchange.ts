@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseAvailable } from '@/lib/supabase-optional';
 
 interface ExchangeQuote {
   from: string;
@@ -29,11 +29,15 @@ export const useChangellyExchange = () => {
   const [error, setError] = useState<string | null>(null);
 
   const getCurrencies = async () => {
+    if (!isSupabaseAvailable) {
+      throw new Error('Supabase not configured - using demo mode');
+    }
+
     setLoading(true);
     setError(null);
     
     try {
-      const { data, error } = await supabase.functions.invoke('changelly-exchange', {
+      const { data, error } = await supabase!.functions.invoke('changelly-exchange', {
         body: {
           action: 'getCurrencies'
         }
@@ -56,11 +60,15 @@ export const useChangellyExchange = () => {
   };
 
   const getExchangeAmount = async (from: string, to: string, amount: string): Promise<string> => {
+    if (!isSupabaseAvailable) {
+      throw new Error('Supabase not configured - using demo mode');
+    }
+
     setLoading(true);
     setError(null);
     
     try {
-      const { data, error } = await supabase.functions.invoke('changelly-exchange', {
+      const { data, error } = await supabase!.functions.invoke('changelly-exchange', {
         body: {
           action: 'getExchangeAmount',
           from,
@@ -92,11 +100,15 @@ export const useChangellyExchange = () => {
     address: string, 
     refundAddress?: string
   ): Promise<Transaction> => {
+    if (!isSupabaseAvailable) {
+      throw new Error('Supabase not configured - using demo mode');
+    }
+
     setLoading(true);
     setError(null);
     
     try {
-      const { data, error } = await supabase.functions.invoke('changelly-exchange', {
+      const { data, error } = await supabase!.functions.invoke('changelly-exchange', {
         body: {
           action: 'createTransaction',
           from,
@@ -124,11 +136,15 @@ export const useChangellyExchange = () => {
   };
 
   const getTransactionStatus = async (transactionId: string) => {
+    if (!isSupabaseAvailable) {
+      throw new Error('Supabase not configured - using demo mode');
+    }
+
     setLoading(true);
     setError(null);
     
     try {
-      const { data, error } = await supabase.functions.invoke('changelly-exchange', {
+      const { data, error } = await supabase!.functions.invoke('changelly-exchange', {
         body: {
           action: 'getStatus',
           id: transactionId
