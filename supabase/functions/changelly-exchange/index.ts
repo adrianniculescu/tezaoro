@@ -34,35 +34,64 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Changelly edge function called with method:', req.method)
+    
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     )
 
     // Get Changelly API credentials from Supabase secrets
-    const { data: secrets, error: secretsError } = await supabase
+    // First try CHANGELLY_PUBLIC_KEY, then fallback to CHANGELLY_API_KEY
+    let { data: secrets, error: secretsError } = await supabase
       .from('vault')
       .select('secret')
-      .eq('name', 'CHANGELLY_API_KEY')
+      .eq('name', 'CHANGELLY_PUBLIC_KEY')
       .single()
 
     if (secretsError || !secrets) {
-      throw new Error('Changelly API key not found in secrets')
+      console.log('CHANGELLY_PUBLIC_KEY not found, trying CHANGELLY_API_KEY')
+      const { data: fallbackSecrets, error: fallbackError } = await supabase
+        .from('vault')
+        .select('secret')
+        .eq('name', 'CHANGELLY_API_KEY')
+        .single()
+      
+      if (fallbackError || !fallbackSecrets) {
+        throw new Error('Neither CHANGELLY_PUBLIC_KEY nor CHANGELLY_API_KEY found in secrets')
+      }
+      secrets = fallbackSecrets
     }
 
-    const { data: secretKeyData, error: secretKeyError } = await supabase
+    // First try CHANGELLY_PRIVATE_KEY, then fallback to CHANGELLY_SECRET_KEY
+    let { data: secretKeyData, error: secretKeyError } = await supabase
       .from('vault')
       .select('secret')
-      .eq('name', 'CHANGELLY_SECRET_KEY')
+      .eq('name', 'CHANGELLY_PRIVATE_KEY')
       .single()
 
     if (secretKeyError || !secretKeyData) {
-      throw new Error('Changelly secret key not found in secrets')
+      console.log('CHANGELLY_PRIVATE_KEY not found, trying CHANGELLY_SECRET_KEY')
+      const { data: fallbackSecretKey, error: fallbackSecretKeyError } = await supabase
+        .from('vault')
+        .select('secret')
+        .eq('name', 'CHANGELLY_SECRET_KEY')
+        .single()
+      
+      if (fallbackSecretKeyError || !fallbackSecretKey) {
+        throw new Error('Neither CHANGELLY_PRIVATE_KEY nor CHANGELLY_SECRET_KEY found in secrets')
+      }
+      secretKeyData = fallbackSecretKey
     }
 
     const apiKey = secrets.secret
     const secretKey = secretKeyData.secret
+    
+    console.log('API Key found:', !!apiKey)
+    console.log('Secret Key found:', !!secretKey)
+    
     const { action, ...params } = await req.json()
+    console.log('Action requested:', action)
 
     // Create HMAC signature for Changelly API
     const message = JSON.stringify({
@@ -71,6 +100,8 @@ serve(async (req) => {
       method: action,
       params
     })
+
+    console.log('Request message created for Changelly API')
 
     const encoder = new TextEncoder()
     const keyData = encoder.encode(secretKey)
@@ -89,6 +120,8 @@ serve(async (req) => {
       .map(b => b.toString(16).padStart(2, '0'))
       .join('')
 
+    console.log('Making request to Changelly API...')
+
     // Make request to Changelly API
     const response = await fetch('https://api.changelly.com/v2', {
       method: 'POST',
@@ -101,6 +134,8 @@ serve(async (req) => {
     })
 
     const data = await response.json()
+    console.log('Changelly API response status:', response.status)
+    console.log('Changelly API response:', data)
 
     return new Response(
       JSON.stringify(data),
