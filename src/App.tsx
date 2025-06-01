@@ -15,7 +15,6 @@ import Blog from "./pages/Blog";
 import Exchange from "./pages/Exchange";
 import DexAggregator from "./pages/DexAggregator";
 import FiatGateway from "./pages/FiatGateway";
-import SecretManagerPage from "./pages/SecretManager";
 import MarketMaking from "./pages/MarketMaking";
 import TokenListing from "./pages/TokenListing";
 import TokenomicsConsulting from "./pages/TokenomicsConsulting";
@@ -76,7 +75,6 @@ const App = () => (
           <Route path="/exchange" element={<Exchange />} />
           <Route path="/dex-aggregator" element={<DexAggregator />} />
           <Route path="/fiat-gateway" element={<FiatGateway />} />
-          <Route path="/secret-manager" element={<SecretManagerPage />} />
           <Route path="/market-making" element={<MarketMaking />} />
           <Route path="/token-listing" element={<TokenListing />} />
           <Route path="/tokenomics-consulting" element={<TokenomicsConsulting />} />
