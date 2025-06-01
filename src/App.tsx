@@ -29,6 +29,7 @@ import MicroCap from "./pages/MicroCap";
 import NanoCap from "./pages/NanoCap";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
+import TradingTools from "./pages/TradingTools";
 import NotFound from "./pages/NotFound";
 
 // Blog posts
@@ -75,6 +76,7 @@ const App = () => (
           <Route path="/exchange" element={<Exchange />} />
           <Route path="/dex-aggregator" element={<DexAggregator />} />
           <Route path="/fiat-gateway" element={<FiatGateway />} />
+          <Route path="/trading-tools" element={<TradingTools />} />
           <Route path="/market-making" element={<MarketMaking />} />
           <Route path="/token-listing" element={<TokenListing />} />
           <Route path="/tokenomics-consulting" element={<TokenomicsConsulting />} />

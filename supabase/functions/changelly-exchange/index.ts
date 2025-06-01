@@ -140,17 +140,35 @@ serve(async (req) => {
     console.log('Public key (first 8 chars):', publicKey.substring(0, 8))
     console.log('Private key length:', privateKey.length)
 
-    // Validate credentials are not placeholder values
+    // Validate credentials are not placeholder values - STOP if they are placeholders
     if (publicKey.includes('placeholder') || privateKey.includes('placeholder') ||
-        publicKey === 'your_public_key_here' || privateKey === 'your_private_key_here') {
-      console.error('Placeholder API credentials detected')
+        publicKey.includes('your_') || privateKey.includes('your_') ||
+        publicKey === 'your_public_key_here' || privateKey === 'your_private_key_here' ||
+        publicKey.startsWith('your_act') || privateKey.startsWith('your_sec')) {
+      
+      console.error('Placeholder API credentials detected - refusing to proceed')
       return new Response(
         JSON.stringify({ 
-          error: 'Please update API credentials',
-          details: 'Replace placeholder values with actual Changelly API keys'
+          error: 'Placeholder API credentials detected',
+          details: 'Please update your Changelly API keys with real credentials from your Changelly account'
         }),
         { 
-          status: 500, 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
+    // Additional validation - check key formats
+    if (publicKey.length < 10 || privateKey.length < 20) {
+      console.error('Invalid API key format detected')
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid API key format',
+          details: 'API keys appear to be too short or invalid format'
+        }),
+        { 
+          status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       )
