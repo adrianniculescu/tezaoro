@@ -7,80 +7,168 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-interface ChangellyRequest {
-  id: string
-  jsonrpc: string
-  method: string
-  params: any
-}
-
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    console.log('Changelly edge function called with method:', req.method)
-    
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
+    console.log('=== Changelly Edge Function Started ===')
+    console.log('Request method:', req.method)
+    console.log('Request URL:', req.url)
 
-    console.log('Attempting to retrieve Changelly API credentials from vault...')
-
-    // Get Changelly API credentials from Supabase secrets
-    const { data: publicKeyData, error: publicKeyError } = await supabase
-      .from('vault')
-      .select('secret')
-      .eq('name', 'CHANGELLY_PUBLIC_KEY')
-      .single()
-
-    if (publicKeyError || !publicKeyData) {
-      console.error('Failed to retrieve CHANGELLY_PUBLIC_KEY:', publicKeyError)
-      throw new Error('CHANGELLY_PUBLIC_KEY not found in vault. Please add it through the Supabase dashboard.')
+    // Validate request method
+    if (req.method !== 'POST') {
+      console.error('Invalid request method:', req.method)
+      return new Response(
+        JSON.stringify({ error: 'Method not allowed. Use POST.' }),
+        { 
+          status: 405, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
     }
 
-    const { data: privateKeyData, error: privateKeyError } = await supabase
-      .from('vault')
-      .select('secret')
-      .eq('name', 'CHANGELLY_PRIVATE_KEY')
-      .single()
-
-    if (privateKeyError || !privateKeyData) {
-      console.error('Failed to retrieve CHANGELLY_PRIVATE_KEY:', privateKeyError)
-      throw new Error('CHANGELLY_PRIVATE_KEY not found in vault. Please add it through the Supabase dashboard.')
+    // Parse request body
+    let requestBody
+    try {
+      requestBody = await req.json()
+      console.log('Request body received:', JSON.stringify(requestBody, null, 2))
+    } catch (parseError) {
+      console.error('Failed to parse request body:', parseError)
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON in request body' }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
     }
 
-    const publicKey = publicKeyData.secret
-    const privateKey = privateKeyData.secret
+    const { action, ...params } = requestBody
 
-    console.log('Successfully retrieved API credentials')
-    console.log('Public Key:', publicKey.substring(0, 8) + '...')
-    console.log('Private Key length:', privateKey?.length || 0)
-
-    // Validate that keys are not placeholder values
-    if (publicKey === 'your_public_key_here' || privateKey === 'your_private_key_here' || 
-        publicKey.includes('placeholder') || privateKey.includes('placeholder')) {
-      throw new Error('Please replace placeholder API keys with your actual Changelly API credentials in the Supabase vault.')
+    if (!action) {
+      console.error('Missing action parameter')
+      return new Response(
+        JSON.stringify({ error: 'Missing action parameter' }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
     }
 
-    const { action, ...params } = await req.json()
     console.log('Action requested:', action)
-    console.log('Params:', JSON.stringify(params))
+    console.log('Parameters:', JSON.stringify(params, null, 2))
 
-    // Create request ID and message
+    // Initialize Supabase client
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('Missing Supabase environment variables')
+      return new Response(
+        JSON.stringify({ error: 'Server configuration error' }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+    console.log('Supabase client initialized')
+
+    // Get API credentials from vault
+    console.log('Fetching Changelly API credentials from vault...')
+
+    const { data: secretsData, error: secretsError } = await supabase
+      .from('vault')
+      .select('name, secret')
+      .in('name', ['CHANGELLY_PUBLIC_KEY', 'CHANGELLY_PRIVATE_KEY'])
+
+    if (secretsError) {
+      console.error('Failed to fetch secrets from vault:', secretsError)
+      return new Response(
+        JSON.stringify({ 
+          error: 'Failed to retrieve API credentials',
+          details: secretsError.message 
+        }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
+    if (!secretsData || secretsData.length !== 2) {
+      console.error('Missing API credentials in vault. Found:', secretsData?.length || 0, 'credentials')
+      return new Response(
+        JSON.stringify({ 
+          error: 'API credentials not properly configured',
+          details: 'Please ensure both CHANGELLY_PUBLIC_KEY and CHANGELLY_PRIVATE_KEY are set in the vault'
+        }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
+    const publicKeyRecord = secretsData.find(s => s.name === 'CHANGELLY_PUBLIC_KEY')
+    const privateKeyRecord = secretsData.find(s => s.name === 'CHANGELLY_PRIVATE_KEY')
+
+    if (!publicKeyRecord || !privateKeyRecord) {
+      console.error('Missing required API keys in vault')
+      return new Response(
+        JSON.stringify({ 
+          error: 'Incomplete API credentials',
+          details: 'Both public and private keys are required'
+        }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
+    const publicKey = publicKeyRecord.secret
+    const privateKey = privateKeyRecord.secret
+
+    console.log('API credentials retrieved successfully')
+    console.log('Public key (first 8 chars):', publicKey.substring(0, 8))
+    console.log('Private key length:', privateKey.length)
+
+    // Validate credentials are not placeholder values
+    if (publicKey.includes('placeholder') || privateKey.includes('placeholder') ||
+        publicKey === 'your_public_key_here' || privateKey === 'your_private_key_here') {
+      console.error('Placeholder API credentials detected')
+      return new Response(
+        JSON.stringify({ 
+          error: 'Please update API credentials',
+          details: 'Replace placeholder values with actual Changelly API keys'
+        }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
+    // Create request for Changelly API
     const requestId = crypto.randomUUID()
-    const message = JSON.stringify({
+    const changellyRequest = {
       id: requestId,
       jsonrpc: "2.0",
       method: action,
       params
-    })
+    }
 
-    console.log('Request message:', message)
+    const message = JSON.stringify(changellyRequest)
+    console.log('Changelly API request:', message)
 
-    // Create HMAC signature for Changelly API
+    // Create HMAC signature
     const encoder = new TextEncoder()
     const keyData = encoder.encode(privateKey)
     const messageData = encoder.encode(message)
@@ -98,63 +186,106 @@ serve(async (req) => {
       .map(b => b.toString(16).padStart(2, '0'))
       .join('')
 
-    console.log('HMAC signature created:', signatureHex.substring(0, 16) + '...')
+    console.log('HMAC signature created (first 16 chars):', signatureHex.substring(0, 16))
 
-    // Prepare headers for Changelly API v2
-    const headers: Record<string, string> = {
+    // Make request to Changelly API
+    const changellyHeaders = {
       'Content-Type': 'application/json',
       'X-Api-Key': publicKey,
       'X-Api-Signature': signatureHex,
     }
 
-    console.log('Making request to Changelly API with headers:', Object.keys(headers))
+    console.log('Making request to Changelly API...')
+    console.log('Headers keys:', Object.keys(changellyHeaders))
 
-    // Make request to Changelly API
-    const response = await fetch('https://api.changelly.com/v2', {
+    const changellyResponse = await fetch('https://api.changelly.com/v2', {
       method: 'POST',
-      headers,
+      headers: changellyHeaders,
       body: message
     })
 
-    const responseText = await response.text()
-    console.log('Changelly API response status:', response.status)
-    console.log('Changelly API response headers:', Object.fromEntries(response.headers.entries()))
+    console.log('Changelly API response status:', changellyResponse.status)
+    console.log('Changelly API response ok:', changellyResponse.ok)
+
+    const responseText = await changellyResponse.text()
     console.log('Changelly API response body:', responseText)
 
-    if (!response.ok) {
-      console.error('Changelly API returned non-OK status:', response.status)
-      throw new Error(`Changelly API error: ${response.status} - ${responseText}`)
+    if (!changellyResponse.ok) {
+      console.error('Changelly API error response:', {
+        status: changellyResponse.status,
+        statusText: changellyResponse.statusText,
+        body: responseText
+      })
+      
+      return new Response(
+        JSON.stringify({ 
+          error: `Changelly API error: ${changellyResponse.status}`,
+          details: responseText,
+          request: action
+        }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
     }
 
-    let data
+    // Parse response
+    let responseData
     try {
-      data = JSON.parse(responseText)
+      responseData = JSON.parse(responseText)
     } catch (parseError) {
-      console.error('Failed to parse Changelly API response:', parseError)
-      throw new Error('Invalid response from Changelly API')
+      console.error('Failed to parse Changelly response:', parseError)
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid response from Changelly API',
+          details: responseText
+        }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
     }
 
     // Check for API-level errors
-    if (data.error) {
-      console.error('Changelly API returned an error:', data.error)
-      throw new Error(`Changelly API error: ${data.error.message || JSON.stringify(data.error)}`)
+    if (responseData.error) {
+      console.error('Changelly API returned error:', responseData.error)
+      return new Response(
+        JSON.stringify({
+          error: 'Changelly API error',
+          details: responseData.error.message || responseData.error,
+          code: responseData.error.code
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
     }
 
-    console.log('Changelly API request completed successfully')
+    console.log('=== Changelly API request completed successfully ===')
+    console.log('Response data:', JSON.stringify(responseData, null, 2))
 
     return new Response(
-      JSON.stringify(data),
+      JSON.stringify(responseData),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       },
     )
+
   } catch (error) {
-    console.error('Changelly API error:', error)
+    console.error('=== Edge Function Error ===')
+    console.error('Error name:', error.name)
+    console.error('Error message:', error.message)
+    console.error('Error stack:', error.stack)
+    
     return new Response(
       JSON.stringify({ 
-        error: error.message,
-        details: 'Check the edge function logs for more information. Make sure your Changelly API keys are correct.'
+        error: 'Internal server error',
+        details: error.message,
+        timestamp: new Date().toISOString()
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -33,35 +33,35 @@ export const useChangellyExchange = () => {
     setError(null);
     
     try {
-      console.log('Requesting currencies from Changelly API...');
+      console.log('🔄 Requesting currencies from Changelly API...');
       
-      const { data, error } = await supabase.functions.invoke('changelly-exchange', {
+      const { data, error: supabaseError } = await supabase.functions.invoke('changelly-exchange', {
         body: {
           action: 'getCurrencies'
         }
       });
 
-      console.log('Changelly API response for getCurrencies:', data);
+      console.log('📡 Supabase function response:', { data, error: supabaseError });
 
-      if (error) {
-        console.error('Supabase function error:', error);
-        throw error;
+      if (supabaseError) {
+        console.error('❌ Supabase function error:', supabaseError);
+        throw new Error(`Function invocation failed: ${supabaseError.message}`);
       }
       
-      if (data.error) {
-        console.error('Changelly API error:', data.error);
-        throw new Error(data.error.message || 'Failed to get currencies');
+      if (data?.error) {
+        console.error('❌ Changelly API error:', data.error);
+        throw new Error(data.error.details || data.error || 'Failed to get currencies');
       }
 
-      if (!data.result) {
-        console.warn('No currencies returned from API');
+      if (!data?.result) {
+        console.warn('⚠️ No currencies returned from API');
         return [];
       }
 
-      console.log('Successfully retrieved currencies:', data.result.length);
+      console.log('✅ Successfully retrieved currencies:', data.result?.length || 0);
       return data.result;
     } catch (err) {
-      console.error('getCurrencies error:', err);
+      console.error('❌ getCurrencies error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to get currencies';
       setError(errorMessage);
       throw new Error(errorMessage);
@@ -75,9 +75,9 @@ export const useChangellyExchange = () => {
     setError(null);
     
     try {
-      console.log(`Calculating exchange: ${amount} ${from} -> ${to}`);
+      console.log(`🔄 Calculating exchange: ${amount} ${from} -> ${to}`);
       
-      const { data, error } = await supabase.functions.invoke('changelly-exchange', {
+      const { data, error: supabaseError } = await supabase.functions.invoke('changelly-exchange', {
         body: {
           action: 'getExchangeAmount',
           from,
@@ -86,27 +86,27 @@ export const useChangellyExchange = () => {
         }
       });
 
-      console.log('Changelly API response for getExchangeAmount:', data);
+      console.log('📡 Supabase function response:', { data, error: supabaseError });
 
-      if (error) {
-        console.error('Supabase function error:', error);
-        throw error;
+      if (supabaseError) {
+        console.error('❌ Supabase function error:', supabaseError);
+        throw new Error(`Function invocation failed: ${supabaseError.message}`);
       }
       
-      if (data.error) {
-        console.error('Changelly API error:', data.error);
-        throw new Error(data.error.message || 'Failed to get exchange amount');
+      if (data?.error) {
+        console.error('❌ Changelly API error:', data.error);
+        throw new Error(data.error.details || data.error || 'Failed to get exchange amount');
       }
 
-      if (!data.result) {
-        console.warn('No exchange amount returned from API');
+      if (!data?.result) {
+        console.warn('⚠️ No exchange amount returned from API');
         return '0';
       }
 
-      console.log('Successfully calculated exchange amount:', data.result);
+      console.log('✅ Successfully calculated exchange amount:', data.result);
       return data.result;
     } catch (err) {
-      console.error('getExchangeAmount error:', err);
+      console.error('❌ getExchangeAmount error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to calculate exchange';
       setError(errorMessage);
       throw new Error(errorMessage);
@@ -126,9 +126,9 @@ export const useChangellyExchange = () => {
     setError(null);
     
     try {
-      console.log(`Creating transaction: ${amount} ${from} -> ${to} to ${address}`);
+      console.log(`🔄 Creating transaction: ${amount} ${from} -> ${to} to ${address}`);
       
-      const { data, error } = await supabase.functions.invoke('changelly-exchange', {
+      const { data, error: supabaseError } = await supabase.functions.invoke('changelly-exchange', {
         body: {
           action: 'createTransaction',
           from,
@@ -139,27 +139,27 @@ export const useChangellyExchange = () => {
         }
       });
 
-      console.log('Changelly API response for createTransaction:', data);
+      console.log('📡 Supabase function response:', { data, error: supabaseError });
 
-      if (error) {
-        console.error('Supabase function error:', error);
-        throw error;
+      if (supabaseError) {
+        console.error('❌ Supabase function error:', supabaseError);
+        throw new Error(`Function invocation failed: ${supabaseError.message}`);
       }
       
-      if (data.error) {
-        console.error('Changelly API error:', data.error);
-        throw new Error(data.error.message || 'Failed to create transaction');
+      if (data?.error) {
+        console.error('❌ Changelly API error:', data.error);
+        throw new Error(data.error.details || data.error || 'Failed to create transaction');
       }
 
-      if (!data.result) {
-        console.warn('No transaction data returned from API');
+      if (!data?.result) {
+        console.warn('⚠️ No transaction data returned from API');
         throw new Error('No transaction data received');
       }
 
-      console.log('Successfully created transaction:', data.result);
+      console.log('✅ Successfully created transaction:', data.result);
       return data.result;
     } catch (err) {
-      console.error('createTransaction error:', err);
+      console.error('❌ createTransaction error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to create transaction';
       setError(errorMessage);
       throw new Error(errorMessage);
@@ -173,31 +173,31 @@ export const useChangellyExchange = () => {
     setError(null);
     
     try {
-      console.log(`Getting status for transaction: ${transactionId}`);
+      console.log(`🔄 Getting status for transaction: ${transactionId}`);
       
-      const { data, error } = await supabase.functions.invoke('changelly-exchange', {
+      const { data, error: supabaseError } = await supabase.functions.invoke('changelly-exchange', {
         body: {
           action: 'getStatus',
           id: transactionId
         }
       });
 
-      console.log('Changelly API response for getStatus:', data);
+      console.log('📡 Supabase function response:', { data, error: supabaseError });
 
-      if (error) {
-        console.error('Supabase function error:', error);
-        throw error;
+      if (supabaseError) {
+        console.error('❌ Supabase function error:', supabaseError);
+        throw new Error(`Function invocation failed: ${supabaseError.message}`);
       }
       
-      if (data.error) {
-        console.error('Changelly API error:', data.error);
-        throw new Error(data.error.message || 'Failed to get transaction status');
+      if (data?.error) {
+        console.error('❌ Changelly API error:', data.error);
+        throw new Error(data.error.details || data.error || 'Failed to get transaction status');
       }
 
-      console.log('Successfully retrieved transaction status:', data.result);
+      console.log('✅ Successfully retrieved transaction status:', data.result);
       return data.result;
     } catch (err) {
-      console.error('getTransactionStatus error:', err);
+      console.error('❌ getTransactionStatus error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to get transaction status';
       setError(errorMessage);
       throw new Error(errorMessage);
