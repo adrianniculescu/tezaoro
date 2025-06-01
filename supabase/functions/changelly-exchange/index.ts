@@ -107,11 +107,11 @@ serve(async (req) => {
     console.log('📊 All secrets found:', secretsData?.length || 0)
     console.log('🔍 Secret names:', secretsData?.map(s => s.name) || [])
 
-    if (!secretsData || secretsData.length === 0) {
-      console.error('❌ No API credentials found in vault')
+    if (!secretsData || secretsData.length < 2) {
+      console.error('❌ Insufficient API credentials found in vault')
       return new Response(
         JSON.stringify({ 
-          error: 'API credentials not found',
+          error: 'API credentials not configured',
           details: 'Please ensure both CHANGELLY_PUBLIC_KEY and CHANGELLY_PRIVATE_KEY are set in the Supabase vault'
         }),
         { 
@@ -121,7 +121,7 @@ serve(async (req) => {
       )
     }
 
-    // Get the most recent credentials (in case of duplicates)
+    // Get the credentials
     const publicKeyRecord = secretsData.find(s => s.name === 'CHANGELLY_PUBLIC_KEY')
     const privateKeyRecord = secretsData.find(s => s.name === 'CHANGELLY_PRIVATE_KEY')
 
@@ -144,22 +144,22 @@ serve(async (req) => {
       )
     }
 
-    const publicKey = publicKeyRecord.secret
-    const privateKey = privateKeyRecord.secret
+    const publicKey = publicKeyRecord.secret?.trim()
+    const privateKey = privateKeyRecord.secret?.trim()
 
     console.log('✅ API credentials retrieved successfully')
     console.log('🔍 Public key length:', publicKey?.length || 0)
     console.log('🔍 Private key length:', privateKey?.length || 0)
-    console.log('🔍 Public key updated:', publicKeyRecord.updated_at)
-    console.log('🔍 Private key updated:', privateKeyRecord.updated_at)
+    console.log('🔍 Public key first 10 chars:', publicKey?.substring(0, 10) || 'empty')
+    console.log('🔍 Private key first 10 chars:', privateKey?.substring(0, 10) || 'empty')
 
-    // Validate credentials are not null or empty
-    if (!publicKey || !privateKey) {
+    // Validate credentials exist and are not empty
+    if (!publicKey || !privateKey || publicKey.length === 0 || privateKey.length === 0) {
       console.error('❌ API credentials are null or empty')
       return new Response(
         JSON.stringify({ 
           error: 'API credentials are empty',
-          details: 'Please ensure your Changelly API keys are properly set in the vault'
+          details: 'Please ensure your Changelly API keys are properly set in the vault and not empty'
         }),
         { 
           status: 400, 
@@ -168,14 +168,45 @@ serve(async (req) => {
       )
     }
 
-    // Basic key length validation
-    if (publicKey.length < 20) {
-      console.error('❌ Public key appears too short')
-      console.error('📏 Public key length:', publicKey.length)
+    // Check for common placeholder patterns
+    const placeholderPatterns = [
+      'your_actual_',
+      'placeholder',
+      'enter_your_',
+      'add_your_',
+      'example_',
+      'test_key',
+      'sample_'
+    ]
+    
+    const hasPlaceholderPublic = placeholderPatterns.some(pattern => 
+      publicKey.toLowerCase().includes(pattern)
+    )
+    const hasPlaceholderPrivate = placeholderPatterns.some(pattern => 
+      privateKey.toLowerCase().includes(pattern)
+    )
+
+    if (hasPlaceholderPublic || hasPlaceholderPrivate) {
+      console.error('❌ Placeholder API credentials detected')
+      return new Response(
+        JSON.stringify({ 
+          error: 'Placeholder API credentials detected',
+          details: 'Please replace the placeholder API keys with your actual Changelly API credentials from https://changelly.com/developers'
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
+    // Validate minimum key lengths (Changelly keys should be longer)
+    if (publicKey.length < 30) {
+      console.error('❌ Public key appears too short for Changelly API')
       return new Response(
         JSON.stringify({ 
           error: 'Invalid public key format',
-          details: `Public key appears too short (${publicKey.length} characters). Please verify your Changelly public key.`
+          details: `Public key appears too short (${publicKey.length} characters). Changelly public keys are typically longer.`
         }),
         { 
           status: 400, 
@@ -184,13 +215,12 @@ serve(async (req) => {
       )
     }
 
-    if (privateKey.length < 20) {
-      console.error('❌ Private key appears too short')
-      console.error('📏 Private key length:', privateKey.length)
+    if (privateKey.length < 30) {
+      console.error('❌ Private key appears too short for Changelly API')
       return new Response(
         JSON.stringify({ 
           error: 'Invalid private key format',
-          details: `Private key appears too short (${privateKey.length} characters). Please verify your Changelly private key.`
+          details: `Private key appears too short (${privateKey.length} characters). Changelly private keys are typically longer.`
         }),
         { 
           status: 400, 
@@ -213,14 +243,14 @@ serve(async (req) => {
     const message = JSON.stringify(changellyRequest)
     console.log('📤 Changelly API request:', message)
 
-    // Create HMAC signature - Let's try a different approach
+    // Create HMAC signature
     const encoder = new TextEncoder()
     const keyData = encoder.encode(privateKey)
     const messageData = encoder.encode(message)
     
     console.log('🔐 Creating HMAC signature...')
-    console.log('🔍 Message length:', message.length)
-    console.log('🔍 Private key length for signature:', privateKey.length)
+    console.log('🔍 Message to sign:', message)
+    console.log('🔍 Private key for signature (first 15 chars):', privateKey.substring(0, 15))
     
     let cryptoKey
     try {
@@ -280,7 +310,7 @@ serve(async (req) => {
     }
 
     console.log('📡 Making request to Changelly API...')
-    console.log('🔍 Headers being sent:')
+    console.log('🔍 Request headers (no sensitive data):')
     console.log('  - Content-Type: application/json')
     console.log('  - X-Api-Key length:', publicKey.length)
     console.log('  - X-Api-Signature length:', signatureHex.length)
@@ -293,6 +323,8 @@ serve(async (req) => {
         body: message
       })
       console.log('📥 Changelly API response received')
+      console.log('📥 Status:', changellyResponse.status)
+      console.log('📥 Status Text:', changellyResponse.statusText)
     } catch (fetchError) {
       console.error('❌ Network error calling Changelly API:', fetchError)
       return new Response(
@@ -307,9 +339,6 @@ serve(async (req) => {
       )
     }
 
-    console.log('📥 Changelly API response status:', changellyResponse.status)
-    console.log('📥 Changelly API response headers:', Object.fromEntries(changellyResponse.headers.entries()))
-
     const responseText = await changellyResponse.text()
     console.log('📄 Changelly API response body:', responseText)
 
@@ -320,26 +349,19 @@ serve(async (req) => {
         body: responseText
       })
       
-      // Let's provide more specific error handling for 401
+      // Provide specific error messages based on status code
       if (changellyResponse.status === 401) {
-        console.error('🔍 401 Error Analysis:')
-        console.error('  - Public key being used:', publicKey.substring(0, 10) + '...')
-        console.error('  - Private key being used:', privateKey.substring(0, 10) + '...')
-        console.error('  - Message being signed:', message)
-        console.error('  - Signature generated:', signatureHex.substring(0, 20) + '...')
+        console.error('🔍 401 Unauthorized Analysis:')
+        console.error('  - This indicates invalid API credentials')
+        console.error('  - Please verify your keys are correct and active')
+        console.error('  - Check that your Changelly account has the required permissions')
         
         return new Response(
           JSON.stringify({ 
-            error: 'Invalid API credentials detected by Changelly',
-            details: 'The Changelly API rejected your credentials. Please verify that:\n1. Your API keys are correct and active\n2. Your API keys have the necessary permissions\n3. Your Changelly account is in good standing',
-            debug_info: {
-              public_key_preview: publicKey.substring(0, 15) + '...',
-              private_key_preview: privateKey.substring(0, 15) + '...',
-              signature_preview: signatureHex.substring(0, 20) + '...',
-              request_id: requestId,
-              message_length: message.length,
-              signature_length: signatureHex.length
-            }
+            error: 'Invalid Changelly API credentials',
+            details: 'The Changelly API rejected your credentials. Please verify:\n1. Your API keys are correct and copied completely\n2. Your API keys are active and not expired\n3. Your Changelly account has the necessary permissions\n4. You have enabled the required API methods in your Changelly dashboard',
+            status: changellyResponse.status,
+            response_body: responseText
           }),
           { 
             status: 400, 
@@ -348,22 +370,26 @@ serve(async (req) => {
         )
       }
       
-      let errorMessage = `Changelly API error: ${changellyResponse.status}`
-      
       if (changellyResponse.status === 403) {
-        errorMessage = 'Access forbidden. Please check that your Changelly API keys have the required permissions for this operation.'
+        return new Response(
+          JSON.stringify({ 
+            error: 'Access forbidden by Changelly API',
+            details: 'Your API keys do not have permission for this operation. Please check your Changelly API permissions.',
+            status: changellyResponse.status
+          }),
+          { 
+            status: 400, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        )
       }
       
       return new Response(
         JSON.stringify({ 
-          error: errorMessage,
-          details: responseText,
+          error: `Changelly API error: ${changellyResponse.status}`,
+          details: responseText || changellyResponse.statusText,
           request: action,
-          debug_info: {
-            public_key_length: publicKey.length,
-            private_key_length: privateKey.length,
-            request_id: requestId
-          }
+          status: changellyResponse.status
         }),
         { 
           status: 500, 
