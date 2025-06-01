@@ -16,6 +16,7 @@ interface ExchangeFormProps {
   onAmountChange: (value: string) => void;
   onSwapCurrencies: () => void;
   onCalculateRate: () => void;
+  loading?: boolean;
 }
 
 const ExchangeForm = ({
@@ -28,14 +29,15 @@ const ExchangeForm = ({
   onToCurrencyChange,
   onAmountChange,
   onSwapCurrencies,
-  onCalculateRate
+  onCalculateRate,
+  loading = false
 }: ExchangeFormProps) => {
   return (
     <Card className="glass-card bg-card p-8 max-w-2xl mx-auto">
       <div className="space-y-6">
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-2">Exchange Cryptocurrencies</h2>
-          <p className="text-muted-foreground">Demo exchange with sample data</p>
+          <p className="text-muted-foreground">Get real-time exchange rates</p>
         </div>
 
         <div className="space-y-4">
@@ -54,6 +56,7 @@ const ExchangeForm = ({
               size="sm"
               onClick={onSwapCurrencies}
               className="rounded-full p-2"
+              disabled={loading}
             >
               <ArrowRightLeft className="h-4 w-4" />
             </Button>
@@ -72,23 +75,23 @@ const ExchangeForm = ({
           <div className="space-y-3">
             <Button
               onClick={onCalculateRate}
-              disabled={!amount}
+              disabled={!amount || loading}
               className="w-full"
               variant="outline"
             >
-              Get Exchange Rate
+              {loading ? 'Calculating...' : 'Get Exchange Rate'}
             </Button>
             
             <Button
-              disabled={!exchangeAmount}
+              disabled={!exchangeAmount || loading}
               className="w-full bg-primary hover:bg-primary/90"
             >
-              Start Exchange (Demo)
+              Start Exchange
             </Button>
           </div>
 
           <div className="text-center text-sm text-muted-foreground">
-            <p>Demo rates for testing • No real transactions</p>
+            <p>Real-time rates powered by Changelly</p>
           </div>
         </div>
       </div>
