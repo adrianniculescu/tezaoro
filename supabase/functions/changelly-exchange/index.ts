@@ -81,9 +81,8 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     console.log('Supabase client initialized')
 
-    // Get API credentials from vault with detailed debugging
+    // Get API credentials from vault
     console.log('🔍 Fetching Changelly API credentials from vault...')
-    console.log('🕐 Current timestamp for debugging:', Date.now())
 
     const { data: secretsData, error: secretsError } = await supabase
       .from('vault')
@@ -104,33 +103,14 @@ serve(async (req) => {
       )
     }
 
-    console.log('📊 Raw vault query result:', {
-      count: secretsData?.length || 0,
-      secrets_found: secretsData?.map(s => ({ name: s.name, updated_at: s.updated_at })) || []
-    })
-
-    // Enhanced debugging for each secret
-    secretsData?.forEach((secret, index) => {
-      console.log(`🔑 Secret ${index + 1}:`, {
-        name: secret.name,
-        created_at: secret.created_at,
-        updated_at: secret.updated_at,
-        secret_length: secret.secret?.length || 0,
-        secret_first_20_chars: secret.secret?.substring(0, 20) || 'null',
-        secret_last_10_chars: secret.secret?.substring(secret.secret?.length - 10) || 'null',
-        secret_type: typeof secret.secret,
-        is_base64_like: /^[A-Za-z0-9+/]*={0,2}$/.test(secret.secret || ''),
-        starts_with_MII: secret.secret?.startsWith('MII') || false,
-        contains_your_actual: secret.secret?.includes('your_actual') || false
-      })
-    })
+    console.log('📊 Secrets found:', secretsData?.length || 0)
 
     if (!secretsData || secretsData.length !== 2) {
       console.error('❌ Missing API credentials in vault. Found:', secretsData?.length || 0, 'credentials')
       return new Response(
         JSON.stringify({ 
           error: 'API credentials not properly configured',
-          details: 'Please ensure both CHANGELLY_PUBLIC_KEY and CHANGELLY_PRIVATE_KEY are set in the vault'
+          details: 'Please ensure both CHANGELLY_PUBLIC_KEY and CHANGELLY_PRIVATE_KEY are set in the Supabase vault'
         }),
         { 
           status: 500, 
@@ -160,8 +140,6 @@ serve(async (req) => {
     const privateKey = privateKeyRecord.secret
 
     console.log('✅ API credentials retrieved successfully')
-    console.log('📅 Public key updated at:', publicKeyRecord.updated_at)
-    console.log('📅 Private key updated at:', privateKeyRecord.updated_at)
 
     // Validate credentials are not null or empty
     if (!publicKey || !privateKey) {
@@ -178,39 +156,29 @@ serve(async (req) => {
       )
     }
 
-    // Updated placeholder detection - more specific criteria
-    const commonPlaceholders = [
-      'placeholder',
-      'your_api_key_here',
-      'your_public_key_here', 
-      'your_private_key_here',
-      'your_actual_changelly_public_key_here',
-      'your_actual_changelly_private_key_here',
-      'example',
-      'test_key',
-      'demo_key'
-    ]
-
+    // Enhanced placeholder detection with clearer messaging
     const isPlaceholder = (key: string) => {
       const lowerKey = key.toLowerCase()
-      return commonPlaceholders.some(placeholder => lowerKey.includes(placeholder)) ||
-             key.length < 10 || // Keys should be reasonably long
-             /^(test|demo|sample)/.test(lowerKey)
+      return lowerKey.includes('your_actual') ||
+             lowerKey.includes('placeholder') ||
+             lowerKey.includes('your_api_key_here') ||
+             lowerKey.includes('your_public_key_here') || 
+             lowerKey.includes('your_private_key_here') ||
+             lowerKey.includes('example') ||
+             lowerKey.includes('test_key') ||
+             lowerKey.includes('demo_key') ||
+             key.length < 20 // Changelly keys should be longer
     }
 
     if (isPlaceholder(publicKey) || isPlaceholder(privateKey)) {
       console.error('❌ Placeholder API credentials detected')
-      console.error('🔍 Detailed credential analysis:', {
-        public_key_is_placeholder: isPlaceholder(publicKey),
-        private_key_is_placeholder: isPlaceholder(privateKey),
-        public_key_sample: publicKey.substring(0, 30) + '...',
-        private_key_sample: privateKey.substring(0, 30) + '...'
-      })
+      console.error('🔍 Public key starts with:', publicKey.substring(0, 20))
+      console.error('🔍 Private key starts with:', privateKey.substring(0, 20))
       
       return new Response(
         JSON.stringify({ 
-          error: 'Invalid API credentials detected',
-          details: 'The API keys appear to be placeholder values. Please enter your real Changelly API credentials in the Supabase vault.'
+          error: 'Placeholder API credentials detected',
+          details: 'You need to replace the placeholder values with your actual Changelly API keys. Please visit https://changelly.com/developers to get your real API credentials and update them in the Supabase vault.'
         }),
         { 
           status: 400, 
@@ -219,7 +187,7 @@ serve(async (req) => {
       )
     }
 
-    // For RSA keys, we expect them to start with MII for base64 format
+    // For Changelly API v2, public key should be base64 encoded RSA key
     if (!publicKey.startsWith('MII')) {
       console.error('❌ Invalid public key format - expected RSA key starting with MII')
       console.error('🔍 Public key format details:', {
@@ -230,7 +198,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           error: 'Invalid public key format',
-          details: 'Changelly public key should be a base64-encoded RSA key starting with "MII"'
+          details: 'Changelly public key should be a base64-encoded RSA key starting with "MII". Please ensure you copied the correct public key from your Changelly API settings.'
         }),
         { 
           status: 400, 
@@ -246,7 +214,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           error: 'Invalid API key format',
-          details: 'API keys appear to be too short or invalid format'
+          details: 'API keys appear to be too short. Please verify you copied the complete keys from Changelly.'
         }),
         { 
           status: 400, 
@@ -285,7 +253,7 @@ serve(async (req) => {
       .map(b => b.toString(16).padStart(2, '0'))
       .join('')
 
-    console.log('🔐 HMAC signature created (first 16 chars):', signatureHex.substring(0, 16))
+    console.log('🔐 HMAC signature created')
 
     // Make request to Changelly API
     const changellyHeaders = {
@@ -295,7 +263,6 @@ serve(async (req) => {
     }
 
     console.log('📡 Making request to Changelly API...')
-    console.log('📋 Request headers keys:', Object.keys(changellyHeaders))
 
     const changellyResponse = await fetch('https://api.changelly.com/v2', {
       method: 'POST',
@@ -304,7 +271,6 @@ serve(async (req) => {
     })
 
     console.log('📥 Changelly API response status:', changellyResponse.status)
-    console.log('✅ Changelly API response ok:', changellyResponse.ok)
 
     const responseText = await changellyResponse.text()
     console.log('📄 Changelly API response body:', responseText)
@@ -316,9 +282,18 @@ serve(async (req) => {
         body: responseText
       })
       
+      let errorMessage = `Changelly API error: ${changellyResponse.status}`
+      
+      // Provide specific guidance for common errors
+      if (changellyResponse.status === 401) {
+        errorMessage = 'Invalid API credentials. Please verify your Changelly API keys are correct and have the necessary permissions.'
+      } else if (changellyResponse.status === 403) {
+        errorMessage = 'Access forbidden. Please check that your Changelly API keys have the required permissions for this operation.'
+      }
+      
       return new Response(
         JSON.stringify({ 
-          error: `Changelly API error: ${changellyResponse.status}`,
+          error: errorMessage,
           details: responseText,
           request: action
         }),
@@ -364,7 +339,6 @@ serve(async (req) => {
     }
 
     console.log('🎉 Changelly API request completed successfully')
-    console.log('📊 Response data:', JSON.stringify(responseData, null, 2))
 
     return new Response(
       JSON.stringify(responseData),
