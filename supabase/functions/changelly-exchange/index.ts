@@ -106,7 +106,7 @@ serve(async (req) => {
 
     console.log('📊 Raw vault query result:', {
       count: secretsData?.length || 0,
-      raw_data: secretsData
+      secrets_found: secretsData?.map(s => ({ name: s.name, updated_at: s.updated_at })) || []
     })
 
     // Enhanced debugging for each secret
@@ -120,7 +120,8 @@ serve(async (req) => {
         secret_last_10_chars: secret.secret?.substring(secret.secret?.length - 10) || 'null',
         secret_type: typeof secret.secret,
         is_base64_like: /^[A-Za-z0-9+/]*={0,2}$/.test(secret.secret || ''),
-        starts_with_MII: secret.secret?.startsWith('MII') || false
+        starts_with_MII: secret.secret?.startsWith('MII') || false,
+        contains_your_actual: secret.secret?.includes('your_actual') || false
       })
     })
 
@@ -161,21 +162,6 @@ serve(async (req) => {
     console.log('✅ API credentials retrieved successfully')
     console.log('📅 Public key updated at:', publicKeyRecord.updated_at)
     console.log('📅 Private key updated at:', privateKeyRecord.updated_at)
-    
-    // Enhanced key validation logging
-    console.log('🔐 Public key analysis:', {
-      length: publicKey?.length || 0,
-      starts_with: publicKey?.substring(0, 10) || 'null',
-      ends_with: publicKey?.substring(publicKey?.length - 10) || 'null',
-      is_base64_format: /^[A-Za-z0-9+/]*={0,2}$/.test(publicKey || ''),
-      contains_MII: publicKey?.includes('MII') || false
-    })
-    
-    console.log('🔐 Private key analysis:', {
-      length: privateKey?.length || 0,
-      starts_with: privateKey?.substring(0, 10) || 'null',
-      ends_with: privateKey?.substring(privateKey?.length - 10) || 'null'
-    })
 
     // Validate credentials are not null or empty
     if (!publicKey || !privateKey) {
@@ -192,32 +178,39 @@ serve(async (req) => {
       )
     }
 
-    // Enhanced placeholder detection
-    const isPlaceholder = (
-      publicKey.includes('placeholder') || privateKey.includes('placeholder') ||
-      publicKey.includes('your_') || privateKey.includes('your_') ||
-      publicKey === 'your_public_key_here' || privateKey === 'your_private_key_here' ||
-      publicKey.startsWith('your_act') || privateKey.startsWith('your_act') ||
-      publicKey.includes('example') || privateKey.includes('example') ||
-      publicKey.startsWith('5be2b90d') // Check for the truncated value we saw
-    )
+    // Updated placeholder detection - more specific criteria
+    const commonPlaceholders = [
+      'placeholder',
+      'your_api_key_here',
+      'your_public_key_here', 
+      'your_private_key_here',
+      'your_actual_changelly_public_key_here',
+      'your_actual_changelly_private_key_here',
+      'example',
+      'test_key',
+      'demo_key'
+    ]
 
-    if (isPlaceholder) {
+    const isPlaceholder = (key: string) => {
+      const lowerKey = key.toLowerCase()
+      return commonPlaceholders.some(placeholder => lowerKey.includes(placeholder)) ||
+             key.length < 10 || // Keys should be reasonably long
+             /^(test|demo|sample)/.test(lowerKey)
+    }
+
+    if (isPlaceholder(publicKey) || isPlaceholder(privateKey)) {
       console.error('❌ Placeholder API credentials detected')
-      console.error('🔍 Placeholder detection details:', {
-        contains_placeholder: publicKey.includes('placeholder') || privateKey.includes('placeholder'),
-        contains_your: publicKey.includes('your_') || privateKey.includes('your_'),
-        starts_with_your_act: publicKey.startsWith('your_act') || privateKey.startsWith('your_act'),
-        contains_example: publicKey.includes('example') || privateKey.includes('example'),
-        starts_with_truncated: publicKey.startsWith('5be2b90d'),
-        public_key_preview: publicKey.substring(0, 30),
-        private_key_preview: privateKey.substring(0, 30)
+      console.error('🔍 Detailed credential analysis:', {
+        public_key_is_placeholder: isPlaceholder(publicKey),
+        private_key_is_placeholder: isPlaceholder(privateKey),
+        public_key_sample: publicKey.substring(0, 30) + '...',
+        private_key_sample: privateKey.substring(0, 30) + '...'
       })
       
       return new Response(
         JSON.stringify({ 
-          error: 'Placeholder or invalid API credentials detected',
-          details: 'The API keys in the vault appear to be placeholder values or corrupted. Please re-enter your real Changelly API credentials.'
+          error: 'Invalid API credentials detected',
+          details: 'The API keys appear to be placeholder values. Please enter your real Changelly API credentials in the Supabase vault.'
         }),
         { 
           status: 400, 
@@ -229,6 +222,11 @@ serve(async (req) => {
     // For RSA keys, we expect them to start with MII for base64 format
     if (!publicKey.startsWith('MII')) {
       console.error('❌ Invalid public key format - expected RSA key starting with MII')
+      console.error('🔍 Public key format details:', {
+        starts_with: publicKey.substring(0, 10),
+        length: publicKey.length,
+        is_base64_like: /^[A-Za-z0-9+/]*={0,2}$/.test(publicKey)
+      })
       return new Response(
         JSON.stringify({ 
           error: 'Invalid public key format',
@@ -297,7 +295,7 @@ serve(async (req) => {
     }
 
     console.log('📡 Making request to Changelly API...')
-    console.log('📋 Request headers:', Object.keys(changellyHeaders))
+    console.log('📋 Request headers keys:', Object.keys(changellyHeaders))
 
     const changellyResponse = await fetch('https://api.changelly.com/v2', {
       method: 'POST',
