@@ -84,11 +84,25 @@ serve(async (req) => {
       secretKeyData = fallbackSecretKey
     }
 
+    // Get the Base64 API key
+    const { data: base64KeyData, error: base64Error } = await supabase
+      .from('vault')
+      .select('secret')
+      .eq('name', 'CHANGELLY_API_KEY_BASE64')
+      .single()
+
+    if (base64Error || !base64KeyData) {
+      console.log('CHANGELLY_API_KEY_BASE64 not found')
+      // Continue without Base64 key for now, but log the warning
+    }
+
     const apiKey = secrets.secret
     const secretKey = secretKeyData.secret
+    const base64ApiKey = base64KeyData?.secret
     
     console.log('API Key found:', !!apiKey)
     console.log('Secret Key found:', !!secretKey)
+    console.log('Base64 API Key found:', !!base64ApiKey)
     
     const { action, ...params } = await req.json()
     console.log('Action requested:', action)
@@ -122,14 +136,25 @@ serve(async (req) => {
 
     console.log('Making request to Changelly API...')
 
+    // Prepare headers - use Base64 key if available, otherwise use regular API key
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'X-Api-Signature': signatureHex,
+    }
+
+    // Use Base64 API key if available, otherwise fall back to regular API key
+    if (base64ApiKey) {
+      headers['Authorization'] = `Basic ${base64ApiKey}`
+      console.log('Using Base64 API key for authorization')
+    } else {
+      headers['X-Api-Key'] = apiKey
+      console.log('Using regular API key')
+    }
+
     // Make request to Changelly API
     const response = await fetch('https://api.changelly.com/v2', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Api-Key': apiKey,
-        'X-Api-Signature': signatureHex,
-      },
+      headers,
       body: message
     })
 
