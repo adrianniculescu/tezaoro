@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import Features from '@/components/Features';
+import TradingSolutionsSection from '@/components/home/TradingSolutionsSection';
 import AlgorithmCards from '@/components/AlgorithmCards';
 import PerformanceChart from '@/components/PerformanceChart';
 import Testimonials from '@/components/Testimonials';
@@ -24,6 +25,7 @@ const Index = () => {
       <main>
         <Hero />
         <Features />
+        <TradingSolutionsSection />
         <AlgorithmCards />
         <PerformanceChart />
         <MarketMakingSection />
