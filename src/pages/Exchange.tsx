@@ -7,6 +7,7 @@ import { useChangellyExchange } from '@/hooks/useChangellyExchange';
 import ExchangeForm from '@/components/exchange/ExchangeForm';
 import ExchangeInfoCards from '@/components/exchange/ExchangeInfoCards';
 import ExchangeStatusBanner from '@/components/exchange/ExchangeStatusBanner';
+import ApiTestButton from '@/components/exchange/ApiTestButton';
 
 const Exchange = () => {
   console.log('Exchange component: Rendering');
@@ -104,6 +105,10 @@ const Exchange = () => {
       
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
+          <div className="mb-6 flex justify-center">
+            <ApiTestButton />
+          </div>
+          
           <ExchangeStatusBanner 
             apiError={apiError}
             useMockData={useMockData}
