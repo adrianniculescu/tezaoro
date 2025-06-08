@@ -105,7 +105,7 @@ serve(async (req) => {
     }
 
     console.log('📊 All secrets found:', secretsData?.length || 0)
-    console.log('🔍 Secret names:', secretsData?.map(s => s.name) || [])
+    console.log('🔍 Secret names available:', secretsData?.map(s => s.name) || [])
 
     if (!secretsData || secretsData.length === 0) {
       console.error('❌ No API credentials found in vault')
@@ -129,60 +129,53 @@ serve(async (req) => {
     let publicKey, privateKey
 
     if (base64KeyRecord && base64KeyRecord.secret) {
-      console.log('✅ Using CHANGELLY_API_KEY_BASE64')
-      // Decode the base64 key to get both public and private keys
+      console.log('✅ Found CHANGELLY_API_KEY_BASE64, attempting to decode...')
       try {
         const decodedKeys = atob(base64KeyRecord.secret.trim())
         const keyParts = decodedKeys.split(':')
         if (keyParts.length >= 2) {
-          publicKey = keyParts[0]
-          privateKey = keyParts[1]
+          publicKey = keyParts[0].trim()
+          privateKey = keyParts[1].trim()
           console.log('✅ Successfully decoded base64 API keys')
         } else {
-          throw new Error('Invalid base64 key format')
+          console.warn('⚠️ Base64 key format invalid, falling back to individual keys')
         }
       } catch (decodeError) {
-        console.error('❌ Failed to decode base64 key:', decodeError)
+        console.warn('⚠️ Failed to decode base64 key, falling back to individual keys:', decodeError)
+      }
+    }
+
+    // If base64 didn't work, try individual keys
+    if (!publicKey || !privateKey) {
+      if (publicKeyRecord && privateKeyRecord) {
+        console.log('✅ Using individual CHANGELLY_PUBLIC_KEY and CHANGELLY_PRIVATE_KEY')
+        publicKey = publicKeyRecord.secret?.trim()
+        privateKey = privateKeyRecord.secret?.trim()
+      } else {
+        const missingKeys = []
+        if (!base64KeyRecord) missingKeys.push('CHANGELLY_API_KEY_BASE64')
+        if (!publicKeyRecord) missingKeys.push('CHANGELLY_PUBLIC_KEY')
+        if (!privateKeyRecord) missingKeys.push('CHANGELLY_PRIVATE_KEY')
+        
+        console.error('❌ Missing required API keys:', missingKeys)
         return new Response(
           JSON.stringify({ 
-            error: 'Invalid base64 API key format',
-            details: 'The CHANGELLY_API_KEY_BASE64 key could not be decoded. Please ensure it contains both public and private keys separated by a colon.'
+            error: 'Incomplete API credentials',
+            details: 'Please set either CHANGELLY_API_KEY_BASE64 or both CHANGELLY_PUBLIC_KEY and CHANGELLY_PRIVATE_KEY in the vault',
+            available_keys: secretsData?.map(s => s.name) || [],
+            missing_keys: missingKeys
           }),
           { 
-            status: 400, 
+            status: 500, 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
           }
         )
       }
-    } else if (publicKeyRecord && privateKeyRecord) {
-      console.log('✅ Using individual CHANGELLY_PUBLIC_KEY and CHANGELLY_PRIVATE_KEY')
-      publicKey = publicKeyRecord.secret?.trim()
-      privateKey = privateKeyRecord.secret?.trim()
-    } else {
-      const missingKeys = []
-      if (!base64KeyRecord) missingKeys.push('CHANGELLY_API_KEY_BASE64')
-      if (!publicKeyRecord) missingKeys.push('CHANGELLY_PUBLIC_KEY')
-      if (!privateKeyRecord) missingKeys.push('CHANGELLY_PRIVATE_KEY')
-      
-      console.error('❌ Missing required API keys')
-      return new Response(
-        JSON.stringify({ 
-          error: 'Incomplete API credentials',
-          details: 'Please set either CHANGELLY_API_KEY_BASE64 or both CHANGELLY_PUBLIC_KEY and CHANGELLY_PRIVATE_KEY in the vault',
-          available_keys: secretsData?.map(s => s.name) || []
-        }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      )
     }
 
     console.log('✅ API credentials retrieved successfully')
     console.log('🔍 Public key length:', publicKey?.length || 0)
     console.log('🔍 Private key length:', privateKey?.length || 0)
-    console.log('🔍 Public key first 10 chars:', publicKey?.substring(0, 10) || 'empty')
-    console.log('🔍 Private key first 10 chars:', privateKey?.substring(0, 10) || 'empty')
 
     // Validate credentials exist and are not empty
     if (!publicKey || !privateKey || publicKey.length === 0 || privateKey.length === 0) {
@@ -199,61 +192,15 @@ serve(async (req) => {
       )
     }
 
-    // Check for common placeholder patterns
-    const placeholderPatterns = [
-      'your_actual_',
-      'placeholder',
-      'enter_your_',
-      'add_your_',
-      'example_',
-      'test_key',
-      'sample_'
-    ]
-    
-    const hasPlaceholderPublic = placeholderPatterns.some(pattern => 
-      publicKey.toLowerCase().includes(pattern)
-    )
-    const hasPlaceholderPrivate = placeholderPatterns.some(pattern => 
-      privateKey.toLowerCase().includes(pattern)
-    )
-
-    if (hasPlaceholderPublic || hasPlaceholderPrivate) {
-      console.error('❌ Placeholder API credentials detected')
-      console.error('🔍 Public key contains placeholder:', hasPlaceholderPublic)
-      console.error('🔍 Private key contains placeholder:', hasPlaceholderPrivate)
-      return new Response(
-        JSON.stringify({ 
-          error: 'Placeholder API credentials detected',
-          details: 'Please replace the placeholder API keys with your actual Changelly API credentials from https://changelly.com/developers'
-        }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      )
-    }
-
     // Validate minimum key lengths (Changelly keys should be longer)
-    if (publicKey.length < 30) {
-      console.error('❌ Public key appears too short for Changelly API')
+    if (publicKey.length < 20 || privateKey.length < 20) {
+      console.error('❌ API keys appear too short for Changelly API')
+      console.error('🔍 Public key length:', publicKey.length)
+      console.error('🔍 Private key length:', privateKey.length)
       return new Response(
         JSON.stringify({ 
-          error: 'Invalid public key format',
-          details: `Public key appears too short (${publicKey.length} characters). Changelly public keys are typically longer.`
-        }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      )
-    }
-
-    if (privateKey.length < 30) {
-      console.error('❌ Private key appears too short for Changelly API')
-      return new Response(
-        JSON.stringify({ 
-          error: 'Invalid private key format',
-          details: `Private key appears too short (${privateKey.length} characters). Changelly private keys are typically longer.`
+          error: 'Invalid API key format',
+          details: `API keys appear too short. Public: ${publicKey.length} chars, Private: ${privateKey.length} chars. Please verify your Changelly API keys.`
         }),
         { 
           status: 400, 
@@ -387,20 +334,6 @@ serve(async (req) => {
             details: 'The Changelly API rejected your credentials. Please verify:\n1. Your API keys are correct and copied completely\n2. Your API keys are active and not expired\n3. Your Changelly account has the necessary permissions\n4. You have enabled the required API methods in your Changelly dashboard',
             status: changellyResponse.status,
             response_body: responseText
-          }),
-          { 
-            status: 400, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
-        )
-      }
-      
-      if (changellyResponse.status === 403) {
-        return new Response(
-          JSON.stringify({ 
-            error: 'Access forbidden by Changelly API',
-            details: 'Your API keys do not have permission for this operation. Please check your Changelly API permissions.',
-            status: changellyResponse.status
           }),
           { 
             status: 400, 
