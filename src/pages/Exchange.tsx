@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useChangellyExchange } from '@/hooks/useChangellyExchange';
 import ExchangeForm from '@/components/exchange/ExchangeForm';
 import ExchangeInfoCards from '@/components/exchange/ExchangeInfoCards';
+import ExchangeStatusBanner from '@/components/exchange/ExchangeStatusBanner';
 
 const Exchange = () => {
   console.log('Exchange component: Rendering');
@@ -18,6 +19,8 @@ const Exchange = () => {
   const [amount, setAmount] = useState('');
   const [exchangeAmount, setExchangeAmount] = useState('');
   const [currencies, setCurrencies] = useState(['btc', 'eth', 'usdt', 'bnb', 'ada', 'dot', 'ltc']);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [useMockData, setUseMockData] = useState(false);
   
   // Load available currencies on component mount
   useEffect(() => {
@@ -28,6 +31,8 @@ const Exchange = () => {
         if (availableCurrencies && Array.isArray(availableCurrencies)) {
           setCurrencies(availableCurrencies.slice(0, 20)); // Limit to first 20 currencies
           console.log('✅ Successfully loaded currencies from API');
+          setApiError(null);
+          setUseMockData(false);
           
           toast({
             title: "Live Exchange Rates Active",
@@ -36,10 +41,13 @@ const Exchange = () => {
         }
       } catch (err) {
         console.log('❌ Failed to load currencies from API:', err);
+        const errorMessage = error || (err instanceof Error ? err.message : 'Unable to connect to exchange API');
+        setApiError(errorMessage);
+        setUseMockData(true);
         
         toast({
           title: "API Connection Failed",
-          description: error || (err instanceof Error ? err.message : 'Unable to connect to exchange API'),
+          description: errorMessage,
           variant: "destructive",
         });
       }
@@ -96,6 +104,11 @@ const Exchange = () => {
       
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
+          <ExchangeStatusBanner 
+            apiError={apiError}
+            useMockData={useMockData}
+          />
+          
           <ExchangeForm
             fromCurrency={fromCurrency}
             toCurrency={toCurrency}
