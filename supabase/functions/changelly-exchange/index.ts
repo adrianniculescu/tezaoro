@@ -81,13 +81,13 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     console.log('Supabase client initialized')
 
-    // Get API credentials from vault
+    // Get API credentials from vault - trying the base64 key first
     console.log('🔍 Fetching Changelly API credentials from vault...')
 
     const { data: secretsData, error: secretsError } = await supabase
       .from('vault')
       .select('name, secret, updated_at, created_at')
-      .in('name', ['CHANGELLY_PUBLIC_KEY', 'CHANGELLY_PRIVATE_KEY'])
+      .in('name', ['CHANGELLY_PUBLIC_KEY', 'CHANGELLY_PRIVATE_KEY', 'CHANGELLY_API_KEY_BASE64'])
       .order('updated_at', { ascending: false })
 
     if (secretsError) {
@@ -107,12 +107,12 @@ serve(async (req) => {
     console.log('📊 All secrets found:', secretsData?.length || 0)
     console.log('🔍 Secret names:', secretsData?.map(s => s.name) || [])
 
-    if (!secretsData || secretsData.length < 2) {
-      console.error('❌ Insufficient API credentials found in vault')
+    if (!secretsData || secretsData.length === 0) {
+      console.error('❌ No API credentials found in vault')
       return new Response(
         JSON.stringify({ 
           error: 'API credentials not configured',
-          details: 'Please ensure both CHANGELLY_PUBLIC_KEY and CHANGELLY_PRIVATE_KEY are set in the Supabase vault'
+          details: 'Please ensure Changelly API keys are set in the Supabase vault'
         }),
         { 
           status: 500, 
@@ -121,21 +121,55 @@ serve(async (req) => {
       )
     }
 
-    // Get the credentials
+    // Try to use CHANGELLY_API_KEY_BASE64 first, then fall back to individual keys
+    const base64KeyRecord = secretsData.find(s => s.name === 'CHANGELLY_API_KEY_BASE64')
     const publicKeyRecord = secretsData.find(s => s.name === 'CHANGELLY_PUBLIC_KEY')
     const privateKeyRecord = secretsData.find(s => s.name === 'CHANGELLY_PRIVATE_KEY')
 
-    if (!publicKeyRecord || !privateKeyRecord) {
+    let publicKey, privateKey
+
+    if (base64KeyRecord && base64KeyRecord.secret) {
+      console.log('✅ Using CHANGELLY_API_KEY_BASE64')
+      // Decode the base64 key to get both public and private keys
+      try {
+        const decodedKeys = atob(base64KeyRecord.secret.trim())
+        const keyParts = decodedKeys.split(':')
+        if (keyParts.length >= 2) {
+          publicKey = keyParts[0]
+          privateKey = keyParts[1]
+          console.log('✅ Successfully decoded base64 API keys')
+        } else {
+          throw new Error('Invalid base64 key format')
+        }
+      } catch (decodeError) {
+        console.error('❌ Failed to decode base64 key:', decodeError)
+        return new Response(
+          JSON.stringify({ 
+            error: 'Invalid base64 API key format',
+            details: 'The CHANGELLY_API_KEY_BASE64 key could not be decoded. Please ensure it contains both public and private keys separated by a colon.'
+          }),
+          { 
+            status: 400, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        )
+      }
+    } else if (publicKeyRecord && privateKeyRecord) {
+      console.log('✅ Using individual CHANGELLY_PUBLIC_KEY and CHANGELLY_PRIVATE_KEY')
+      publicKey = publicKeyRecord.secret?.trim()
+      privateKey = privateKeyRecord.secret?.trim()
+    } else {
       const missingKeys = []
+      if (!base64KeyRecord) missingKeys.push('CHANGELLY_API_KEY_BASE64')
       if (!publicKeyRecord) missingKeys.push('CHANGELLY_PUBLIC_KEY')
       if (!privateKeyRecord) missingKeys.push('CHANGELLY_PRIVATE_KEY')
       
-      console.error('❌ Missing required API keys:', missingKeys)
+      console.error('❌ Missing required API keys')
       return new Response(
         JSON.stringify({ 
           error: 'Incomplete API credentials',
-          details: `Missing keys: ${missingKeys.join(', ')}`,
-          found_keys: secretsData?.map(s => s.name) || []
+          details: 'Please set either CHANGELLY_API_KEY_BASE64 or both CHANGELLY_PUBLIC_KEY and CHANGELLY_PRIVATE_KEY in the vault',
+          available_keys: secretsData?.map(s => s.name) || []
         }),
         { 
           status: 500, 
@@ -143,9 +177,6 @@ serve(async (req) => {
         }
       )
     }
-
-    const publicKey = publicKeyRecord.secret?.trim()
-    const privateKey = privateKeyRecord.secret?.trim()
 
     console.log('✅ API credentials retrieved successfully')
     console.log('🔍 Public key length:', publicKey?.length || 0)
@@ -188,6 +219,8 @@ serve(async (req) => {
 
     if (hasPlaceholderPublic || hasPlaceholderPrivate) {
       console.error('❌ Placeholder API credentials detected')
+      console.error('🔍 Public key contains placeholder:', hasPlaceholderPublic)
+      console.error('🔍 Private key contains placeholder:', hasPlaceholderPrivate)
       return new Response(
         JSON.stringify({ 
           error: 'Placeholder API credentials detected',
@@ -249,8 +282,6 @@ serve(async (req) => {
     const messageData = encoder.encode(message)
     
     console.log('🔐 Creating HMAC signature...')
-    console.log('🔍 Message to sign:', message)
-    console.log('🔍 Private key for signature (first 15 chars):', privateKey.substring(0, 15))
     
     let cryptoKey
     try {
@@ -298,9 +329,7 @@ serve(async (req) => {
       .map(b => b.toString(16).padStart(2, '0'))
       .join('')
 
-    console.log('🔐 HMAC signature details:')
-    console.log('🔍 Signature length:', signatureHex.length)
-    console.log('🔍 Signature first 20 chars:', signatureHex.substring(0, 20))
+    console.log('🔐 HMAC signature created with length:', signatureHex.length)
 
     // Make request to Changelly API
     const changellyHeaders = {
@@ -310,10 +339,6 @@ serve(async (req) => {
     }
 
     console.log('📡 Making request to Changelly API...')
-    console.log('🔍 Request headers (no sensitive data):')
-    console.log('  - Content-Type: application/json')
-    console.log('  - X-Api-Key length:', publicKey.length)
-    console.log('  - X-Api-Signature length:', signatureHex.length)
 
     let changellyResponse
     try {
