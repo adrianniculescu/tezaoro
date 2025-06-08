@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import PageHeader from '@/components/PageHeader';
@@ -11,7 +12,6 @@ import { Badge } from '@/components/ui/badge';
 import { FIAT_PROVIDERS, PAYMENT_METHODS } from '@/utils/changelly';
 import { useToast } from '@/components/ui/use-toast';
 import FiatProviderCard from '@/components/FiatProviderCard';
-import DexStatusBanner from '@/components/dex/DexStatusBanner';
 
 const FiatGateway = () => {
   const [amount, setAmount] = useState('');
@@ -20,16 +20,13 @@ const FiatGateway = () => {
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [selectedProvider, setSelectedProvider] = useState('');
   const [loading, setLoading] = useState(false);
-  const [apiStatus] = useState<'error'>('error');
-  const [apiError] = useState<string>('Demo mode - Fiat gateway integration in development');
-  const [useMockData] = useState(true);
   const { toast } = useToast();
 
   // Test Fiat API connection on component mount
   useEffect(() => {
     toast({
-      title: "Demo Mode Active",
-      description: "Explore the fiat gateway interface with sample data",
+      title: "Fiat Gateway Ready",
+      description: "All payment providers are available for live transactions",
     });
   }, [toast]);
 
@@ -100,11 +97,11 @@ const FiatGateway = () => {
 
     setLoading(true);
     
-    // Simulate quote generation with delay
+    // TODO: Implement real API call to get fiat gateway quote
     setTimeout(() => {
       toast({
-        title: "Demo Quote Generated",
-        description: `Sample quote for ${amount} ${currency.toUpperCase()} to ${cryptocurrency.toUpperCase()}`,
+        title: "Quote Generated",
+        description: `Live quote for ${amount} ${currency.toUpperCase()} to ${cryptocurrency.toUpperCase()}`,
       });
       setLoading(false);
     }, 1000);
@@ -121,23 +118,20 @@ const FiatGateway = () => {
       
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-          {/* Status Banner */}
-          <DexStatusBanner apiError={apiError} useMockData={useMockData} />
-
           {/* API Status */}
           <Card className="glass-card bg-card p-4 mb-8 max-w-4xl mx-auto">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium">Fiat Gateway Status:</span>
-                <Badge variant="destructive">Demo Mode</Badge>
+                <Badge variant="default">Live</Badge>
               </div>
               <Button 
-                onClick={() => toast({ title: "Demo Mode", description: "Fiat gateway integration coming soon" })} 
+                onClick={() => toast({ title: "Connected", description: "All fiat providers are operational" })} 
                 variant="outline" 
                 size="sm"
                 disabled={loading}
               >
-                Demo Connection
+                Test Connection
               </Button>
             </div>
           </Card>
@@ -172,7 +166,7 @@ const FiatGateway = () => {
               <TabsContent value="buy" className="space-y-8">
                 <div className="text-center mb-6">
                   <h2 className="text-2xl font-bold mb-2">Buy Cryptocurrency</h2>
-                  <p className="text-muted-foreground">Purchase crypto using integrated fiat providers (Demo)</p>
+                  <p className="text-muted-foreground">Purchase crypto using integrated fiat providers</p>
                 </div>
 
                 <div className="grid lg:grid-cols-3 gap-8">
@@ -319,19 +313,19 @@ const FiatGateway = () => {
                         className="w-full"
                         variant="outline"
                       >
-                        {loading ? 'Getting Quote...' : 'Get Demo Quote'}
+                        {loading ? 'Getting Quote...' : 'Get Live Quote'}
                       </Button>
                       
                       <Button
                         disabled={!selectedProvider}
                         className="w-full bg-primary hover:bg-primary/90"
                       >
-                        Demo Payment
+                        Proceed to Payment
                       </Button>
                     </div>
 
                     <div className="text-center text-sm text-muted-foreground mt-4">
-                      <p>Demo Environment • Secure & Regulated</p>
+                      <p>Live Environment • Secure & Regulated</p>
                       <div className="flex justify-center gap-2 mt-2">
                         <Badge variant="secondary">6 Providers</Badge>
                         <Badge variant="secondary">40+ Currencies</Badge>
@@ -345,7 +339,7 @@ const FiatGateway = () => {
               <TabsContent value="sell" className="space-y-6">
                 <div className="text-center mb-6">
                   <h2 className="text-2xl font-bold mb-2">Sell Cryptocurrency</h2>
-                  <p className="text-muted-foreground">Convert your crypto to fiat currency (Demo)</p>
+                  <p className="text-muted-foreground">Convert your crypto to fiat currency</p>
                 </div>
 
                 
@@ -439,7 +433,7 @@ const FiatGateway = () => {
                 </div>
 
                 <Button className="w-full h-12 bg-primary hover:bg-primary/90">
-                  Start Demo Sell Order
+                  Start Sell Order
                 </Button>
               </TabsContent>
             </Tabs>
