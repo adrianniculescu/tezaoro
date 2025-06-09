@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -107,6 +106,18 @@ serve(async (req) => {
     console.log('📊 All secrets found:', secretsData?.length || 0)
     console.log('🔍 Secret names available:', secretsData?.map(s => s.name) || [])
 
+    // Enhanced debugging: log first and last 10 characters of each secret
+    if (secretsData) {
+      secretsData.forEach(secret => {
+        const secretValue = secret.secret || ''
+        const preview = secretValue.length > 20 
+          ? `${secretValue.substring(0, 10)}...${secretValue.substring(secretValue.length - 10)}`
+          : secretValue.substring(0, 20) + '...'
+        console.log(`🔍 ${secret.name} (${secretValue.length} chars): ${preview}`)
+        console.log(`🕒 ${secret.name} updated: ${secret.updated_at}`)
+      })
+    }
+
     if (!secretsData || secretsData.length === 0) {
       console.error('❌ No API credentials found in vault')
       return new Response(
@@ -132,13 +143,20 @@ serve(async (req) => {
       console.log('✅ Found CHANGELLY_API_KEY_BASE64, attempting to decode...')
       try {
         const decodedKeys = atob(base64KeyRecord.secret.trim())
+        console.log('🔍 Decoded string length:', decodedKeys.length)
+        console.log('🔍 Decoded preview:', decodedKeys.substring(0, 20) + '...')
+        
         const keyParts = decodedKeys.split(':')
         if (keyParts.length >= 2) {
           publicKey = keyParts[0].trim()
           privateKey = keyParts[1].trim()
           console.log('✅ Successfully decoded base64 API keys')
+          console.log('🔍 Decoded public key length:', publicKey.length)
+          console.log('🔍 Decoded private key length:', privateKey.length)
         } else {
           console.warn('⚠️ Base64 key format invalid, falling back to individual keys')
+          console.warn('⚠️ Key parts found:', keyParts.length)
+          console.warn('⚠️ Expected format: public_key:private_key')
         }
       } catch (decodeError) {
         console.warn('⚠️ Failed to decode base64 key, falling back to individual keys:', decodeError)
@@ -151,6 +169,8 @@ serve(async (req) => {
         console.log('✅ Using individual CHANGELLY_PUBLIC_KEY and CHANGELLY_PRIVATE_KEY')
         publicKey = publicKeyRecord.secret?.trim()
         privateKey = privateKeyRecord.secret?.trim()
+        console.log('🔍 Individual public key length:', publicKey?.length || 0)
+        console.log('🔍 Individual private key length:', privateKey?.length || 0)
       } else {
         const missingKeys = []
         if (!base64KeyRecord) missingKeys.push('CHANGELLY_API_KEY_BASE64')
@@ -174,8 +194,8 @@ serve(async (req) => {
     }
 
     console.log('✅ API credentials retrieved successfully')
-    console.log('🔍 Public key preview:', publicKey?.substring(0, 8) + '...' + publicKey?.substring(-4) || 'N/A')
-    console.log('🔍 Private key preview:', privateKey?.substring(0, 8) + '...' + privateKey?.substring(-4) || 'N/A')
+    console.log('🔍 Final public key length:', publicKey?.length || 0)
+    console.log('🔍 Final private key length:', privateKey?.length || 0)
 
     // Validate credentials exist and are not empty
     if (!publicKey || !privateKey || publicKey.length === 0 || privateKey.length === 0) {
@@ -192,7 +212,13 @@ serve(async (req) => {
       )
     }
 
-    // Enhanced key validation
+    // Enhanced key validation with detailed analysis
+    console.log('🔍 Detailed key analysis:')
+    console.log('🔍 Public key starts with:', publicKey.substring(0, 10))
+    console.log('🔍 Public key ends with:', publicKey.substring(publicKey.length - 10))
+    console.log('🔍 Private key starts with:', privateKey.substring(0, 10))
+    console.log('🔍 Private key ends with:', privateKey.substring(privateKey.length - 10))
+
     if (publicKey.length < 20 || privateKey.length < 20) {
       console.error('❌ API keys appear too short for Changelly API')
       console.error('🔍 Public key length:', publicKey.length)
@@ -209,18 +235,35 @@ serve(async (req) => {
       )
     }
 
-    // Check for placeholder values
-    const placeholderPatterns = ['your_', 'placeholder', 'example', 'test_key', 'sample']
-    const hasPlaceholder = placeholderPatterns.some(pattern => 
-      publicKey.toLowerCase().includes(pattern) || privateKey.toLowerCase().includes(pattern)
-    )
+    // Enhanced placeholder detection
+    const placeholderPatterns = [
+      'your_', 'placeholder', 'example', 'test_key', 'sample', 'demo_', 'fake_',
+      'changelly_public_key', 'changelly_private_key', 'actual_changelly'
+    ]
     
-    if (hasPlaceholder) {
+    const publicKeyLower = publicKey.toLowerCase()
+    const privateKeyLower = privateKey.toLowerCase()
+    
+    const publicKeyHasPlaceholder = placeholderPatterns.some(pattern => publicKeyLower.includes(pattern))
+    const privateKeyHasPlaceholder = placeholderPatterns.some(pattern => privateKeyLower.includes(pattern))
+    
+    if (publicKeyHasPlaceholder || privateKeyHasPlaceholder) {
       console.error('❌ API keys appear to be placeholder values')
+      console.error('🔍 Public key contains placeholder:', publicKeyHasPlaceholder)
+      console.error('🔍 Private key contains placeholder:', privateKeyHasPlaceholder)
+      console.error('🔍 Detected patterns in public key:', placeholderPatterns.filter(p => publicKeyLower.includes(p)))
+      console.error('🔍 Detected patterns in private key:', placeholderPatterns.filter(p => privateKeyLower.includes(p)))
+      
       return new Response(
         JSON.stringify({ 
           error: 'Placeholder API credentials detected',
-          details: 'Please replace placeholder API keys with real Changelly credentials from your account dashboard'
+          details: 'Please replace placeholder API keys with real Changelly credentials from your account dashboard',
+          debug_info: {
+            public_key_placeholder: publicKeyHasPlaceholder,
+            private_key_placeholder: privateKeyHasPlaceholder,
+            public_key_preview: publicKey.substring(0, 20) + '...',
+            private_key_preview: privateKey.substring(0, 20) + '...'
+          }
         }),
         { 
           status: 400, 
@@ -229,7 +272,7 @@ serve(async (req) => {
       )
     }
 
-    console.log('✅ API key validation passed')
+    console.log('✅ API key validation passed - no placeholders detected')
 
     // Create request for Changelly API
     const requestId = crypto.randomUUID()
