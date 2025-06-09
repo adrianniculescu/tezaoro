@@ -81,7 +81,22 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     console.log('Supabase client initialized')
 
-    // Get API credentials from vault - only looking for CHANGELLY_API_KEY_BASE64
+    // Debug: Let's see what's actually in the vault
+    console.log('🔍 Checking vault contents...')
+    const { data: allSecrets, error: allSecretsError } = await supabase
+      .from('vault')
+      .select('name, created_at, updated_at')
+
+    if (allSecretsError) {
+      console.error('❌ Failed to query vault:', allSecretsError)
+    } else {
+      console.log('📋 Vault contents:', allSecrets)
+      console.log('📊 Total secrets in vault:', allSecrets?.length || 0)
+      const secretNames = allSecrets?.map(s => s.name) || []
+      console.log('📝 Secret names:', secretNames)
+    }
+
+    // Try to get the specific API key
     console.log('🔍 Fetching CHANGELLY_API_KEY_BASE64 from vault...')
 
     const { data: secretsData, error: secretsError } = await supabase
@@ -92,13 +107,27 @@ serve(async (req) => {
 
     if (secretsError) {
       console.error('❌ Failed to fetch CHANGELLY_API_KEY_BASE64 from vault:', secretsError)
+      
+      // Try searching with case variations
+      console.log('🔍 Trying case-insensitive search...')
+      const { data: caseInsensitiveSearch, error: caseError } = await supabase
+        .from('vault')
+        .select('name, updated_at, created_at')
+        .ilike('name', '%changelly%')
+
+      if (!caseError && caseInsensitiveSearch) {
+        console.log('📋 Found Changelly-related secrets:', caseInsensitiveSearch)
+      }
+
       return new Response(
         JSON.stringify({ 
           error: 'Failed to retrieve API credentials',
-          details: 'CHANGELLY_API_KEY_BASE64 not found in vault',
+          details: 'CHANGELLY_API_KEY_BASE64 not found in vault. Please ensure you have added your Changelly API key using the secret form.',
           debug_info: {
             supabase_error: secretsError,
-            vault_query: 'Failed to query vault table for CHANGELLY_API_KEY_BASE64'
+            vault_query: 'Failed to query vault table for CHANGELLY_API_KEY_BASE64',
+            vault_contents: allSecrets,
+            changelly_search: caseInsensitiveSearch || null
           }
         }),
         { 
@@ -540,7 +569,7 @@ serve(async (req) => {
         debug_info: {
           error_name: error.name,
           error_stack: error.stack,
-          function_version: 'streamlined-base64-only-v1'
+          function_version: 'debug-vault-storage-v1'
         }
       }),
       {
