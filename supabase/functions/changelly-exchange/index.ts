@@ -169,29 +169,87 @@ serve(async (req) => {
     // Create RSA-SHA256 signature
     console.log('🔐 Creating RSA-SHA256 signature...')
     try {
-      // Convert hex private key to binary
-      const privateKeyHex = privateKey.replace(/\s/g, '')
-      console.log('🔍 Private key hex length:', privateKeyHex.length)
+      let rsaPrivateKey;
       
-      // Convert hex string to Uint8Array
-      const privateKeyBytes = new Uint8Array(privateKeyHex.length / 2)
-      for (let i = 0; i < privateKeyHex.length; i += 2) {
-        privateKeyBytes[i / 2] = parseInt(privateKeyHex.substr(i, 2), 16)
-      }
-      console.log('✅ Private key converted from hex, bytes length:', privateKeyBytes.length)
+      // Try different private key formats
+      try {
+        // First, try treating it as a base64-encoded DER key
+        console.log('🔍 Trying base64 DER format...')
+        const keyData = Uint8Array.from(atob(privateKey), c => c.charCodeAt(0))
+        
+        rsaPrivateKey = await crypto.subtle.importKey(
+          'pkcs8',
+          keyData,
+          {
+            name: 'RSA-PSS',
+            hash: 'SHA-256'
+          },
+          false,
+          ['sign']
+        )
+        console.log('✅ Successfully imported base64 DER private key')
+      } catch (base64Error) {
+        console.log('❌ Base64 DER import failed:', base64Error.message)
+        
+        try {
+          // Try as hex format
+          console.log('🔍 Trying hex format...')
+          const privateKeyHex = privateKey.replace(/\s/g, '')
+          console.log('🔍 Private key hex length:', privateKeyHex.length)
+          
+          if (privateKeyHex.length % 2 !== 0) {
+            throw new Error('Invalid hex string length')
+          }
+          
+          // Convert hex string to Uint8Array
+          const privateKeyBytes = new Uint8Array(privateKeyHex.length / 2)
+          for (let i = 0; i < privateKeyHex.length; i += 2) {
+            privateKeyBytes[i / 2] = parseInt(privateKeyHex.substr(i, 2), 16)
+          }
+          console.log('✅ Private key converted from hex, bytes length:', privateKeyBytes.length)
 
-      // Import RSA private key
-      const rsaPrivateKey = await crypto.subtle.importKey(
-        'pkcs8',
-        privateKeyBytes,
-        {
-          name: 'RSA-PSS',
-          hash: 'SHA-256'
-        },
-        false,
-        ['sign']
-      )
-      console.log('✅ RSA private key imported successfully')
+          rsaPrivateKey = await crypto.subtle.importKey(
+            'pkcs8',
+            privateKeyBytes,
+            {
+              name: 'RSA-PSS',
+              hash: 'SHA-256'
+            },
+            false,
+            ['sign']
+          )
+          console.log('✅ Successfully imported hex private key')
+        } catch (hexError) {
+          console.log('❌ Hex import failed:', hexError.message)
+          
+          // Try as PEM format (remove headers and decode)
+          try {
+            console.log('🔍 Trying PEM format...')
+            let pemKey = privateKey
+            // Remove PEM headers if present
+            pemKey = pemKey.replace(/-----BEGIN PRIVATE KEY-----/, '')
+            pemKey = pemKey.replace(/-----END PRIVATE KEY-----/, '')
+            pemKey = pemKey.replace(/\s/g, '')
+            
+            const keyData = Uint8Array.from(atob(pemKey), c => c.charCodeAt(0))
+            
+            rsaPrivateKey = await crypto.subtle.importKey(
+              'pkcs8',
+              keyData,
+              {
+                name: 'RSA-PSS',
+                hash: 'SHA-256'
+              },
+              false,
+              ['sign']
+            )
+            console.log('✅ Successfully imported PEM private key')
+          } catch (pemError) {
+            console.log('❌ PEM import failed:', pemError.message)
+            throw new Error(`Unable to import private key. Tried base64 DER, hex, and PEM formats. Last error: ${pemError.message}`)
+          }
+        }
+      }
 
       // Sign the message
       const messageBytes = encoder.encode(message)
@@ -267,23 +325,21 @@ serve(async (req) => {
 
 TROUBLESHOOTING STEPS:
 
-1. **Verify API Key Format**: 
-   - Public key should be in standard format
-   - Private key should be in hexadecimal format (as provided by Changelly)
+1. **Check Key Format**: 
+   - Public key: Should be your Changelly public API key
+   - Private key: Should be base64-encoded DER, hex, or PEM format
 
-2. **Check Key Validity**:
-   - Ensure your Changelly API keys are active
-   - Verify your account status in Changelly dashboard
+2. **Verify Keys in Changelly Dashboard**:
+   - Log into your Changelly account
+   - Go to API settings
+   - Ensure keys are active and correctly copied
 
-3. **Key Storage**:
-   - Make sure CHANGELLY_PUBLIC_KEY contains your public key
-   - Make sure CHANGELLY_PRIVATE_KEY contains your private key in hex format
+3. **Current Configuration**:
+   - API endpoint: ${apiUrl}
+   - Public key length: ${publicKey.length} chars
+   - Private key length: ${privateKey.length} chars
 
-Current API endpoint: ${apiUrl}
-X-Api-Key (SHA256 hash): ${xApiKey.substring(0, 20)}...
-Signature method: RSA-SHA256
-
-If issues persist, verify your API keys in the Changelly dashboard.`,
+Response from Changelly: ${responseText}`,
               status: changellyResponse.status,
               endpoint: apiUrl
             }),
@@ -358,7 +414,14 @@ If issues persist, verify your API keys in the Changelly dashboard.`,
       return new Response(
         JSON.stringify({ 
           error: 'Failed to create request signature',
-          details: `Cryptographic error: ${cryptoError.message}. Please verify your private key is in correct hexadecimal format.`
+          details: `Cryptographic error: ${cryptoError.message}. 
+
+Please verify your private key format. Supported formats:
+- Base64-encoded DER (PKCS#8)
+- Hexadecimal string
+- PEM format (with or without headers)
+
+Current private key length: ${privateKey?.length || 0} characters`
         }),
         { 
           status: 500, 
