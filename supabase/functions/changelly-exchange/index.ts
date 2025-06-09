@@ -81,24 +81,24 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     console.log('Supabase client initialized')
 
-    // Get API credentials from vault
-    console.log('🔍 Fetching Changelly API credentials from vault...')
+    // Get API credentials from vault - only looking for CHANGELLY_API_KEY_BASE64
+    console.log('🔍 Fetching CHANGELLY_API_KEY_BASE64 from vault...')
 
     const { data: secretsData, error: secretsError } = await supabase
       .from('vault')
       .select('name, secret, updated_at, created_at')
-      .in('name', ['CHANGELLY_PUBLIC_KEY', 'CHANGELLY_PRIVATE_KEY', 'CHANGELLY_API_KEY_BASE64'])
-      .order('updated_at', { ascending: false })
+      .eq('name', 'CHANGELLY_API_KEY_BASE64')
+      .single()
 
     if (secretsError) {
-      console.error('❌ Failed to fetch secrets from vault:', secretsError)
+      console.error('❌ Failed to fetch CHANGELLY_API_KEY_BASE64 from vault:', secretsError)
       return new Response(
         JSON.stringify({ 
           error: 'Failed to retrieve API credentials',
-          details: secretsError.message,
+          details: 'CHANGELLY_API_KEY_BASE64 not found in vault',
           debug_info: {
             supabase_error: secretsError,
-            vault_query: 'Failed to query vault table'
+            vault_query: 'Failed to query vault table for CHANGELLY_API_KEY_BASE64'
           }
         }),
         { 
@@ -108,30 +108,15 @@ serve(async (req) => {
       )
     }
 
-    console.log('📊 All secrets found:', secretsData?.length || 0)
-    console.log('🔍 Secret names available:', secretsData?.map(s => s.name) || [])
-
-    // Enhanced debugging: log first and last 10 characters of each secret
-    if (secretsData) {
-      secretsData.forEach(secret => {
-        const secretValue = secret.secret || ''
-        const preview = secretValue.length > 20 
-          ? `${secretValue.substring(0, 10)}...${secretValue.substring(secretValue.length - 10)}`
-          : secretValue.substring(0, 20) + '...'
-        console.log(`🔍 ${secret.name} (${secretValue.length} chars): ${preview}`)
-        console.log(`🕒 ${secret.name} updated: ${secret.updated_at}`)
-      })
-    }
-
-    if (!secretsData || secretsData.length === 0) {
-      console.error('❌ No API credentials found in vault')
+    if (!secretsData || !secretsData.secret) {
+      console.error('❌ CHANGELLY_API_KEY_BASE64 not found or empty')
       return new Response(
         JSON.stringify({ 
           error: 'API credentials not configured',
-          details: 'Please ensure Changelly API keys are set in the Supabase vault',
+          details: 'Please ensure CHANGELLY_API_KEY_BASE64 is set in the Supabase vault',
           debug_info: {
             vault_response: secretsData,
-            expected_secrets: ['CHANGELLY_PUBLIC_KEY', 'CHANGELLY_PRIVATE_KEY', 'CHANGELLY_API_KEY_BASE64']
+            expected_secret: 'CHANGELLY_API_KEY_BASE64'
           }
         }),
         { 
@@ -141,84 +126,70 @@ serve(async (req) => {
       )
     }
 
-    // Try to use CHANGELLY_API_KEY_BASE64 first, then fall back to individual keys
-    const base64KeyRecord = secretsData.find(s => s.name === 'CHANGELLY_API_KEY_BASE64')
-    const publicKeyRecord = secretsData.find(s => s.name === 'CHANGELLY_PUBLIC_KEY')
-    const privateKeyRecord = secretsData.find(s => s.name === 'CHANGELLY_PRIVATE_KEY')
+    console.log('✅ Found CHANGELLY_API_KEY_BASE64')
+    console.log('🔍 Base64 key length:', secretsData.secret.length)
+    console.log('🔍 Base64 key preview:', secretsData.secret.substring(0, 20) + '...')
+    console.log('🕒 Updated:', secretsData.updated_at)
 
+    // Decode the base64 API key
     let publicKey, privateKey
-
-    if (base64KeyRecord && base64KeyRecord.secret) {
-      console.log('✅ Found CHANGELLY_API_KEY_BASE64, attempting to decode...')
-      try {
-        const decodedKeys = atob(base64KeyRecord.secret.trim())
-        console.log('🔍 Decoded string length:', decodedKeys.length)
-        console.log('🔍 Decoded preview:', decodedKeys.substring(0, 20) + '...')
-        
-        const keyParts = decodedKeys.split(':')
-        if (keyParts.length >= 2) {
-          publicKey = keyParts[0].trim()
-          privateKey = keyParts[1].trim()
-          console.log('✅ Successfully decoded base64 API keys')
-          console.log('🔍 Decoded public key length:', publicKey.length)
-          console.log('🔍 Decoded private key length:', privateKey.length)
-        } else {
-          console.warn('⚠️ Base64 key format invalid, falling back to individual keys')
-          console.warn('⚠️ Key parts found:', keyParts.length)
-          console.warn('⚠️ Expected format: public_key:private_key')
-        }
-      } catch (decodeError) {
-        console.warn('⚠️ Failed to decode base64 key, falling back to individual keys:', decodeError)
-      }
-    }
-
-    // If base64 didn't work, try individual keys
-    if (!publicKey || !privateKey) {
-      if (publicKeyRecord && privateKeyRecord) {
-        console.log('✅ Using individual CHANGELLY_PUBLIC_KEY and CHANGELLY_PRIVATE_KEY')
-        publicKey = publicKeyRecord.secret?.trim()
-        privateKey = privateKeyRecord.secret?.trim()
-        console.log('🔍 Individual public key length:', publicKey?.length || 0)
-        console.log('🔍 Individual private key length:', privateKey?.length || 0)
-      } else {
-        const missingKeys = []
-        if (!base64KeyRecord) missingKeys.push('CHANGELLY_API_KEY_BASE64')
-        if (!publicKeyRecord) missingKeys.push('CHANGELLY_PUBLIC_KEY')
-        if (!privateKeyRecord) missingKeys.push('CHANGELLY_PRIVATE_KEY')
-        
-        console.error('❌ Missing required API keys:', missingKeys)
+    try {
+      const decodedKeys = atob(secretsData.secret.trim())
+      console.log('🔍 Decoded string length:', decodedKeys.length)
+      console.log('🔍 Decoded preview:', decodedKeys.substring(0, 20) + '...')
+      
+      const keyParts = decodedKeys.split(':')
+      if (keyParts.length !== 2) {
+        console.error('❌ Invalid base64 key format. Expected format: base64(public_key:private_key)')
         return new Response(
           JSON.stringify({ 
-            error: 'Incomplete API credentials',
-            details: 'Please set either CHANGELLY_API_KEY_BASE64 or both CHANGELLY_PUBLIC_KEY and CHANGELLY_PRIVATE_KEY in the vault',
-            available_keys: secretsData?.map(s => s.name) || [],
-            missing_keys: missingKeys,
+            error: 'Invalid API key format',
+            details: 'The CHANGELLY_API_KEY_BASE64 must contain public and private keys separated by a colon, then base64 encoded. Format: base64(public_key:private_key)',
             debug_info: {
-              vault_secrets: secretsData,
-              base64_found: !!base64KeyRecord,
-              public_found: !!publicKeyRecord,
-              private_found: !!privateKeyRecord
+              key_parts_found: keyParts.length,
+              expected_format: 'base64(public_key:private_key)',
+              decoded_preview: decodedKeys.substring(0, 50) + '...'
             }
           }),
           { 
-            status: 500, 
+            status: 400, 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
           }
         )
       }
-    }
 
-    console.log('✅ API credentials retrieved successfully')
-    console.log('🔍 Final public key length:', publicKey?.length || 0)
-    console.log('🔍 Final private key length:', privateKey?.length || 0)
+      publicKey = keyParts[0].trim()
+      privateKey = keyParts[1].trim()
+      
+      console.log('✅ Successfully decoded base64 API keys')
+      console.log('🔍 Public key length:', publicKey.length)
+      console.log('🔍 Private key length:', privateKey.length)
+      
+    } catch (decodeError) {
+      console.error('❌ Failed to decode base64 key:', decodeError)
+      return new Response(
+        JSON.stringify({ 
+          error: 'Failed to decode API key',
+          details: 'The CHANGELLY_API_KEY_BASE64 appears to be invalid base64. Please verify the key is properly base64 encoded.',
+          debug_info: {
+            decode_error: decodeError.message,
+            base64_key_preview: secretsData.secret.substring(0, 20) + '...'
+          }
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
 
     // Validate credentials exist and are not empty
     if (!publicKey || !privateKey || publicKey.length === 0 || privateKey.length === 0) {
-      console.error('❌ API credentials are null or empty')
+      console.error('❌ Decoded API credentials are null or empty')
       return new Response(
         JSON.stringify({ 
           error: 'API credentials are empty',
-          details: 'Please ensure your Changelly API keys are properly set in the vault and not empty',
+          details: 'The decoded API keys are empty. Please ensure your Changelly API keys are properly set and not empty',
           debug_info: {
             public_key_empty: !publicKey || publicKey.length === 0,
             private_key_empty: !privateKey || privateKey.length === 0,
@@ -233,7 +204,7 @@ serve(async (req) => {
       )
     }
 
-    // Enhanced key validation with detailed analysis
+    // Enhanced key validation
     console.log('🔍 Detailed key analysis:')
     console.log('🔍 Public key starts with:', publicKey.substring(0, 10))
     console.log('🔍 Public key ends with:', publicKey.substring(publicKey.length - 10))
@@ -569,7 +540,7 @@ serve(async (req) => {
         debug_info: {
           error_name: error.name,
           error_stack: error.stack,
-          function_version: 'enhanced-debug-v2'
+          function_version: 'streamlined-base64-only-v1'
         }
       }),
       {
