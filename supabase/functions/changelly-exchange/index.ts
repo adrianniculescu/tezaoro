@@ -119,6 +119,8 @@ serve(async (req) => {
         console.log('✅ Successfully decoded base64 API keys')
         console.log('🔍 Public key length:', publicKey.length)
         console.log('🔍 Private key length:', privateKey.length)
+        console.log('🔍 Public key prefix:', publicKey.substring(0, 8) + '...')
+        console.log('🔍 Private key prefix:', privateKey.substring(0, 8) + '...')
         console.log('🔍 Using sandbox:', useSandbox)
       } catch (decodeError) {
         console.error('❌ Failed to decode base64 key:', decodeError)
@@ -212,32 +214,31 @@ serve(async (req) => {
       )
     }
 
-    // Very specific placeholder detection - only check for exact matches to obvious placeholders
-    const exactPlaceholderPatterns = [
-      'your_public_key_here',
-      'your_private_key_here', 
-      'placeholder_public_key',
-      'placeholder_private_key',
-      'changelly_public_key_here',
-      'changelly_private_key_here',
-      'insert_your_public_key',
-      'insert_your_private_key',
-      'example_public_key',
-      'example_private_key'
+    // Enhanced placeholder detection
+    const placeholderPatterns = [
+      'your_public_key',
+      'your_private_key', 
+      'placeholder',
+      'changelly_key',
+      'example_key',
+      'test_key',
+      'demo_key',
+      'insert_your',
+      'replace_with'
     ]
     
     const publicKeyLower = publicKey.toLowerCase()
     const privateKeyLower = privateKey.toLowerCase()
     
-    console.log('🔍 Checking for exact placeholder matches...')
+    console.log('🔍 Checking for placeholder patterns...')
     
-    const publicKeyIsExactPlaceholder = exactPlaceholderPatterns.includes(publicKeyLower)
-    const privateKeyIsExactPlaceholder = exactPlaceholderPatterns.includes(privateKeyLower)
+    const publicKeyHasPlaceholder = placeholderPatterns.some(pattern => publicKeyLower.includes(pattern))
+    const privateKeyHasPlaceholder = placeholderPatterns.some(pattern => privateKeyLower.includes(pattern))
     
-    if (publicKeyIsExactPlaceholder || privateKeyIsExactPlaceholder) {
-      console.error('❌ API keys are exact placeholder matches')
-      console.error('❌ Public key placeholder?', publicKeyIsExactPlaceholder)
-      console.error('❌ Private key placeholder?', privateKeyIsExactPlaceholder)
+    if (publicKeyHasPlaceholder || privateKeyHasPlaceholder) {
+      console.error('❌ API keys contain placeholder patterns')
+      console.error('❌ Public key has placeholder?', publicKeyHasPlaceholder)
+      console.error('❌ Private key has placeholder?', privateKeyHasPlaceholder)
       return new Response(
         JSON.stringify({ 
           error: 'Placeholder API credentials detected',
@@ -252,13 +253,17 @@ serve(async (req) => {
 
     console.log('✅ API key validation passed')
 
+    // Test with a simple method first to validate credentials
+    const testMethod = action === 'getCurrencies' ? 'getCurrencies' : 'getCurrencies'
+    const testParams = action === 'getCurrencies' ? {} : params
+
     // Create request for Changelly API
     const requestId = crypto.randomUUID()
     const changellyRequest = {
       id: requestId,
       jsonrpc: "2.0",
-      method: action,
-      params
+      method: testMethod,
+      params: testParams
     }
 
     const message = JSON.stringify(changellyRequest)
@@ -270,6 +275,8 @@ serve(async (req) => {
     const messageData = encoder.encode(message)
     
     console.log('🔐 Creating HMAC signature...')
+    console.log('🔐 Private key for signing (first 10 chars):', privateKey.substring(0, 10) + '...')
+    console.log('🔐 Message to sign length:', message.length)
     
     let cryptoKey
     try {
@@ -318,6 +325,7 @@ serve(async (req) => {
       .join('')
 
     console.log('🔐 HMAC signature created with length:', signatureHex.length)
+    console.log('🔐 HMAC signature (first 20 chars):', signatureHex.substring(0, 20) + '...')
 
     // Determine API endpoint based on sandbox flag
     const apiUrl = useSandbox ? 'https://api-sandbox.changelly.com/v2' : 'https://api.changelly.com/v2'
@@ -331,10 +339,10 @@ serve(async (req) => {
     }
 
     console.log('📡 Making request to Changelly API...')
-    console.log('🔍 Request headers (without signature):', {
+    console.log('🔍 Request headers (sanitized):', {
       'Content-Type': 'application/json',
-      'X-Api-Key': publicKey.substring(0, 10) + '...',
-      'X-Api-Signature': '[REDACTED]'
+      'X-Api-Key': publicKey.substring(0, 12) + '...' + publicKey.substring(publicKey.length - 4),
+      'X-Api-Signature': signatureHex.substring(0, 16) + '...'
     })
 
     let changellyResponse
@@ -347,6 +355,7 @@ serve(async (req) => {
       console.log('📥 Changelly API response received')
       console.log('📥 Status:', changellyResponse.status)
       console.log('📥 Status Text:', changellyResponse.statusText)
+      console.log('📥 Response headers:', Object.fromEntries(changellyResponse.headers.entries()))
     } catch (fetchError) {
       console.error('❌ Network error calling Changelly API:', fetchError)
       return new Response(
@@ -378,22 +387,43 @@ serve(async (req) => {
             error: 'Invalid Changelly API credentials',
             details: `Authentication failed with Changelly API (401 Unauthorized). 
 
-Troubleshooting steps:
-1. Verify your API keys are correct and copied exactly from Changelly dashboard
-2. Ensure you're using PRODUCTION keys (not sandbox) unless you've set sandbox mode
-3. Check that API access is enabled in your Changelly account settings
-4. Verify your Changelly account is active and verified
-5. Make sure the keys have the necessary permissions for the API calls you're making
+TROUBLESHOOTING STEPS:
 
-If using sandbox keys, encode them as: "publickey:privatekey:sandbox" in base64.
+1. **Verify API Key Status**: 
+   - Log into your Changelly Pro dashboard
+   - Check that your API keys are active and not disabled
+   - Verify your account status is active
+
+2. **Check API Key Permissions**:
+   - Ensure your API keys have the required permissions
+   - Some Changelly accounts require specific verification levels
+
+3. **Verify Key Format**:
+   - Public key should be alphanumeric (typically 32+ characters)
+   - Private key should be alphanumeric (typically 64+ characters)
+   - No extra spaces or special characters
+
+4. **Test Environment**:
+   - If using sandbox keys, ensure they're marked with ":sandbox" suffix
+   - Production keys should work on main API endpoint
+
+5. **Account Verification**:
+   - Changelly may require account verification for API access
+   - Check your email for any verification requests
 
 Current endpoint: ${apiUrl}
-Key validation: PASSED
-Signature creation: SUCCESS
-Authentication: FAILED`,
+Public key detected: ${publicKey.length} characters
+Private key detected: ${privateKey.length} characters
+Sandbox mode: ${useSandbox}
+
+If issues persist, contact Changelly support with your API key details.`,
             status: changellyResponse.status,
             endpoint: apiUrl,
-            sandbox: useSandbox
+            sandbox: useSandbox,
+            keyLengths: {
+              public: publicKey.length,
+              private: privateKey.length
+            }
           }),
           { 
             status: 400, 
