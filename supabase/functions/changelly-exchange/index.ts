@@ -81,94 +81,72 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     console.log('Supabase client initialized')
 
-    // Try to get the base64 key first, then fall back to individual keys
-    console.log('🔍 Checking for CHANGELLY_API_KEY_BASE64...')
+    // Get the base64 encoded API key
+    console.log('🔍 Fetching CHANGELLY_API_KEY_BASE64...')
     const { data: base64KeyData, error: base64KeyError } = await supabase
       .from('vault')
       .select('secret')
       .eq('name', 'CHANGELLY_API_KEY_BASE64')
       .maybeSingle()
 
+    if (base64KeyError) {
+      console.error('❌ Failed to fetch base64 API key:', base64KeyError)
+      return new Response(
+        JSON.stringify({ 
+          error: 'Failed to retrieve API credentials',
+          details: 'Could not fetch CHANGELLY_API_KEY_BASE64 from vault.'
+        }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
+    if (!base64KeyData?.secret) {
+      console.error('❌ CHANGELLY_API_KEY_BASE64 not found in vault')
+      return new Response(
+        JSON.stringify({ 
+          error: 'API credentials not configured',
+          details: 'CHANGELLY_API_KEY_BASE64 not found in the Supabase vault. Please set this secret with your base64 encoded Changelly API keys.'
+        }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
+    console.log('✅ Found base64 encoded key, decoding...')
     let publicKey: string
     let privateKey: string
 
-    if (base64KeyData?.secret && !base64KeyError) {
-      console.log('✅ Found base64 encoded key, decoding...')
-      try {
-        const decodedKey = atob(base64KeyData.secret.trim())
-        const [pubKey, privKey] = decodedKey.split(':')
-        
-        if (!pubKey || !privKey) {
-          throw new Error('Base64 key must contain public:private format')
-        }
-        
-        publicKey = pubKey.trim()
-        privateKey = privKey.trim()
-        console.log('✅ Successfully decoded base64 key')
-        console.log('🔍 Public key length:', publicKey.length)
-        console.log('🔍 Private key length:', privateKey.length)
-      } catch (decodeError) {
-        console.error('❌ Failed to decode base64 key:', decodeError)
-        return new Response(
-          JSON.stringify({ 
-            error: 'Invalid base64 key format',
-            details: 'Base64 key must be in format: base64(public_key:private_key)'
-          }),
-          { 
-            status: 400, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
-        )
-      }
-    } else {
-      console.log('🔍 Base64 key not found, checking individual keys...')
+    try {
+      const decodedKey = atob(base64KeyData.secret.trim())
+      const [pubKey, privKey] = decodedKey.split(':')
       
-      // Get individual API credentials from vault
-      const { data: publicKeyData, error: publicKeyError } = await supabase
-        .from('vault')
-        .select('secret')
-        .eq('name', 'CHANGELLY_PUBLIC_KEY')
-        .maybeSingle()
-
-      const { data: privateKeyData, error: privateKeyError } = await supabase
-        .from('vault')
-        .select('secret')
-        .eq('name', 'CHANGELLY_PRIVATE_KEY')
-        .maybeSingle()
-
-      if (publicKeyError || privateKeyError) {
-        console.error('❌ Failed to fetch individual API keys:', { publicKeyError, privateKeyError })
-        return new Response(
-          JSON.stringify({ 
-            error: 'Failed to retrieve API credentials',
-            details: 'Could not find CHANGELLY_API_KEY_BASE64 or individual CHANGELLY_PUBLIC_KEY and CHANGELLY_PRIVATE_KEY in vault.'
-          }),
-          { 
-            status: 500, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
-        )
+      if (!pubKey || !privKey) {
+        throw new Error('Base64 key must contain public:private format')
       }
-
-      if (!publicKeyData?.secret || !privateKeyData?.secret) {
-        console.error('❌ Individual API keys not found in vault')
-        return new Response(
-          JSON.stringify({ 
-            error: 'API credentials not configured',
-            details: 'Please set either CHANGELLY_API_KEY_BASE64 or both CHANGELLY_PUBLIC_KEY and CHANGELLY_PRIVATE_KEY in the Supabase vault'
-          }),
-          { 
-            status: 500, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
-        )
-      }
-
-      publicKey = publicKeyData.secret.trim()
-      privateKey = privateKeyData.secret.trim()
-      console.log('✅ Successfully retrieved individual API keys')
+      
+      publicKey = pubKey.trim()
+      privateKey = privKey.trim()
+      console.log('✅ Successfully decoded base64 key')
       console.log('🔍 Public key length:', publicKey.length)
       console.log('🔍 Private key length:', privateKey.length)
+      console.log('🔍 Public key preview:', publicKey.substring(0, 8) + '...')
+    } catch (decodeError) {
+      console.error('❌ Failed to decode base64 key:', decodeError)
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid base64 key format',
+          details: 'Base64 key must be in format: base64(public_key:private_key). Please check your CHANGELLY_API_KEY_BASE64 secret.'
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
     }
 
     // Validate credentials exist and are not empty
@@ -177,7 +155,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           error: 'API credentials are empty',
-          details: 'The API keys are empty. Please ensure your Changelly API keys are properly set and not empty'
+          details: 'The decoded API keys are empty. Please ensure your base64 encoded key contains valid public and private keys.'
         }),
         { 
           status: 400, 
@@ -280,20 +258,21 @@ serve(async (req) => {
 
 TROUBLESHOOTING STEPS:
 
-1. **Check Key Format**: 
-   - Using HMAC-SHA512 authentication (v1 API)
-   - Public key: Should be your Changelly public API key
-   - Private key: Should be your Changelly private API key (plain text)
+1. **Verify Base64 Key Format**: 
+   - Your base64 key should decode to: public_key:private_key
+   - Current decoded public key length: ${publicKey.length} chars
+   - Current decoded private key length: ${privateKey.length} chars
 
-2. **Verify Keys in Changelly Dashboard**:
+2. **Check Keys in Changelly Dashboard**:
    - Log into your Changelly account
    - Go to API settings
    - Ensure keys are active and correctly copied
+   - Make sure you're using the correct public/private key pair
 
-3. **Current Configuration**:
-   - API endpoint: ${apiUrl}
-   - Public key length: ${publicKey.length} chars
-   - Private key length: ${privateKey.length} chars
+3. **Re-create Base64 Key**:
+   - Combine as: your_public_key:your_private_key
+   - Base64 encode the result
+   - Update CHANGELLY_API_KEY_BASE64 in Supabase secrets
 
 Response from Changelly: ${responseText}`,
               status: changellyResponse.status,
@@ -372,7 +351,7 @@ Response from Changelly: ${responseText}`,
           error: 'Failed to create request signature',
           details: `Cryptographic error: ${cryptoError.message}. 
 
-Please verify your private key format. For HMAC-SHA512, use the plain text private key from Changelly.
+Please verify your base64 key format. It should contain your public and private keys separated by a colon, then base64 encoded.
 
 Current private key length: ${privateKey?.length || 0} characters`
         }),
