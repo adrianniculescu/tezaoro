@@ -187,7 +187,7 @@ serve(async (req) => {
       )
     }
 
-    // Create Changelly API request
+    // Create Changelly API request - Fixed the request structure
     const changellyRequest = {
       id: requestId,
       jsonrpc: "2.0",
@@ -235,18 +235,23 @@ serve(async (req) => {
       )
     }
 
-    // Prepare API call
-    const apiUrl = 'https://api.changelly.com'
+    // Fixed: Use the correct Changelly API endpoint
+    const apiUrl = 'https://api.changelly.com/v2'
     const headers = {
       'Content-Type': 'application/json',
-      'api-key': publicKey,
-      'sign': signatureHex,
+      'X-Api-Key': publicKey,
+      'X-Api-Signature': signatureHex,
     }
 
     console.log('🌐 Making API call to Changelly:')
     console.log('   - URL:', apiUrl)
     console.log('   - Public Key:', publicKey.substring(0, 8) + '...')
     console.log('   - Signature length:', signatureHex.length)
+    console.log('   - Headers:', JSON.stringify({
+      'Content-Type': headers['Content-Type'],
+      'X-Api-Key': headers['X-Api-Key'].substring(0, 8) + '...',
+      'X-Api-Signature': headers['X-Api-Signature'].substring(0, 16) + '...'
+    }))
 
     // Make the API call
     console.log('📡 Sending request to Changelly API...')
