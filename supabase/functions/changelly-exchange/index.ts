@@ -95,6 +95,11 @@ serve(async (req) => {
 
     const keyFetchTime = Date.now() - keyFetchStart
     console.log(`⏱️ Key fetch took ${keyFetchTime}ms`)
+    console.log('🔍 Raw key data result:', { 
+      hasData: !!base64KeyData, 
+      hasError: !!base64KeyError,
+      errorDetails: base64KeyError
+    })
 
     if (base64KeyError) {
       console.error('❌ Failed to fetch base64 API key:', base64KeyError)
@@ -125,30 +130,55 @@ serve(async (req) => {
       )
     }
 
-    console.log('✅ Found base64 encoded key, decoding...')
+    console.log('✅ Found base64 encoded key')
+    console.log('🔍 Raw secret value length:', base64KeyData.secret?.length || 0)
+    console.log('🔍 Raw secret preview (first 20 chars):', base64KeyData.secret?.substring(0, 20) || 'N/A')
+    
     let publicKey: string
     let privateKey: string
 
     try {
-      const decodedKey = atob(base64KeyData.secret.trim())
-      const [pubKey, privKey] = decodedKey.split(':')
+      const rawSecret = base64KeyData.secret.trim()
+      console.log('🔍 Trimmed secret length:', rawSecret.length)
+      console.log('🔍 Attempting to decode base64...')
       
-      if (!pubKey || !privKey) {
-        throw new Error('Base64 key must contain public:private format')
+      const decodedKey = atob(rawSecret)
+      console.log('✅ Base64 decoded successfully')
+      console.log('🔍 Decoded key length:', decodedKey.length)
+      console.log('🔍 Decoded key preview (first 50 chars):', decodedKey.substring(0, 50))
+      
+      const keyParts = decodedKey.split(':')
+      console.log('🔍 Key parts after split:', keyParts.length)
+      
+      if (keyParts.length !== 2) {
+        throw new Error(`Expected 2 parts (public:private), got ${keyParts.length} parts`)
       }
       
-      publicKey = pubKey.trim()
-      privateKey = privKey.trim()
-      console.log('✅ Successfully decoded base64 key')
+      publicKey = keyParts[0].trim()
+      privateKey = keyParts[1].trim()
+      
+      console.log('✅ Successfully parsed keys')
       console.log('🔍 Public key length:', publicKey.length)
       console.log('🔍 Private key length:', privateKey.length)
-      console.log('🔍 Public key preview:', publicKey.substring(0, 8) + '...')
+      console.log('🔍 Public key preview:', publicKey.substring(0, 10) + '...' + publicKey.substring(publicKey.length - 4))
+      console.log('🔍 Private key preview:', privateKey.substring(0, 10) + '...' + privateKey.substring(privateKey.length - 4))
+      
     } catch (decodeError) {
       console.error('❌ Failed to decode base64 key:', decodeError)
+      console.error('❌ Error details:', {
+        name: decodeError.name,
+        message: decodeError.message,
+        stack: decodeError.stack?.substring(0, 500)
+      })
       return new Response(
         JSON.stringify({ 
           error: 'Invalid base64 key format',
-          details: 'Base64 key must be in format: base64(public_key:private_key). Please check your CHANGELLY_API_KEY_BASE64 secret.'
+          details: `Base64 key decoding failed: ${decodeError.message}. Please ensure your CHANGELLY_API_KEY_BASE64 secret is properly formatted as base64(public_key:private_key).`,
+          debugInfo: {
+            secretLength: base64KeyData.secret?.length || 0,
+            errorName: decodeError.name,
+            errorMessage: decodeError.message
+          }
         }),
         { 
           status: 400, 
@@ -159,11 +189,15 @@ serve(async (req) => {
 
     // Validate credentials exist and are not empty
     if (!publicKey || !privateKey || publicKey.length === 0 || privateKey.length === 0) {
-      console.error('❌ API credentials are null or empty')
+      console.error('❌ API credentials are null or empty after parsing')
       return new Response(
         JSON.stringify({ 
           error: 'API credentials are empty',
-          details: 'The decoded API keys are empty. Please ensure your base64 encoded key contains valid public and private keys.'
+          details: 'The decoded API keys are empty. Please ensure your base64 encoded key contains valid public and private keys.',
+          debugInfo: {
+            publicKeyLength: publicKey?.length || 0,
+            privateKeyLength: privateKey?.length || 0
+          }
         }),
         { 
           status: 400, 
@@ -185,7 +219,7 @@ serve(async (req) => {
     console.log('📤 Changelly API request:', message)
     console.log('🆔 Request ID:', requestId)
 
-    // Create HMAC-SHA512 signature (Changelly v1 style)
+    // Create HMAC-SHA512 signature
     console.log('🔐 Creating HMAC-SHA512 signature...')
     const signatureStart = Date.now()
     
@@ -194,6 +228,9 @@ serve(async (req) => {
       const keyData = encoder.encode(privateKey)
       const messageData = encoder.encode(message)
       
+      console.log('🔍 Key data length:', keyData.length)
+      console.log('🔍 Message data length:', messageData.length)
+      
       const cryptoKey = await crypto.subtle.importKey(
         'raw',
         keyData,
@@ -201,6 +238,8 @@ serve(async (req) => {
         false,
         ['sign']
       )
+      
+      console.log('✅ Crypto key imported successfully')
       
       const signature = await crypto.subtle.sign('HMAC', cryptoKey, messageData)
       const signatureHex = Array.from(new Uint8Array(signature))
@@ -212,7 +251,7 @@ serve(async (req) => {
       console.log('🔐 Signature length:', signatureHex.length)
       console.log('🔐 Signature preview:', signatureHex.substring(0, 20) + '...')
 
-      // Make request to Changelly API using v1 endpoint
+      // Make request to Changelly API
       const apiUrl = 'https://api.changelly.com'
       console.log('🌐 Using API endpoint:', apiUrl)
       console.log('🕐 Total preparation time:', Date.now() - requestStartTime, 'ms')
@@ -251,7 +290,7 @@ serve(async (req) => {
         console.log(`📥 Changelly API response received in ${apiCallTime}ms`)
         console.log('📥 Status:', changellyResponse.status)
         console.log('📥 Status Text:', changellyResponse.statusText)
-        console.log('📥 Headers:', Object.fromEntries(changellyResponse.headers.entries()))
+        console.log('📥 Response Headers:', Object.fromEntries(changellyResponse.headers.entries()))
         
       } catch (fetchError) {
         const apiCallTime = Date.now() - apiCallStart
@@ -287,14 +326,24 @@ serve(async (req) => {
       
       console.log(`📄 Response body parsed in ${responseParseTime}ms`)
       console.log('📄 Response length:', responseText.length, 'characters')
-      console.log('📄 Response preview:', responseText.substring(0, 200) + (responseText.length > 200 ? '...' : ''))
+      console.log('📄 Full response body:', responseText)
 
       if (!changellyResponse.ok) {
         console.error('❌ Changelly API error response:', {
           status: changellyResponse.status,
           statusText: changellyResponse.statusText,
-          body: responseText.substring(0, 1000) // Limit log size
+          body: responseText
         })
+        
+        // Try to parse error response for more details
+        let errorDetails = responseText
+        try {
+          const errorJson = JSON.parse(responseText)
+          errorDetails = JSON.stringify(errorJson, null, 2)
+          console.log('📋 Parsed error response:', errorJson)
+        } catch (parseErr) {
+          console.log('📋 Could not parse error response as JSON')
+        }
         
         if (changellyResponse.status === 401) {
           return new Response(
@@ -315,18 +364,21 @@ TROUBLESHOOTING STEPS:
    - Ensure keys are active and correctly copied
    - Make sure you're using the correct public/private key pair
 
-3. **Re-create Base64 Key**:
-   - Combine as: your_public_key:your_private_key
-   - Base64 encode the result
-   - Update CHANGELLY_API_KEY_BASE64 in Supabase secrets
+3. **Test Key Format**:
+   - Public key should be around 32 characters
+   - Private key should be around 64 characters
+   - Keys should only contain alphanumeric characters
 
-Response from Changelly: ${responseText}`,
+Full response from Changelly: ${errorDetails}`,
               status: changellyResponse.status,
               endpoint: apiUrl,
               debugInfo: {
                 requestId,
                 totalTime: Date.now() - requestStartTime,
-                apiCallTime: Date.now() - apiCallStart
+                apiCallTime: Date.now() - apiCallStart,
+                publicKeyLength: publicKey.length,
+                privateKeyLength: privateKey.length,
+                signatureLength: signatureHex.length
               }
             }),
             { 
@@ -339,12 +391,13 @@ Response from Changelly: ${responseText}`,
         return new Response(
           JSON.stringify({
             error: `Changelly API error: ${changellyResponse.status}`,
-            details: responseText || changellyResponse.statusText,
+            details: errorDetails,
             status: changellyResponse.status,
             endpoint: apiUrl,
             debugInfo: {
               requestId,
-              totalTime: Date.now() - requestStartTime
+              totalTime: Date.now() - requestStartTime,
+              responseBody: responseText.substring(0, 1000) // Limit response size
             }
           }),
           { 
@@ -365,9 +418,10 @@ Response from Changelly: ${responseText}`,
           resultType: typeof responseData.result,
           resultLength: Array.isArray(responseData.result) ? responseData.result.length : 'not array'
         })
+        console.log('📋 Full parsed response:', responseData)
       } catch (parseError) {
         console.error('❌ Failed to parse Changelly response:', parseError)
-        console.error('❌ Raw response:', responseText.substring(0, 500))
+        console.error('❌ Raw response:', responseText)
         return new Response(
           JSON.stringify({ 
             error: 'Invalid response from Changelly API',
@@ -395,7 +449,8 @@ Response from Changelly: ${responseText}`,
             code: responseData.error.code,
             debugInfo: {
               requestId,
-              totalTime: Date.now() - requestStartTime
+              totalTime: Date.now() - requestStartTime,
+              fullError: responseData.error
             }
           }),
           { 
@@ -447,7 +502,9 @@ Please verify your base64 key format. It should contain your public and private 
 Current private key length: ${privateKey?.length || 0} characters`,
           debugInfo: {
             totalTime: Date.now() - requestStartTime,
-            signatureTime: Date.now() - signatureStart
+            signatureTime: Date.now() - signatureStart,
+            cryptoErrorName: cryptoError.name,
+            cryptoErrorMessage: cryptoError.message
           }
         }),
         { 
