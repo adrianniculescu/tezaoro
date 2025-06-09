@@ -14,10 +14,12 @@ serve(async (req) => {
   }
 
   try {
+    const requestStartTime = Date.now()
     console.log('=== Changelly Edge Function Started ===')
     console.log('Request method:', req.method)
     console.log('Request URL:', req.url)
     console.log('Timestamp:', new Date().toISOString())
+    console.log('Request ID:', crypto.randomUUID())
 
     // Validate request method
     if (req.method !== 'POST') {
@@ -35,9 +37,9 @@ serve(async (req) => {
     let requestBody
     try {
       requestBody = await req.json()
-      console.log('Request body received:', JSON.stringify(requestBody, null, 2))
+      console.log('✅ Request body parsed successfully:', JSON.stringify(requestBody, null, 2))
     } catch (parseError) {
-      console.error('Failed to parse request body:', parseError)
+      console.error('❌ Failed to parse request body:', parseError)
       return new Response(
         JSON.stringify({ error: 'Invalid JSON in request body' }),
         { 
@@ -50,7 +52,7 @@ serve(async (req) => {
     const { action, ...params } = requestBody
 
     if (!action) {
-      console.error('Missing action parameter')
+      console.error('❌ Missing action parameter')
       return new Response(
         JSON.stringify({ error: 'Missing action parameter' }),
         { 
@@ -60,15 +62,15 @@ serve(async (req) => {
       )
     }
 
-    console.log('Action requested:', action)
-    console.log('Parameters:', JSON.stringify(params, null, 2))
+    console.log('🎯 Action requested:', action)
+    console.log('📋 Parameters:', JSON.stringify(params, null, 2))
 
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
     if (!supabaseUrl || !supabaseServiceKey) {
-      console.error('Missing Supabase environment variables')
+      console.error('❌ Missing Supabase environment variables')
       return new Response(
         JSON.stringify({ error: 'Server configuration error' }),
         { 
@@ -79,22 +81,28 @@ serve(async (req) => {
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
-    console.log('Supabase client initialized')
+    console.log('✅ Supabase client initialized')
 
     // Get the base64 encoded API key
     console.log('🔍 Fetching CHANGELLY_API_KEY_BASE64...')
+    const keyFetchStart = Date.now()
+    
     const { data: base64KeyData, error: base64KeyError } = await supabase
       .from('vault')
       .select('secret')
       .eq('name', 'CHANGELLY_API_KEY_BASE64')
       .maybeSingle()
 
+    const keyFetchTime = Date.now() - keyFetchStart
+    console.log(`⏱️ Key fetch took ${keyFetchTime}ms`)
+
     if (base64KeyError) {
       console.error('❌ Failed to fetch base64 API key:', base64KeyError)
       return new Response(
         JSON.stringify({ 
           error: 'Failed to retrieve API credentials',
-          details: 'Could not fetch CHANGELLY_API_KEY_BASE64 from vault.'
+          details: 'Could not fetch CHANGELLY_API_KEY_BASE64 from vault.',
+          debugInfo: { keyFetchTime, error: base64KeyError }
         }),
         { 
           status: 500, 
@@ -175,9 +183,12 @@ serve(async (req) => {
 
     const message = JSON.stringify(changellyRequest)
     console.log('📤 Changelly API request:', message)
+    console.log('🆔 Request ID:', requestId)
 
     // Create HMAC-SHA512 signature (Changelly v1 style)
     console.log('🔐 Creating HMAC-SHA512 signature...')
+    const signatureStart = Date.now()
+    
     try {
       const encoder = new TextEncoder()
       const keyData = encoder.encode(privateKey)
@@ -196,12 +207,15 @@ serve(async (req) => {
         .map(b => b.toString(16).padStart(2, '0'))
         .join('')
       
-      console.log('✅ HMAC-SHA512 signature created, length:', signatureHex.length)
+      const signatureTime = Date.now() - signatureStart
+      console.log(`✅ HMAC-SHA512 signature created in ${signatureTime}ms`)
+      console.log('🔐 Signature length:', signatureHex.length)
       console.log('🔐 Signature preview:', signatureHex.substring(0, 20) + '...')
 
       // Make request to Changelly API using v1 endpoint
       const apiUrl = 'https://api.changelly.com'
       console.log('🌐 Using API endpoint:', apiUrl)
+      console.log('🕐 Total preparation time:', Date.now() - requestStartTime, 'ms')
 
       const changellyHeaders = {
         'Content-Type': 'application/json',
@@ -216,22 +230,49 @@ serve(async (req) => {
         'sign': signatureHex.substring(0, 16) + '...'
       })
 
+      const apiCallStart = Date.now()
       let changellyResponse
+      
       try {
+        // Set a reasonable timeout for the API call
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
+        
         changellyResponse = await fetch(apiUrl, {
           method: 'POST',
           headers: changellyHeaders,
-          body: message
+          body: message,
+          signal: controller.signal
         })
-        console.log('📥 Changelly API response received')
+        
+        clearTimeout(timeoutId)
+        const apiCallTime = Date.now() - apiCallStart
+        
+        console.log(`📥 Changelly API response received in ${apiCallTime}ms`)
         console.log('📥 Status:', changellyResponse.status)
         console.log('📥 Status Text:', changellyResponse.statusText)
+        console.log('📥 Headers:', Object.fromEntries(changellyResponse.headers.entries()))
+        
       } catch (fetchError) {
-        console.error('❌ Network error calling Changelly API:', fetchError)
+        const apiCallTime = Date.now() - apiCallStart
+        console.error(`❌ Network error calling Changelly API after ${apiCallTime}ms:`, fetchError)
+        
+        let errorDetails = 'Unknown network error'
+        if (fetchError.name === 'AbortError') {
+          errorDetails = 'Request timed out after 30 seconds'
+        } else if (fetchError.message) {
+          errorDetails = fetchError.message
+        }
+        
         return new Response(
           JSON.stringify({ 
             error: 'Network error connecting to Changelly API',
-            details: fetchError.message
+            details: errorDetails,
+            debugInfo: { 
+              apiCallTime,
+              errorName: fetchError.name,
+              totalTime: Date.now() - requestStartTime
+            }
           }),
           { 
             status: 500, 
@@ -240,14 +281,19 @@ serve(async (req) => {
         )
       }
 
+      const responseParseStart = Date.now()
       const responseText = await changellyResponse.text()
-      console.log('📄 Changelly API response body:', responseText)
+      const responseParseTime = Date.now() - responseParseStart
+      
+      console.log(`📄 Response body parsed in ${responseParseTime}ms`)
+      console.log('📄 Response length:', responseText.length, 'characters')
+      console.log('📄 Response preview:', responseText.substring(0, 200) + (responseText.length > 200 ? '...' : ''))
 
       if (!changellyResponse.ok) {
         console.error('❌ Changelly API error response:', {
           status: changellyResponse.status,
           statusText: changellyResponse.statusText,
-          body: responseText
+          body: responseText.substring(0, 1000) // Limit log size
         })
         
         if (changellyResponse.status === 401) {
@@ -276,7 +322,12 @@ TROUBLESHOOTING STEPS:
 
 Response from Changelly: ${responseText}`,
               status: changellyResponse.status,
-              endpoint: apiUrl
+              endpoint: apiUrl,
+              debugInfo: {
+                requestId,
+                totalTime: Date.now() - requestStartTime,
+                apiCallTime: Date.now() - apiCallStart
+              }
             }),
             { 
               status: 400, 
@@ -290,7 +341,11 @@ Response from Changelly: ${responseText}`,
             error: `Changelly API error: ${changellyResponse.status}`,
             details: responseText || changellyResponse.statusText,
             status: changellyResponse.status,
-            endpoint: apiUrl
+            endpoint: apiUrl,
+            debugInfo: {
+              requestId,
+              totalTime: Date.now() - requestStartTime
+            }
           }),
           { 
             status: 500, 
@@ -303,13 +358,25 @@ Response from Changelly: ${responseText}`,
       let responseData
       try {
         responseData = JSON.parse(responseText)
-        console.log('📋 Parsed Changelly response:', JSON.stringify(responseData, null, 2))
+        console.log('📋 Successfully parsed Changelly response')
+        console.log('📋 Response structure:', {
+          hasResult: !!responseData.result,
+          hasError: !!responseData.error,
+          resultType: typeof responseData.result,
+          resultLength: Array.isArray(responseData.result) ? responseData.result.length : 'not array'
+        })
       } catch (parseError) {
         console.error('❌ Failed to parse Changelly response:', parseError)
+        console.error('❌ Raw response:', responseText.substring(0, 500))
         return new Response(
           JSON.stringify({ 
             error: 'Invalid response from Changelly API',
-            details: responseText
+            details: 'Response is not valid JSON',
+            rawResponse: responseText.substring(0, 500),
+            debugInfo: {
+              requestId,
+              totalTime: Date.now() - requestStartTime
+            }
           }),
           { 
             status: 500, 
@@ -325,7 +392,11 @@ Response from Changelly: ${responseText}`,
           JSON.stringify({
             error: 'Changelly API error',
             details: responseData.error.message || responseData.error,
-            code: responseData.error.code
+            code: responseData.error.code,
+            debugInfo: {
+              requestId,
+              totalTime: Date.now() - requestStartTime
+            }
           }),
           { 
             status: 400, 
@@ -334,10 +405,30 @@ Response from Changelly: ${responseText}`,
         )
       }
 
-      console.log('🎉 Changelly API request completed successfully')
+      const totalTime = Date.now() - requestStartTime
+      console.log(`🎉 Changelly API request completed successfully in ${totalTime}ms`)
+      console.log('✅ Final response data:', {
+        hasResult: !!responseData.result,
+        resultType: typeof responseData.result,
+        resultPreview: Array.isArray(responseData.result) 
+          ? `Array with ${responseData.result.length} items` 
+          : String(responseData.result).substring(0, 100)
+      })
 
       return new Response(
-        JSON.stringify(responseData),
+        JSON.stringify({
+          ...responseData,
+          debugInfo: {
+            requestId,
+            totalTime,
+            processingSteps: {
+              keyFetch: keyFetchTime,
+              signature: signatureTime,
+              apiCall: Date.now() - apiCallStart,
+              responseParse: responseParseTime
+            }
+          }
+        }),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 200,
@@ -353,7 +444,11 @@ Response from Changelly: ${responseText}`,
 
 Please verify your base64 key format. It should contain your public and private keys separated by a colon, then base64 encoded.
 
-Current private key length: ${privateKey?.length || 0} characters`
+Current private key length: ${privateKey?.length || 0} characters`,
+          debugInfo: {
+            totalTime: Date.now() - requestStartTime,
+            signatureTime: Date.now() - signatureStart
+          }
         }),
         { 
           status: 500, 
@@ -369,7 +464,8 @@ Current private key length: ${privateKey?.length || 0} characters`
       JSON.stringify({ 
         error: 'Internal server error',
         details: error.message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        stack: error.stack?.substring(0, 1000) // Limit stack trace size
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
