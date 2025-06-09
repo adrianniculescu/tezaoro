@@ -61,14 +61,13 @@ serve(async (req) => {
     console.log('🎯 Action requested:', action)
     console.log('📋 Parameters:', JSON.stringify(params, null, 2))
 
-    // Initialize Supabase client with detailed error handling
+    // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
     console.log('🔍 Environment check:')
     console.log('   - SUPABASE_URL exists:', !!supabaseUrl)
     console.log('   - SUPABASE_SERVICE_ROLE_KEY exists:', !!supabaseServiceKey)
-    console.log('   - SUPABASE_URL value:', supabaseUrl?.substring(0, 30) + '...')
 
     if (!supabaseUrl || !supabaseServiceKey) {
       console.error('❌ Missing Supabase environment variables')
@@ -102,144 +101,94 @@ serve(async (req) => {
       )
     }
 
-    // Get the base64 encoded API key with detailed vault debugging
-    console.log('🔍 Fetching CHANGELLY_API_KEY_BASE64 from vault...')
-    let vaultQueryResult
-    
-    try {
-      vaultQueryResult = await supabase
-        .from('vault')
-        .select('secret')
-        .eq('name', 'CHANGELLY_API_KEY_BASE64')
-        .maybeSingle()
-        
-      console.log('🔍 Vault query completed:', {
-        hasData: !!vaultQueryResult.data,
-        hasError: !!vaultQueryResult.error,
-        errorDetails: vaultQueryResult.error
-      })
-    } catch (vaultQueryError) {
-      console.error('❌ Vault query exception:', vaultQueryError)
+    // Get the public key from vault
+    console.log('🔍 Fetching CHANGELLY_PUBLIC_KEY from vault...')
+    const { data: publicKeyData, error: publicKeyError } = await supabase
+      .from('vault')
+      .select('secret')
+      .eq('name', 'CHANGELLY_PUBLIC_KEY')
+      .maybeSingle()
+
+    if (publicKeyError) {
+      console.error('❌ Public key vault query error:', publicKeyError)
       return new Response(
         JSON.stringify({ 
-          error: 'Database query failed',
-          details: vaultQueryError.message,
-          debugInfo: { requestId, step: 'vault_query_exception' }
-        }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    const { data: base64KeyData, error: base64KeyError } = vaultQueryResult
-
-    if (base64KeyError) {
-      console.error('❌ Vault query error:', base64KeyError)
-      return new Response(
-        JSON.stringify({ 
-          error: 'Failed to retrieve API credentials from vault',
-          details: base64KeyError.message,
+          error: 'Failed to retrieve public API key from vault',
+          details: publicKeyError.message,
           debugInfo: { 
             requestId, 
-            step: 'vault_query_error',
-            errorCode: base64KeyError.code,
-            errorHint: base64KeyError.hint
+            step: 'public_key_vault_error',
+            errorCode: publicKeyError.code
           }
         }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    if (!base64KeyData?.secret) {
-      console.error('❌ CHANGELLY_API_KEY_BASE64 not found in vault')
-      
-      // Check if the secret exists with a different name
-      try {
-        const allSecrets = await supabase.from('vault').select('name').limit(10)
-        console.log('🔍 Available secrets in vault:', allSecrets.data?.map(s => s.name) || [])
-      } catch (listError) {
-        console.log('🔍 Could not list vault secrets:', listError)
-      }
-      
+    if (!publicKeyData?.secret) {
+      console.error('❌ CHANGELLY_PUBLIC_KEY not found in vault')
       return new Response(
         JSON.stringify({ 
-          error: 'API credentials not configured',
-          details: 'CHANGELLY_API_KEY_BASE64 not found in vault. Please add this secret with your base64 encoded Changelly API keys in format: base64(public_key:private_key)',
+          error: 'Public API key not configured',
+          details: 'CHANGELLY_PUBLIC_KEY not found in vault. Please add this secret.',
+          debugInfo: { requestId, step: 'public_key_not_found' }
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Get the private key from vault
+    console.log('🔍 Fetching CHANGELLY_PRIVATE_KEY from vault...')
+    const { data: privateKeyData, error: privateKeyError } = await supabase
+      .from('vault')
+      .select('secret')
+      .eq('name', 'CHANGELLY_PRIVATE_KEY')
+      .maybeSingle()
+
+    if (privateKeyError) {
+      console.error('❌ Private key vault query error:', privateKeyError)
+      return new Response(
+        JSON.stringify({ 
+          error: 'Failed to retrieve private API key from vault',
+          details: privateKeyError.message,
           debugInfo: { 
             requestId, 
-            step: 'secret_not_found',
-            secretExists: !!base64KeyData,
-            secretHasValue: !!base64KeyData?.secret
+            step: 'private_key_vault_error',
+            errorCode: privateKeyError.code
           }
         }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    console.log('✅ Found base64 key in vault')
-    console.log('🔍 Secret length:', base64KeyData.secret?.length || 0)
-    console.log('🔍 Secret starts with:', base64KeyData.secret?.substring(0, 10))
-    
-    // Decode and parse the base64 key with comprehensive error handling
-    let publicKey: string
-    let privateKey: string
+    if (!privateKeyData?.secret) {
+      console.error('❌ CHANGELLY_PRIVATE_KEY not found in vault')
+      return new Response(
+        JSON.stringify({ 
+          error: 'Private API key not configured',
+          details: 'CHANGELLY_PRIVATE_KEY not found in vault. Please add this secret.',
+          debugInfo: { requestId, step: 'private_key_not_found' }
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
 
-    try {
-      const rawSecret = base64KeyData.secret.trim()
-      console.log('🔍 Raw secret length:', rawSecret.length)
-      console.log('🔍 Raw secret first 20 chars:', rawSecret.substring(0, 20))
-      console.log('🔍 Raw secret contains colon before decode:', rawSecret.includes(':'))
-      
-      // Check if it's already decoded (contains colon)
-      if (rawSecret.includes(':')) {
-        console.log('🔍 Secret appears to be already decoded (contains colon)')
-        const keyParts = rawSecret.split(':')
-        if (keyParts.length !== 2) {
-          throw new Error(`Expected exactly 2 key parts separated by colon, got ${keyParts.length}`)
-        }
-        publicKey = keyParts[0].trim()
-        privateKey = keyParts[1].trim()
-      } else {
-        console.log('🔐 Attempting base64 decode...')
-        const decodedKey = atob(rawSecret)
-        console.log('✅ Base64 decode successful, length:', decodedKey.length)
-        console.log('🔍 Decoded string preview:', decodedKey.substring(0, 50))
-        
-        if (!decodedKey.includes(':')) {
-          throw new Error('Decoded key does not contain colon separator. Expected format after decode: public_key:private_key')
-        }
-        
-        const keyParts = decodedKey.split(':')
-        if (keyParts.length !== 2) {
-          throw new Error(`Expected exactly 2 key parts after decode, got ${keyParts.length}`)
-        }
-        
-        publicKey = keyParts[0].trim()
-        privateKey = keyParts[1].trim()
-      }
-      
-      console.log('✅ Keys parsed successfully')
-      console.log('🔑 Public key length:', publicKey.length)
-      console.log('🔑 Private key length:', privateKey.length)
-      console.log('🔑 Public key preview:', publicKey.substring(0, 8) + '...')
-      console.log('🔑 Private key preview:', privateKey.substring(0, 8) + '...')
-      
-      // Validate key formats
-      if (publicKey.length < 8 || privateKey.length < 16) {
-        throw new Error(`Keys seem too short - Public: ${publicKey.length} chars, Private: ${privateKey.length} chars`)
-      }
-      
-    } catch (decodeError) {
-      console.error('❌ Key decode/parse error:', decodeError)
+    const publicKey = publicKeyData.secret.trim()
+    const privateKey = privateKeyData.secret.trim()
+
+    console.log('✅ Found API keys in vault')
+    console.log('🔑 Public key length:', publicKey.length)
+    console.log('🔑 Private key length:', privateKey.length)
+    console.log('🔑 Public key preview:', publicKey.substring(0, 8) + '...')
+
+    // Validate key formats
+    if (publicKey.length < 8 || privateKey.length < 16) {
+      console.error('❌ Keys seem too short')
       return new Response(
         JSON.stringify({ 
           error: 'Invalid API key format',
-          details: `${decodeError.message}. Please ensure your CHANGELLY_API_KEY_BASE64 contains either base64(public_key:private_key) or public_key:private_key directly.`,
-          debugInfo: { 
-            requestId, 
-            step: 'key_decode_error',
-            secretLength: base64KeyData.secret?.length || 0,
-            hasColon: base64KeyData.secret?.includes(':') || false
-          }
+          details: `Keys seem too short - Public: ${publicKey.length} chars, Private: ${privateKey.length} chars`,
+          debugInfo: { requestId, step: 'key_validation_error' }
         }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
@@ -256,7 +205,7 @@ serve(async (req) => {
     const message = JSON.stringify(changellyRequest)
     console.log('📝 Changelly request message:', message)
 
-    // Create HMAC-SHA512 signature with detailed error handling
+    // Create HMAC-SHA512 signature
     console.log('🔐 Creating HMAC-SHA512 signature...')
     let signatureHex: string
     
@@ -264,10 +213,6 @@ serve(async (req) => {
       const encoder = new TextEncoder()
       const keyData = encoder.encode(privateKey)
       const messageData = encoder.encode(message)
-      
-      console.log('🔍 Signature creation inputs:')
-      console.log('   - Key data length:', keyData.length)
-      console.log('   - Message data length:', messageData.length)
       
       const cryptoKey = await crypto.subtle.importKey(
         'raw',
@@ -284,7 +229,6 @@ serve(async (req) => {
       
       console.log('✅ HMAC-SHA512 signature created successfully')
       console.log('🔐 Signature length:', signatureHex.length)
-      console.log('🔐 Signature preview:', signatureHex.substring(0, 16) + '...')
       
     } catch (cryptoError) {
       console.error('❌ Signature creation error:', cryptoError)
@@ -292,17 +236,13 @@ serve(async (req) => {
         JSON.stringify({ 
           error: 'Failed to create request signature',
           details: cryptoError.message,
-          debugInfo: { 
-            requestId, 
-            step: 'signature_creation',
-            cryptoErrorName: cryptoError.name
-          }
+          debugInfo: { requestId, step: 'signature_creation' }
         }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Prepare API call with comprehensive logging
+    // Prepare API call
     const apiUrl = 'https://api.changelly.com'
     const headers = {
       'Content-Type': 'application/json',
@@ -312,12 +252,10 @@ serve(async (req) => {
 
     console.log('🌐 Making API call to Changelly:')
     console.log('   - URL:', apiUrl)
-    console.log('   - Method: POST')
     console.log('   - Public Key:', publicKey.substring(0, 8) + '...')
     console.log('   - Signature length:', signatureHex.length)
-    console.log('   - Request body:', message)
 
-    // Make the API call with timeout and detailed error handling
+    // Make the API call
     console.log('📡 Sending request to Changelly API...')
     let response: Response
     
@@ -341,20 +279,9 @@ serve(async (req) => {
       console.log(`📥 API response received in ${fetchTime}ms`)
       console.log('📊 Response status:', response.status)
       console.log('📊 Response ok:', response.ok)
-      console.log('📊 Response headers:', Object.fromEntries(response.headers.entries()))
       
     } catch (fetchError) {
       console.error('❌ Network/Fetch error:', fetchError)
-      
-      let errorType = 'unknown'
-      if (fetchError.name === 'AbortError') {
-        errorType = 'timeout'
-      } else if (fetchError.message?.includes('network')) {
-        errorType = 'network'
-      } else if (fetchError.message?.includes('CORS')) {
-        errorType = 'cors'
-      }
-      
       return new Response(
         JSON.stringify({ 
           error: 'Network error connecting to Changelly API',
@@ -362,20 +289,17 @@ serve(async (req) => {
           debugInfo: { 
             requestId, 
             step: 'api_fetch_error',
-            errorName: fetchError.name,
-            errorType,
-            totalTime: Date.now() - requestStartTime
+            errorName: fetchError.name
           }
         }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Process response with comprehensive logging
+    // Process response
     let responseText: string
     try {
       responseText = await response.text()
-      console.log('📄 Raw response body length:', responseText.length)
       console.log('📄 Raw response body:', responseText)
     } catch (responseReadError) {
       console.error('❌ Failed to read response body:', responseReadError)
@@ -383,31 +307,19 @@ serve(async (req) => {
         JSON.stringify({ 
           error: 'Failed to read API response',
           details: responseReadError.message,
-          debugInfo: { 
-            requestId, 
-            step: 'response_read_error',
-            status: response.status
-          }
+          debugInfo: { requestId, step: 'response_read_error' }
         }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Handle non-200 responses with detailed analysis
+    // Handle non-200 responses
     if (!response.ok) {
-      console.error(`❌ API returned error status: ${response.status} ${response.statusText}`)
+      console.error(`❌ API returned error status: ${response.status}`)
       
-      let errorAnalysis = {
-        status: response.status,
-        statusText: response.statusText,
-        body: responseText,
-        headers: Object.fromEntries(response.headers.entries())
-      }
-      
-      // Provide specific guidance based on status code
       let userFriendlyMessage = ''
       if (response.status === 401) {
-        userFriendlyMessage = `Authentication failed. Please verify your Changelly API keys are correct and properly formatted.`
+        userFriendlyMessage = `Authentication failed. Please verify your Changelly API keys are correct.`
       } else if (response.status === 403) {
         userFriendlyMessage = `Access forbidden. Your API keys may not have the required permissions.`
       } else if (response.status === 400) {
@@ -427,15 +339,8 @@ serve(async (req) => {
           debugInfo: {
             requestId,
             step: 'api_error_response',
-            errorAnalysis,
-            totalTime: Date.now() - requestStartTime,
-            requestSent: {
-              url: apiUrl,
-              method: 'POST',
-              body: message,
-              publicKeyPreview: publicKey.substring(0, 8) + '...',
-              signatureLength: signatureHex.length
-            }
+            status: response.status,
+            headers: Object.fromEntries(response.headers.entries())
           }
         }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -447,7 +352,6 @@ serve(async (req) => {
     try {
       responseData = JSON.parse(responseText)
       console.log('✅ Response parsed successfully')
-      console.log('📋 Response keys:', Object.keys(responseData))
       console.log('📋 Has result:', !!responseData.result)
       console.log('📋 Has error:', !!responseData.error)
     } catch (parseError) {
@@ -457,11 +361,7 @@ serve(async (req) => {
           error: 'Invalid JSON response from Changelly API',
           details: 'The API returned a response that could not be parsed as JSON',
           rawResponse: responseText.substring(0, 500),
-          debugInfo: { 
-            requestId, 
-            step: 'response_parse_error',
-            parseErrorMessage: parseError.message
-          }
+          debugInfo: { requestId, step: 'response_parse_error' }
         }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
@@ -475,12 +375,7 @@ serve(async (req) => {
           error: 'Changelly API returned an error',
           details: responseData.error.message || JSON.stringify(responseData.error),
           code: responseData.error.code,
-          debugInfo: { 
-            requestId, 
-            step: 'api_error_in_response',
-            fullError: responseData.error,
-            totalTime: Date.now() - requestStartTime
-          }
+          debugInfo: { requestId, step: 'api_error_in_response' }
         }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
@@ -488,8 +383,6 @@ serve(async (req) => {
 
     const totalTime = Date.now() - requestStartTime
     console.log(`🎉 SUCCESS! Request completed in ${totalTime}ms`)
-    console.log('📊 Final result type:', typeof responseData.result)
-    console.log('📊 Result preview:', JSON.stringify(responseData.result).substring(0, 100))
     console.log('=== CHANGELLY DEBUG SESSION END ===')
 
     return new Response(
@@ -498,10 +391,7 @@ serve(async (req) => {
         debugInfo: {
           requestId,
           totalTime,
-          step: 'success',
-          publicKeyLength: publicKey.length,
-          privateKeyLength: privateKey.length,
-          signatureLength: signatureHex.length
+          step: 'success'
         }
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
@@ -513,11 +403,7 @@ serve(async (req) => {
       JSON.stringify({ 
         error: 'Internal server error',
         details: error.message,
-        stack: error.stack?.substring(0, 1000),
-        debugInfo: {
-          step: 'top_level_exception',
-          errorName: error.name
-        }
+        debugInfo: { step: 'top_level_exception' }
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
     )
