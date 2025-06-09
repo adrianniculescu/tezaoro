@@ -81,55 +81,95 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     console.log('Supabase client initialized')
 
-    // Get API credentials from vault
-    console.log('🔍 Fetching Changelly API keys from vault...')
-
-    const { data: publicKeyData, error: publicKeyError } = await supabase
+    // Try to get the base64 key first, then fall back to individual keys
+    console.log('🔍 Checking for CHANGELLY_API_KEY_BASE64...')
+    const { data: base64KeyData, error: base64KeyError } = await supabase
       .from('vault')
       .select('secret')
-      .eq('name', 'CHANGELLY_PUBLIC_KEY')
+      .eq('name', 'CHANGELLY_API_KEY_BASE64')
       .maybeSingle()
 
-    const { data: privateKeyData, error: privateKeyError } = await supabase
-      .from('vault')
-      .select('secret')
-      .eq('name', 'CHANGELLY_PRIVATE_KEY')
-      .maybeSingle()
+    let publicKey: string
+    let privateKey: string
 
-    if (publicKeyError || privateKeyError) {
-      console.error('❌ Failed to fetch API keys:', { publicKeyError, privateKeyError })
-      return new Response(
-        JSON.stringify({ 
-          error: 'Failed to retrieve API credentials',
-          details: 'Could not find CHANGELLY_PUBLIC_KEY and CHANGELLY_PRIVATE_KEY in vault.'
-        }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+    if (base64KeyData?.secret && !base64KeyError) {
+      console.log('✅ Found base64 encoded key, decoding...')
+      try {
+        const decodedKey = atob(base64KeyData.secret.trim())
+        const [pubKey, privKey] = decodedKey.split(':')
+        
+        if (!pubKey || !privKey) {
+          throw new Error('Base64 key must contain public:private format')
         }
-      )
+        
+        publicKey = pubKey.trim()
+        privateKey = privKey.trim()
+        console.log('✅ Successfully decoded base64 key')
+        console.log('🔍 Public key length:', publicKey.length)
+        console.log('🔍 Private key length:', privateKey.length)
+      } catch (decodeError) {
+        console.error('❌ Failed to decode base64 key:', decodeError)
+        return new Response(
+          JSON.stringify({ 
+            error: 'Invalid base64 key format',
+            details: 'Base64 key must be in format: base64(public_key:private_key)'
+          }),
+          { 
+            status: 400, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        )
+      }
+    } else {
+      console.log('🔍 Base64 key not found, checking individual keys...')
+      
+      // Get individual API credentials from vault
+      const { data: publicKeyData, error: publicKeyError } = await supabase
+        .from('vault')
+        .select('secret')
+        .eq('name', 'CHANGELLY_PUBLIC_KEY')
+        .maybeSingle()
+
+      const { data: privateKeyData, error: privateKeyError } = await supabase
+        .from('vault')
+        .select('secret')
+        .eq('name', 'CHANGELLY_PRIVATE_KEY')
+        .maybeSingle()
+
+      if (publicKeyError || privateKeyError) {
+        console.error('❌ Failed to fetch individual API keys:', { publicKeyError, privateKeyError })
+        return new Response(
+          JSON.stringify({ 
+            error: 'Failed to retrieve API credentials',
+            details: 'Could not find CHANGELLY_API_KEY_BASE64 or individual CHANGELLY_PUBLIC_KEY and CHANGELLY_PRIVATE_KEY in vault.'
+          }),
+          { 
+            status: 500, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        )
+      }
+
+      if (!publicKeyData?.secret || !privateKeyData?.secret) {
+        console.error('❌ Individual API keys not found in vault')
+        return new Response(
+          JSON.stringify({ 
+            error: 'API credentials not configured',
+            details: 'Please set either CHANGELLY_API_KEY_BASE64 or both CHANGELLY_PUBLIC_KEY and CHANGELLY_PRIVATE_KEY in the Supabase vault'
+          }),
+          { 
+            status: 500, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        )
+      }
+
+      publicKey = publicKeyData.secret.trim()
+      privateKey = privateKeyData.secret.trim()
+      console.log('✅ Successfully retrieved individual API keys')
+      console.log('🔍 Public key length:', publicKey.length)
+      console.log('🔍 Private key length:', privateKey.length)
     }
-
-    if (!publicKeyData?.secret || !privateKeyData?.secret) {
-      console.error('❌ API keys not found in vault')
-      return new Response(
-        JSON.stringify({ 
-          error: 'API credentials not configured',
-          details: 'Please set both CHANGELLY_PUBLIC_KEY and CHANGELLY_PRIVATE_KEY in the Supabase vault'
-        }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      )
-    }
-
-    const publicKey = publicKeyData.secret.trim()
-    const privateKey = privateKeyData.secret.trim()
-
-    console.log('✅ Successfully retrieved API keys')
-    console.log('🔍 Public key length:', publicKey.length)
-    console.log('🔍 Private key length:', privateKey.length)
 
     // Validate credentials exist and are not empty
     if (!publicKey || !privateKey || publicKey.length === 0 || privateKey.length === 0) {
@@ -158,129 +198,44 @@ serve(async (req) => {
     const message = JSON.stringify(changellyRequest)
     console.log('📤 Changelly API request:', message)
 
-    // Create X-Api-Key: SHA256 hash of public key in Base64 format
-    console.log('🔐 Creating X-Api-Key (SHA256 of public key)...')
-    const encoder = new TextEncoder()
-    const publicKeyBytes = encoder.encode(publicKey)
-    const publicKeyHash = await crypto.subtle.digest('SHA-256', publicKeyBytes)
-    const xApiKey = btoa(String.fromCharCode(...new Uint8Array(publicKeyHash)))
-    console.log('✅ X-Api-Key created:', xApiKey.substring(0, 20) + '...')
-
-    // Create RSA-SHA256 signature
-    console.log('🔐 Creating RSA-SHA256 signature...')
+    // Create HMAC-SHA512 signature (Changelly v1 style)
+    console.log('🔐 Creating HMAC-SHA512 signature...')
     try {
-      let rsaPrivateKey;
+      const encoder = new TextEncoder()
+      const keyData = encoder.encode(privateKey)
+      const messageData = encoder.encode(message)
       
-      // Try different private key formats
-      try {
-        // First, try treating it as a base64-encoded DER key
-        console.log('🔍 Trying base64 DER format...')
-        const keyData = Uint8Array.from(atob(privateKey), c => c.charCodeAt(0))
-        
-        rsaPrivateKey = await crypto.subtle.importKey(
-          'pkcs8',
-          keyData,
-          {
-            name: 'RSA-PSS',
-            hash: 'SHA-256'
-          },
-          false,
-          ['sign']
-        )
-        console.log('✅ Successfully imported base64 DER private key')
-      } catch (base64Error) {
-        console.log('❌ Base64 DER import failed:', base64Error.message)
-        
-        try {
-          // Try as hex format
-          console.log('🔍 Trying hex format...')
-          const privateKeyHex = privateKey.replace(/\s/g, '')
-          console.log('🔍 Private key hex length:', privateKeyHex.length)
-          
-          if (privateKeyHex.length % 2 !== 0) {
-            throw new Error('Invalid hex string length')
-          }
-          
-          // Convert hex string to Uint8Array
-          const privateKeyBytes = new Uint8Array(privateKeyHex.length / 2)
-          for (let i = 0; i < privateKeyHex.length; i += 2) {
-            privateKeyBytes[i / 2] = parseInt(privateKeyHex.substr(i, 2), 16)
-          }
-          console.log('✅ Private key converted from hex, bytes length:', privateKeyBytes.length)
-
-          rsaPrivateKey = await crypto.subtle.importKey(
-            'pkcs8',
-            privateKeyBytes,
-            {
-              name: 'RSA-PSS',
-              hash: 'SHA-256'
-            },
-            false,
-            ['sign']
-          )
-          console.log('✅ Successfully imported hex private key')
-        } catch (hexError) {
-          console.log('❌ Hex import failed:', hexError.message)
-          
-          // Try as PEM format (remove headers and decode)
-          try {
-            console.log('🔍 Trying PEM format...')
-            let pemKey = privateKey
-            // Remove PEM headers if present
-            pemKey = pemKey.replace(/-----BEGIN PRIVATE KEY-----/, '')
-            pemKey = pemKey.replace(/-----END PRIVATE KEY-----/, '')
-            pemKey = pemKey.replace(/\s/g, '')
-            
-            const keyData = Uint8Array.from(atob(pemKey), c => c.charCodeAt(0))
-            
-            rsaPrivateKey = await crypto.subtle.importKey(
-              'pkcs8',
-              keyData,
-              {
-                name: 'RSA-PSS',
-                hash: 'SHA-256'
-              },
-              false,
-              ['sign']
-            )
-            console.log('✅ Successfully imported PEM private key')
-          } catch (pemError) {
-            console.log('❌ PEM import failed:', pemError.message)
-            throw new Error(`Unable to import private key. Tried base64 DER, hex, and PEM formats. Last error: ${pemError.message}`)
-          }
-        }
-      }
-
-      // Sign the message
-      const messageBytes = encoder.encode(message)
-      const signature = await crypto.subtle.sign(
-        {
-          name: 'RSA-PSS',
-          saltLength: 32
-        },
-        rsaPrivateKey,
-        messageBytes
+      const cryptoKey = await crypto.subtle.importKey(
+        'raw',
+        keyData,
+        { name: 'HMAC', hash: 'SHA-512' },
+        false,
+        ['sign']
       )
       
-      const xApiSignature = btoa(String.fromCharCode(...new Uint8Array(signature)))
-      console.log('✅ RSA-SHA256 signature created, length:', xApiSignature.length)
-      console.log('🔐 Signature preview:', xApiSignature.substring(0, 20) + '...')
+      const signature = await crypto.subtle.sign('HMAC', cryptoKey, messageData)
+      const signatureHex = Array.from(new Uint8Array(signature))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('')
+      
+      console.log('✅ HMAC-SHA512 signature created, length:', signatureHex.length)
+      console.log('🔐 Signature preview:', signatureHex.substring(0, 20) + '...')
 
-      // Make request to Changelly API
-      const apiUrl = 'https://api.changelly.com/v2'
+      // Make request to Changelly API using v1 endpoint
+      const apiUrl = 'https://api.changelly.com'
       console.log('🌐 Using API endpoint:', apiUrl)
 
       const changellyHeaders = {
         'Content-Type': 'application/json',
-        'X-Api-Key': xApiKey,
-        'X-Api-Signature': xApiSignature,
+        'api-key': publicKey,
+        'sign': signatureHex,
       }
 
       console.log('📡 Making request to Changelly API...')
       console.log('🔍 Request headers (sanitized):', {
         'Content-Type': 'application/json',
-        'X-Api-Key': xApiKey.substring(0, 12) + '...' + xApiKey.substring(xApiKey.length - 4),
-        'X-Api-Signature': xApiSignature.substring(0, 16) + '...'
+        'api-key': publicKey.substring(0, 8) + '...' + publicKey.substring(publicKey.length - 4),
+        'sign': signatureHex.substring(0, 16) + '...'
       })
 
       let changellyResponse
@@ -326,8 +281,9 @@ serve(async (req) => {
 TROUBLESHOOTING STEPS:
 
 1. **Check Key Format**: 
+   - Using HMAC-SHA512 authentication (v1 API)
    - Public key: Should be your Changelly public API key
-   - Private key: Should be base64-encoded DER, hex, or PEM format
+   - Private key: Should be your Changelly private API key (plain text)
 
 2. **Verify Keys in Changelly Dashboard**:
    - Log into your Changelly account
@@ -416,10 +372,7 @@ Response from Changelly: ${responseText}`,
           error: 'Failed to create request signature',
           details: `Cryptographic error: ${cryptoError.message}. 
 
-Please verify your private key format. Supported formats:
-- Base64-encoded DER (PKCS#8)
-- Hexadecimal string
-- PEM format (with or without headers)
+Please verify your private key format. For HMAC-SHA512, use the plain text private key from Changelly.
 
 Current private key length: ${privateKey?.length || 0} characters`
         }),
