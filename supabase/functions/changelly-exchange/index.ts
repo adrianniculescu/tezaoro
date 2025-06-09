@@ -90,7 +90,7 @@ serve(async (req) => {
       .eq('name', 'CHANGELLY_API_KEY_BASE64')
       .maybeSingle()
 
-    let publicKey, privateKey
+    let publicKey, privateKey, useSandbox = false
 
     if (base64SecretData && base64SecretData.secret && !base64Error) {
       console.log('✅ Found CHANGELLY_API_KEY_BASE64, decoding...')
@@ -104,22 +104,28 @@ serve(async (req) => {
         console.log('🔍 Decoded string preview:', decodedKeys.substring(0, 50) + '...')
         
         const keyParts = decodedKeys.split(':')
-        if (keyParts.length !== 2) {
-          throw new Error('Invalid base64 key format - expected "publickey:privatekey"')
+        if (keyParts.length < 2) {
+          throw new Error('Invalid base64 key format - expected "publickey:privatekey" or "publickey:privatekey:sandbox"')
         }
         publicKey = keyParts[0].trim()
         privateKey = keyParts[1].trim()
+        
+        // Check if sandbox flag is included
+        if (keyParts.length === 3 && keyParts[2].trim().toLowerCase() === 'sandbox') {
+          useSandbox = true
+          console.log('🧪 Sandbox mode enabled')
+        }
+        
         console.log('✅ Successfully decoded base64 API keys')
         console.log('🔍 Public key length:', publicKey.length)
         console.log('🔍 Private key length:', privateKey.length)
-        console.log('🔍 Public key starts with:', publicKey.substring(0, 10) + '...')
-        console.log('🔍 Private key starts with:', privateKey.substring(0, 10) + '...')
+        console.log('🔍 Using sandbox:', useSandbox)
       } catch (decodeError) {
         console.error('❌ Failed to decode base64 key:', decodeError)
         return new Response(
           JSON.stringify({ 
             error: 'Failed to decode API key',
-            details: 'The CHANGELLY_API_KEY_BASE64 appears to be invalid. Please verify the key is properly base64 encoded in the format "publickey:privatekey".'
+            details: 'The CHANGELLY_API_KEY_BASE64 appears to be invalid. Please verify the key is properly base64 encoded in the format "publickey:privatekey" or "publickey:privatekey:sandbox".'
           }),
           { 
             status: 400, 
@@ -224,8 +230,6 @@ serve(async (req) => {
     const privateKeyLower = privateKey.toLowerCase()
     
     console.log('🔍 Checking for exact placeholder matches...')
-    console.log('🔍 Public key (first 50 chars):', publicKeyLower.substring(0, 50))
-    console.log('🔍 Private key (first 50 chars):', privateKeyLower.substring(0, 50))
     
     const publicKeyIsExactPlaceholder = exactPlaceholderPatterns.includes(publicKeyLower)
     const privateKeyIsExactPlaceholder = exactPlaceholderPatterns.includes(privateKeyLower)
@@ -315,6 +319,10 @@ serve(async (req) => {
 
     console.log('🔐 HMAC signature created with length:', signatureHex.length)
 
+    // Determine API endpoint based on sandbox flag
+    const apiUrl = useSandbox ? 'https://api-sandbox.changelly.com/v2' : 'https://api.changelly.com/v2'
+    console.log('🌐 Using API endpoint:', apiUrl)
+
     // Make request to Changelly API
     const changellyHeaders = {
       'Content-Type': 'application/json',
@@ -323,10 +331,15 @@ serve(async (req) => {
     }
 
     console.log('📡 Making request to Changelly API...')
+    console.log('🔍 Request headers (without signature):', {
+      'Content-Type': 'application/json',
+      'X-Api-Key': publicKey.substring(0, 10) + '...',
+      'X-Api-Signature': '[REDACTED]'
+    })
 
     let changellyResponse
     try {
-      changellyResponse = await fetch('https://api.changelly.com/v2', {
+      changellyResponse = await fetch(apiUrl, {
         method: 'POST',
         headers: changellyHeaders,
         body: message
@@ -363,8 +376,24 @@ serve(async (req) => {
         return new Response(
           JSON.stringify({
             error: 'Invalid Changelly API credentials',
-            details: 'The Changelly API rejected your credentials (401 Unauthorized). Please verify:\n\n1. Your keys are for PRODUCTION (not sandbox)\n2. API access is enabled in your Changelly account\n3. Your account status is active\n\nDouble-check your API keys in the Changelly dashboard.',
-            status: changellyResponse.status
+            details: `Authentication failed with Changelly API (401 Unauthorized). 
+
+Troubleshooting steps:
+1. Verify your API keys are correct and copied exactly from Changelly dashboard
+2. Ensure you're using PRODUCTION keys (not sandbox) unless you've set sandbox mode
+3. Check that API access is enabled in your Changelly account settings
+4. Verify your Changelly account is active and verified
+5. Make sure the keys have the necessary permissions for the API calls you're making
+
+If using sandbox keys, encode them as: "publickey:privatekey:sandbox" in base64.
+
+Current endpoint: ${apiUrl}
+Key validation: PASSED
+Signature creation: SUCCESS
+Authentication: FAILED`,
+            status: changellyResponse.status,
+            endpoint: apiUrl,
+            sandbox: useSandbox
           }),
           { 
             status: 400, 
@@ -377,7 +406,8 @@ serve(async (req) => {
         JSON.stringify({
           error: `Changelly API error: ${changellyResponse.status}`,
           details: responseText || changellyResponse.statusText,
-          status: changellyResponse.status
+          status: changellyResponse.status,
+          endpoint: apiUrl
         }),
         { 
           status: 500, 
