@@ -95,7 +95,14 @@ serve(async (req) => {
     if (base64SecretData && base64SecretData.secret && !base64Error) {
       console.log('✅ Found CHANGELLY_API_KEY_BASE64, decoding...')
       try {
-        const decodedKeys = atob(base64SecretData.secret.trim())
+        const base64Secret = base64SecretData.secret.trim()
+        console.log('🔍 Base64 secret length:', base64Secret.length)
+        console.log('🔍 Base64 secret starts with:', base64Secret.substring(0, 20) + '...')
+        
+        const decodedKeys = atob(base64Secret)
+        console.log('🔍 Decoded string length:', decodedKeys.length)
+        console.log('🔍 Decoded string preview:', decodedKeys.substring(0, 50) + '...')
+        
         const keyParts = decodedKeys.split(':')
         if (keyParts.length !== 2) {
           throw new Error('Invalid base64 key format - expected "publickey:privatekey"')
@@ -103,8 +110,10 @@ serve(async (req) => {
         publicKey = keyParts[0].trim()
         privateKey = keyParts[1].trim()
         console.log('✅ Successfully decoded base64 API keys')
-        console.log('🔍 Decoded public key length:', publicKey.length)
-        console.log('🔍 Decoded private key length:', privateKey.length)
+        console.log('🔍 Public key length:', publicKey.length)
+        console.log('🔍 Private key length:', privateKey.length)
+        console.log('🔍 Public key starts with:', publicKey.substring(0, 10) + '...')
+        console.log('🔍 Private key starts with:', privateKey.substring(0, 10) + '...')
       } catch (decodeError) {
         console.error('❌ Failed to decode base64 key:', decodeError)
         return new Response(
@@ -197,22 +206,34 @@ serve(async (req) => {
       )
     }
 
-    // More targeted placeholder detection - only for obvious placeholder patterns
-    const obviousPlaceholderPatterns = [
-      'your_public_key', 'your_private_key', 'placeholder_public', 'placeholder_private',
-      'example_public', 'example_private', 'test_public_key', 'test_private_key',
-      'changelly_public_key_here', 'changelly_private_key_here', 'insert_public_key',
-      'insert_private_key', 'actual_changelly_public', 'actual_changelly_private'
+    // Very specific placeholder detection - only check for exact matches to obvious placeholders
+    const exactPlaceholderPatterns = [
+      'your_public_key_here',
+      'your_private_key_here', 
+      'placeholder_public_key',
+      'placeholder_private_key',
+      'changelly_public_key_here',
+      'changelly_private_key_here',
+      'insert_your_public_key',
+      'insert_your_private_key',
+      'example_public_key',
+      'example_private_key'
     ]
     
     const publicKeyLower = publicKey.toLowerCase()
     const privateKeyLower = privateKey.toLowerCase()
     
-    const publicKeyHasObviousPlaceholder = obviousPlaceholderPatterns.some(pattern => publicKeyLower.includes(pattern))
-    const privateKeyHasObviousPlaceholder = obviousPlaceholderPatterns.some(pattern => privateKeyLower.includes(pattern))
+    console.log('🔍 Checking for exact placeholder matches...')
+    console.log('🔍 Public key (first 50 chars):', publicKeyLower.substring(0, 50))
+    console.log('🔍 Private key (first 50 chars):', privateKeyLower.substring(0, 50))
     
-    if (publicKeyHasObviousPlaceholder || privateKeyHasObviousPlaceholder) {
-      console.error('❌ API keys appear to be obvious placeholder values')
+    const publicKeyIsExactPlaceholder = exactPlaceholderPatterns.includes(publicKeyLower)
+    const privateKeyIsExactPlaceholder = exactPlaceholderPatterns.includes(privateKeyLower)
+    
+    if (publicKeyIsExactPlaceholder || privateKeyIsExactPlaceholder) {
+      console.error('❌ API keys are exact placeholder matches')
+      console.error('❌ Public key placeholder?', publicKeyIsExactPlaceholder)
+      console.error('❌ Private key placeholder?', privateKeyIsExactPlaceholder)
       return new Response(
         JSON.stringify({ 
           error: 'Placeholder API credentials detected',
