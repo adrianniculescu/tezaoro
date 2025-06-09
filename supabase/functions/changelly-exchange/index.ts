@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -94,7 +95,11 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           error: 'Failed to retrieve API credentials',
-          details: secretsError.message 
+          details: secretsError.message,
+          debug_info: {
+            supabase_error: secretsError,
+            vault_query: 'Failed to query vault table'
+          }
         }),
         { 
           status: 500, 
@@ -123,7 +128,11 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           error: 'API credentials not configured',
-          details: 'Please ensure Changelly API keys are set in the Supabase vault'
+          details: 'Please ensure Changelly API keys are set in the Supabase vault',
+          debug_info: {
+            vault_response: secretsData,
+            expected_secrets: ['CHANGELLY_PUBLIC_KEY', 'CHANGELLY_PRIVATE_KEY', 'CHANGELLY_API_KEY_BASE64']
+          }
         }),
         { 
           status: 500, 
@@ -183,7 +192,13 @@ serve(async (req) => {
             error: 'Incomplete API credentials',
             details: 'Please set either CHANGELLY_API_KEY_BASE64 or both CHANGELLY_PUBLIC_KEY and CHANGELLY_PRIVATE_KEY in the vault',
             available_keys: secretsData?.map(s => s.name) || [],
-            missing_keys: missingKeys
+            missing_keys: missingKeys,
+            debug_info: {
+              vault_secrets: secretsData,
+              base64_found: !!base64KeyRecord,
+              public_found: !!publicKeyRecord,
+              private_found: !!privateKeyRecord
+            }
           }),
           { 
             status: 500, 
@@ -203,7 +218,13 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           error: 'API credentials are empty',
-          details: 'Please ensure your Changelly API keys are properly set in the vault and not empty'
+          details: 'Please ensure your Changelly API keys are properly set in the vault and not empty',
+          debug_info: {
+            public_key_empty: !publicKey || publicKey.length === 0,
+            private_key_empty: !privateKey || privateKey.length === 0,
+            public_key_length: publicKey?.length || 0,
+            private_key_length: privateKey?.length || 0
+          }
         }),
         { 
           status: 400, 
@@ -226,7 +247,13 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           error: 'Invalid API key format',
-          details: `API keys appear too short. Public: ${publicKey.length} chars, Private: ${privateKey.length} chars. Please verify your Changelly API keys.`
+          details: `API keys appear too short. Public: ${publicKey.length} chars, Private: ${privateKey.length} chars. Please verify your Changelly API keys.`,
+          debug_info: {
+            public_key_length: publicKey.length,
+            private_key_length: privateKey.length,
+            public_key_preview: publicKey.substring(0, 20) + '...',
+            private_key_preview: privateKey.substring(0, 20) + '...'
+          }
         }),
         { 
           status: 400, 
@@ -262,7 +289,11 @@ serve(async (req) => {
             public_key_placeholder: publicKeyHasPlaceholder,
             private_key_placeholder: privateKeyHasPlaceholder,
             public_key_preview: publicKey.substring(0, 20) + '...',
-            private_key_preview: privateKey.substring(0, 20) + '...'
+            private_key_preview: privateKey.substring(0, 20) + '...',
+            detected_patterns: {
+              public: placeholderPatterns.filter(p => publicKeyLower.includes(p)),
+              private: placeholderPatterns.filter(p => privateKeyLower.includes(p))
+            }
           }
         }),
         { 
@@ -308,7 +339,11 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           error: 'Failed to process API credentials',
-          details: 'Error creating signature key - please verify your private key format'
+          details: 'Error creating signature key - please verify your private key format',
+          debug_info: {
+            crypto_error: keyError.message,
+            private_key_length: privateKey.length
+          }
         }),
         { 
           status: 500, 
@@ -326,7 +361,11 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           error: 'Failed to create request signature',
-          details: 'Error signing request - please verify your private key'
+          details: 'Error signing request - please verify your private key',
+          debug_info: {
+            sign_error: signError.message,
+            message_length: message.length
+          }
         }),
         { 
           status: 500, 
@@ -366,12 +405,19 @@ serve(async (req) => {
       console.log('📥 Changelly API response received')
       console.log('📥 Status:', changellyResponse.status)
       console.log('📥 Status Text:', changellyResponse.statusText)
+      console.log('📥 Headers:', Object.fromEntries(changellyResponse.headers.entries()))
     } catch (fetchError) {
       console.error('❌ Network error calling Changelly API:', fetchError)
       return new Response(
         JSON.stringify({ 
           error: 'Network error connecting to Changelly API',
-          details: fetchError.message
+          details: fetchError.message,
+          debug_info: {
+            network_error: fetchError.message,
+            api_endpoint: 'https://api.changelly.com/v2',
+            request_headers: changellyHeaders,
+            request_body: message
+          }
         }),
         { 
           status: 500, 
@@ -381,14 +427,44 @@ serve(async (req) => {
     }
 
     const responseText = await changellyResponse.text()
-    console.log('📄 Changelly API response body:', responseText)
+    console.log('📄 Changelly API response body (RAW):', responseText)
+    console.log('📄 Response length:', responseText.length)
 
     if (!changellyResponse.ok) {
       console.error('❌ Changelly API error response:', {
         status: changellyResponse.status,
         statusText: changellyResponse.statusText,
+        headers: Object.fromEntries(changellyResponse.headers.entries()),
         body: responseText
       })
+      
+      // Enhanced error response with full debugging info
+      let errorDetails = {
+        error: `Changelly API error: ${changellyResponse.status}`,
+        details: responseText || changellyResponse.statusText,
+        request: action,
+        status: changellyResponse.status,
+        response_body_raw: responseText,
+        response_headers: Object.fromEntries(changellyResponse.headers.entries()),
+        request_sent: {
+          url: 'https://api.changelly.com/v2',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Api-Key': publicKey.substring(0, 8) + '...' + publicKey.substring(-8),
+            'X-Api-Signature': signatureHex.substring(0, 16) + '...'
+          },
+          body_preview: message.substring(0, 200) + (message.length > 200 ? '...' : '')
+        },
+        debug_info: {
+          api_credentials_used: {
+            public_key_length: publicKey.length,
+            private_key_length: privateKey.length,
+            signature_length: signatureHex.length
+          },
+          timestamp: new Date().toISOString()
+        }
+      }
       
       // Provide specific error messages based on status code
       if (changellyResponse.status === 401) {
@@ -403,19 +479,11 @@ serve(async (req) => {
         console.error('    3. Keys belong to different API version')
         console.error('    4. Account suspended or restricted')
         
+        errorDetails.error = 'Invalid Changelly API credentials'
+        errorDetails.details = 'The Changelly API rejected your credentials (401 Unauthorized). Possible causes:\n\n1. Using SANDBOX keys instead of PRODUCTION keys\n2. API access not enabled in your Changelly dashboard\n3. Keys from wrong API version\n4. Account suspended or restricted\n\nPlease verify:\n- Your keys are for PRODUCTION (not sandbox)\n- API access is enabled in your Changelly account\n- Your account status is active'
+        
         return new Response(
-          JSON.stringify({ 
-            error: 'Invalid Changelly API credentials',
-            details: 'The Changelly API rejected your credentials (401 Unauthorized). Possible causes:\n\n1. Using SANDBOX keys instead of PRODUCTION keys\n2. API access not enabled in your Changelly dashboard\n3. Keys from wrong API version\n4. Account suspended or restricted\n\nPlease verify:\n- Your keys are for PRODUCTION (not sandbox)\n- API access is enabled in your Changelly account\n- Your account status is active',
-            status: changellyResponse.status,
-            response_body: responseText,
-            debug_info: {
-              public_key_length: publicKey.length,
-              private_key_length: privateKey.length,
-              signature_length: signatureHex.length,
-              api_endpoint: 'https://api.changelly.com/v2'
-            }
-          }),
+          JSON.stringify(errorDetails),
           { 
             status: 400, 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -424,12 +492,7 @@ serve(async (req) => {
       }
       
       return new Response(
-        JSON.stringify({ 
-          error: `Changelly API error: ${changellyResponse.status}`,
-          details: responseText || changellyResponse.statusText,
-          request: action,
-          status: changellyResponse.status
-        }),
+        JSON.stringify(errorDetails),
         { 
           status: 500, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -441,12 +504,18 @@ serve(async (req) => {
     let responseData
     try {
       responseData = JSON.parse(responseText)
+      console.log('📋 Parsed Changelly response:', JSON.stringify(responseData, null, 2))
     } catch (parseError) {
       console.error('❌ Failed to parse Changelly response:', parseError)
       return new Response(
         JSON.stringify({ 
           error: 'Invalid response from Changelly API',
-          details: responseText
+          details: responseText,
+          debug_info: {
+            parse_error: parseError.message,
+            response_body_raw: responseText,
+            response_length: responseText.length
+          }
         }),
         { 
           status: 500, 
@@ -462,7 +531,12 @@ serve(async (req) => {
         JSON.stringify({
           error: 'Changelly API error',
           details: responseData.error.message || responseData.error,
-          code: responseData.error.code
+          code: responseData.error.code,
+          response_body_raw: responseText,
+          debug_info: {
+            changelly_error: responseData.error,
+            full_response: responseData
+          }
         }),
         { 
           status: 400, 
@@ -491,7 +565,12 @@ serve(async (req) => {
       JSON.stringify({ 
         error: 'Internal server error',
         details: error.message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        debug_info: {
+          error_name: error.name,
+          error_stack: error.stack,
+          function_version: 'enhanced-debug-v2'
+        }
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
