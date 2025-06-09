@@ -81,10 +81,9 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     console.log('Supabase client initialized')
 
-    // Get API credentials from vault - using individual keys
+    // Get API credentials from vault - prioritize base64 key
     console.log('🔍 Fetching Changelly API keys from vault...')
 
-    // Try to get CHANGELLY_API_KEY_BASE64 first
     const { data: base64SecretData, error: base64Error } = await supabase
       .from('vault')
       .select('secret')
@@ -99,17 +98,19 @@ serve(async (req) => {
         const decodedKeys = atob(base64SecretData.secret.trim())
         const keyParts = decodedKeys.split(':')
         if (keyParts.length !== 2) {
-          throw new Error('Invalid base64 key format')
+          throw new Error('Invalid base64 key format - expected "publickey:privatekey"')
         }
         publicKey = keyParts[0].trim()
         privateKey = keyParts[1].trim()
         console.log('✅ Successfully decoded base64 API keys')
+        console.log('🔍 Decoded public key length:', publicKey.length)
+        console.log('🔍 Decoded private key length:', privateKey.length)
       } catch (decodeError) {
         console.error('❌ Failed to decode base64 key:', decodeError)
         return new Response(
           JSON.stringify({ 
             error: 'Failed to decode API key',
-            details: 'The CHANGELLY_API_KEY_BASE64 appears to be invalid. Please verify the key is properly base64 encoded.'
+            details: 'The CHANGELLY_API_KEY_BASE64 appears to be invalid. Please verify the key is properly base64 encoded in the format "publickey:privatekey".'
           }),
           { 
             status: 400, 
@@ -120,7 +121,7 @@ serve(async (req) => {
     } else {
       console.log('🔍 CHANGELLY_API_KEY_BASE64 not found, trying individual keys...')
       
-      // Get individual keys
+      // Get individual keys as fallback
       const { data: publicKeyData, error: publicKeyError } = await supabase
         .from('vault')
         .select('secret')
@@ -166,9 +167,6 @@ serve(async (req) => {
       console.log('✅ Successfully retrieved individual API keys')
     }
 
-    console.log('🔍 Public key length:', publicKey.length)
-    console.log('🔍 Private key length:', privateKey.length)
-
     // Validate credentials exist and are not empty
     if (!publicKey || !privateKey || publicKey.length === 0 || privateKey.length === 0) {
       console.error('❌ API credentials are null or empty')
@@ -199,20 +197,22 @@ serve(async (req) => {
       )
     }
 
-    // Enhanced placeholder detection
-    const placeholderPatterns = [
-      'your_', 'placeholder', 'example', 'test_key', 'sample', 'demo_', 'fake_',
-      'changelly_public_key', 'changelly_private_key', 'actual_changelly'
+    // More targeted placeholder detection - only for obvious placeholder patterns
+    const obviousPlaceholderPatterns = [
+      'your_public_key', 'your_private_key', 'placeholder_public', 'placeholder_private',
+      'example_public', 'example_private', 'test_public_key', 'test_private_key',
+      'changelly_public_key_here', 'changelly_private_key_here', 'insert_public_key',
+      'insert_private_key', 'actual_changelly_public', 'actual_changelly_private'
     ]
     
     const publicKeyLower = publicKey.toLowerCase()
     const privateKeyLower = privateKey.toLowerCase()
     
-    const publicKeyHasPlaceholder = placeholderPatterns.some(pattern => publicKeyLower.includes(pattern))
-    const privateKeyHasPlaceholder = placeholderPatterns.some(pattern => privateKeyLower.includes(pattern))
+    const publicKeyHasObviousPlaceholder = obviousPlaceholderPatterns.some(pattern => publicKeyLower.includes(pattern))
+    const privateKeyHasObviousPlaceholder = obviousPlaceholderPatterns.some(pattern => privateKeyLower.includes(pattern))
     
-    if (publicKeyHasPlaceholder || privateKeyHasPlaceholder) {
-      console.error('❌ API keys appear to be placeholder values')
+    if (publicKeyHasObviousPlaceholder || privateKeyHasObviousPlaceholder) {
+      console.error('❌ API keys appear to be obvious placeholder values')
       return new Response(
         JSON.stringify({ 
           error: 'Placeholder API credentials detected',
