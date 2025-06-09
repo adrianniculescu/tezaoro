@@ -81,104 +81,35 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     console.log('Supabase client initialized')
 
-    // Debug: Let's see what's actually in the vault
-    console.log('🔍 Checking vault contents...')
-    const { data: allSecrets, error: allSecretsError } = await supabase
+    // Get API credentials from vault - using individual keys
+    console.log('🔍 Fetching Changelly API keys from vault...')
+
+    // Try to get CHANGELLY_API_KEY_BASE64 first
+    const { data: base64SecretData, error: base64Error } = await supabase
       .from('vault')
-      .select('name, created_at, updated_at')
-
-    if (allSecretsError) {
-      console.error('❌ Failed to query vault:', allSecretsError)
-    } else {
-      console.log('📋 Vault contents:', allSecrets)
-      console.log('📊 Total secrets in vault:', allSecrets?.length || 0)
-      const secretNames = allSecrets?.map(s => s.name) || []
-      console.log('📝 Secret names:', secretNames)
-    }
-
-    // Try to get the specific API key
-    console.log('🔍 Fetching CHANGELLY_API_KEY_BASE64 from vault...')
-
-    const { data: secretsData, error: secretsError } = await supabase
-      .from('vault')
-      .select('name, secret, updated_at, created_at')
+      .select('secret')
       .eq('name', 'CHANGELLY_API_KEY_BASE64')
-      .single()
+      .maybeSingle()
 
-    if (secretsError) {
-      console.error('❌ Failed to fetch CHANGELLY_API_KEY_BASE64 from vault:', secretsError)
-      
-      // Try searching with case variations
-      console.log('🔍 Trying case-insensitive search...')
-      const { data: caseInsensitiveSearch, error: caseError } = await supabase
-        .from('vault')
-        .select('name, updated_at, created_at')
-        .ilike('name', '%changelly%')
-
-      if (!caseError && caseInsensitiveSearch) {
-        console.log('📋 Found Changelly-related secrets:', caseInsensitiveSearch)
-      }
-
-      return new Response(
-        JSON.stringify({ 
-          error: 'Failed to retrieve API credentials',
-          details: 'CHANGELLY_API_KEY_BASE64 not found in vault. Please ensure you have added your Changelly API key using the secret form.',
-          debug_info: {
-            supabase_error: secretsError,
-            vault_query: 'Failed to query vault table for CHANGELLY_API_KEY_BASE64',
-            vault_contents: allSecrets,
-            changelly_search: caseInsensitiveSearch || null
-          }
-        }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      )
-    }
-
-    if (!secretsData || !secretsData.secret) {
-      console.error('❌ CHANGELLY_API_KEY_BASE64 not found or empty')
-      return new Response(
-        JSON.stringify({ 
-          error: 'API credentials not configured',
-          details: 'Please ensure CHANGELLY_API_KEY_BASE64 is set in the Supabase vault',
-          debug_info: {
-            vault_response: secretsData,
-            expected_secret: 'CHANGELLY_API_KEY_BASE64'
-          }
-        }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      )
-    }
-
-    console.log('✅ Found CHANGELLY_API_KEY_BASE64')
-    console.log('🔍 Base64 key length:', secretsData.secret.length)
-    console.log('🔍 Base64 key preview:', secretsData.secret.substring(0, 20) + '...')
-    console.log('🕒 Updated:', secretsData.updated_at)
-
-    // Decode the base64 API key
     let publicKey, privateKey
-    try {
-      const decodedKeys = atob(secretsData.secret.trim())
-      console.log('🔍 Decoded string length:', decodedKeys.length)
-      console.log('🔍 Decoded preview:', decodedKeys.substring(0, 20) + '...')
-      
-      const keyParts = decodedKeys.split(':')
-      if (keyParts.length !== 2) {
-        console.error('❌ Invalid base64 key format. Expected format: base64(public_key:private_key)')
+
+    if (base64SecretData && base64SecretData.secret && !base64Error) {
+      console.log('✅ Found CHANGELLY_API_KEY_BASE64, decoding...')
+      try {
+        const decodedKeys = atob(base64SecretData.secret.trim())
+        const keyParts = decodedKeys.split(':')
+        if (keyParts.length !== 2) {
+          throw new Error('Invalid base64 key format')
+        }
+        publicKey = keyParts[0].trim()
+        privateKey = keyParts[1].trim()
+        console.log('✅ Successfully decoded base64 API keys')
+      } catch (decodeError) {
+        console.error('❌ Failed to decode base64 key:', decodeError)
         return new Response(
           JSON.stringify({ 
-            error: 'Invalid API key format',
-            details: 'The CHANGELLY_API_KEY_BASE64 must contain public and private keys separated by a colon, then base64 encoded. Format: base64(public_key:private_key)',
-            debug_info: {
-              key_parts_found: keyParts.length,
-              expected_format: 'base64(public_key:private_key)',
-              decoded_preview: decodedKeys.substring(0, 50) + '...'
-            }
+            error: 'Failed to decode API key',
+            details: 'The CHANGELLY_API_KEY_BASE64 appears to be invalid. Please verify the key is properly base64 encoded.'
           }),
           { 
             status: 400, 
@@ -186,45 +117,65 @@ serve(async (req) => {
           }
         )
       }
+    } else {
+      console.log('🔍 CHANGELLY_API_KEY_BASE64 not found, trying individual keys...')
+      
+      // Get individual keys
+      const { data: publicKeyData, error: publicKeyError } = await supabase
+        .from('vault')
+        .select('secret')
+        .eq('name', 'CHANGELLY_PUBLIC_KEY')
+        .maybeSingle()
 
-      publicKey = keyParts[0].trim()
-      privateKey = keyParts[1].trim()
-      
-      console.log('✅ Successfully decoded base64 API keys')
-      console.log('🔍 Public key length:', publicKey.length)
-      console.log('🔍 Private key length:', privateKey.length)
-      
-    } catch (decodeError) {
-      console.error('❌ Failed to decode base64 key:', decodeError)
-      return new Response(
-        JSON.stringify({ 
-          error: 'Failed to decode API key',
-          details: 'The CHANGELLY_API_KEY_BASE64 appears to be invalid base64. Please verify the key is properly base64 encoded.',
-          debug_info: {
-            decode_error: decodeError.message,
-            base64_key_preview: secretsData.secret.substring(0, 20) + '...'
+      const { data: privateKeyData, error: privateKeyError } = await supabase
+        .from('vault')
+        .select('secret')
+        .eq('name', 'CHANGELLY_PRIVATE_KEY')
+        .maybeSingle()
+
+      if (publicKeyError || privateKeyError) {
+        console.error('❌ Failed to fetch individual API keys:', { publicKeyError, privateKeyError })
+        return new Response(
+          JSON.stringify({ 
+            error: 'Failed to retrieve API credentials',
+            details: 'Could not find CHANGELLY_API_KEY_BASE64 or individual CHANGELLY_PUBLIC_KEY/CHANGELLY_PRIVATE_KEY in vault.'
+          }),
+          { 
+            status: 500, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
           }
-        }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      )
+        )
+      }
+
+      if (!publicKeyData?.secret || !privateKeyData?.secret) {
+        console.error('❌ API keys not found in vault')
+        return new Response(
+          JSON.stringify({ 
+            error: 'API credentials not configured',
+            details: 'Please set either CHANGELLY_API_KEY_BASE64 or both CHANGELLY_PUBLIC_KEY and CHANGELLY_PRIVATE_KEY in the Supabase vault'
+          }),
+          { 
+            status: 500, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        )
+      }
+
+      publicKey = publicKeyData.secret.trim()
+      privateKey = privateKeyData.secret.trim()
+      console.log('✅ Successfully retrieved individual API keys')
     }
+
+    console.log('🔍 Public key length:', publicKey.length)
+    console.log('🔍 Private key length:', privateKey.length)
 
     // Validate credentials exist and are not empty
     if (!publicKey || !privateKey || publicKey.length === 0 || privateKey.length === 0) {
-      console.error('❌ Decoded API credentials are null or empty')
+      console.error('❌ API credentials are null or empty')
       return new Response(
         JSON.stringify({ 
           error: 'API credentials are empty',
-          details: 'The decoded API keys are empty. Please ensure your Changelly API keys are properly set and not empty',
-          debug_info: {
-            public_key_empty: !publicKey || publicKey.length === 0,
-            private_key_empty: !privateKey || privateKey.length === 0,
-            public_key_length: publicKey?.length || 0,
-            private_key_length: privateKey?.length || 0
-          }
+          details: 'The API keys are empty. Please ensure your Changelly API keys are properly set and not empty'
         }),
         { 
           status: 400, 
@@ -234,26 +185,12 @@ serve(async (req) => {
     }
 
     // Enhanced key validation
-    console.log('🔍 Detailed key analysis:')
-    console.log('🔍 Public key starts with:', publicKey.substring(0, 10))
-    console.log('🔍 Public key ends with:', publicKey.substring(publicKey.length - 10))
-    console.log('🔍 Private key starts with:', privateKey.substring(0, 10))
-    console.log('🔍 Private key ends with:', privateKey.substring(privateKey.length - 10))
-
     if (publicKey.length < 20 || privateKey.length < 20) {
       console.error('❌ API keys appear too short for Changelly API')
-      console.error('🔍 Public key length:', publicKey.length)
-      console.error('🔍 Private key length:', privateKey.length)
       return new Response(
         JSON.stringify({ 
           error: 'Invalid API key format',
-          details: `API keys appear too short. Public: ${publicKey.length} chars, Private: ${privateKey.length} chars. Please verify your Changelly API keys.`,
-          debug_info: {
-            public_key_length: publicKey.length,
-            private_key_length: privateKey.length,
-            public_key_preview: publicKey.substring(0, 20) + '...',
-            private_key_preview: privateKey.substring(0, 20) + '...'
-          }
+          details: `API keys appear too short. Public: ${publicKey.length} chars, Private: ${privateKey.length} chars. Please verify your Changelly API keys.`
         }),
         { 
           status: 400, 
@@ -276,25 +213,10 @@ serve(async (req) => {
     
     if (publicKeyHasPlaceholder || privateKeyHasPlaceholder) {
       console.error('❌ API keys appear to be placeholder values')
-      console.error('🔍 Public key contains placeholder:', publicKeyHasPlaceholder)
-      console.error('🔍 Private key contains placeholder:', privateKeyHasPlaceholder)
-      console.error('🔍 Detected patterns in public key:', placeholderPatterns.filter(p => publicKeyLower.includes(p)))
-      console.error('🔍 Detected patterns in private key:', placeholderPatterns.filter(p => privateKeyLower.includes(p)))
-      
       return new Response(
         JSON.stringify({ 
           error: 'Placeholder API credentials detected',
-          details: 'Please replace placeholder API keys with real Changelly credentials from your account dashboard',
-          debug_info: {
-            public_key_placeholder: publicKeyHasPlaceholder,
-            private_key_placeholder: privateKeyHasPlaceholder,
-            public_key_preview: publicKey.substring(0, 20) + '...',
-            private_key_preview: privateKey.substring(0, 20) + '...',
-            detected_patterns: {
-              public: placeholderPatterns.filter(p => publicKeyLower.includes(p)),
-              private: placeholderPatterns.filter(p => privateKeyLower.includes(p))
-            }
-          }
+          details: 'Please replace placeholder API keys with real Changelly credentials from your account dashboard'
         }),
         { 
           status: 400, 
@@ -303,7 +225,7 @@ serve(async (req) => {
       )
     }
 
-    console.log('✅ API key validation passed - no placeholders detected')
+    console.log('✅ API key validation passed')
 
     // Create request for Changelly API
     const requestId = crypto.randomUUID()
@@ -339,11 +261,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           error: 'Failed to process API credentials',
-          details: 'Error creating signature key - please verify your private key format',
-          debug_info: {
-            crypto_error: keyError.message,
-            private_key_length: privateKey.length
-          }
+          details: 'Error creating signature key - please verify your private key format'
         }),
         { 
           status: 500, 
@@ -361,11 +279,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           error: 'Failed to create request signature',
-          details: 'Error signing request - please verify your private key',
-          debug_info: {
-            sign_error: signError.message,
-            message_length: message.length
-          }
+          details: 'Error signing request - please verify your private key'
         }),
         { 
           status: 500, 
@@ -379,7 +293,6 @@ serve(async (req) => {
       .join('')
 
     console.log('🔐 HMAC signature created with length:', signatureHex.length)
-    console.log('🔐 Signature preview:', signatureHex.substring(0, 16) + '...')
 
     // Make request to Changelly API
     const changellyHeaders = {
@@ -389,11 +302,6 @@ serve(async (req) => {
     }
 
     console.log('📡 Making request to Changelly API...')
-    console.log('📡 Headers preview:', {
-      'Content-Type': changellyHeaders['Content-Type'],
-      'X-Api-Key': publicKey.substring(0, 8) + '...' + publicKey.substring(-4),
-      'X-Api-Signature': signatureHex.substring(0, 16) + '...'
-    })
 
     let changellyResponse
     try {
@@ -405,19 +313,12 @@ serve(async (req) => {
       console.log('📥 Changelly API response received')
       console.log('📥 Status:', changellyResponse.status)
       console.log('📥 Status Text:', changellyResponse.statusText)
-      console.log('📥 Headers:', Object.fromEntries(changellyResponse.headers.entries()))
     } catch (fetchError) {
       console.error('❌ Network error calling Changelly API:', fetchError)
       return new Response(
         JSON.stringify({ 
           error: 'Network error connecting to Changelly API',
-          details: fetchError.message,
-          debug_info: {
-            network_error: fetchError.message,
-            api_endpoint: 'https://api.changelly.com/v2',
-            request_headers: changellyHeaders,
-            request_body: message
-          }
+          details: fetchError.message
         }),
         { 
           status: 500, 
@@ -427,63 +328,23 @@ serve(async (req) => {
     }
 
     const responseText = await changellyResponse.text()
-    console.log('📄 Changelly API response body (RAW):', responseText)
-    console.log('📄 Response length:', responseText.length)
+    console.log('📄 Changelly API response body:', responseText)
 
     if (!changellyResponse.ok) {
       console.error('❌ Changelly API error response:', {
         status: changellyResponse.status,
         statusText: changellyResponse.statusText,
-        headers: Object.fromEntries(changellyResponse.headers.entries()),
         body: responseText
       })
       
-      // Enhanced error response with full debugging info
-      let errorDetails = {
-        error: `Changelly API error: ${changellyResponse.status}`,
-        details: responseText || changellyResponse.statusText,
-        request: action,
-        status: changellyResponse.status,
-        response_body_raw: responseText,
-        response_headers: Object.fromEntries(changellyResponse.headers.entries()),
-        request_sent: {
-          url: 'https://api.changelly.com/v2',
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Api-Key': publicKey.substring(0, 8) + '...' + publicKey.substring(-8),
-            'X-Api-Signature': signatureHex.substring(0, 16) + '...'
-          },
-          body_preview: message.substring(0, 200) + (message.length > 200 ? '...' : '')
-        },
-        debug_info: {
-          api_credentials_used: {
-            public_key_length: publicKey.length,
-            private_key_length: privateKey.length,
-            signature_length: signatureHex.length
-          },
-          timestamp: new Date().toISOString()
-        }
-      }
-      
-      // Provide specific error messages based on status code
+      // Enhanced error response with specific guidance for 401 errors
       if (changellyResponse.status === 401) {
-        console.error('🔍 401 Unauthorized Analysis:')
-        console.error('  - This indicates invalid API credentials')
-        console.error('  - Public key format appears valid, length:', publicKey.length)
-        console.error('  - Private key format appears valid, length:', privateKey.length)
-        console.error('  - HMAC signature length correct:', signatureHex.length === 128)
-        console.error('  - Possible causes:')
-        console.error('    1. Keys are from Changelly SANDBOX instead of PRODUCTION')
-        console.error('    2. API access not enabled in Changelly dashboard')
-        console.error('    3. Keys belong to different API version')
-        console.error('    4. Account suspended or restricted')
-        
-        errorDetails.error = 'Invalid Changelly API credentials'
-        errorDetails.details = 'The Changelly API rejected your credentials (401 Unauthorized). Possible causes:\n\n1. Using SANDBOX keys instead of PRODUCTION keys\n2. API access not enabled in your Changelly dashboard\n3. Keys from wrong API version\n4. Account suspended or restricted\n\nPlease verify:\n- Your keys are for PRODUCTION (not sandbox)\n- API access is enabled in your Changelly account\n- Your account status is active'
-        
         return new Response(
-          JSON.stringify(errorDetails),
+          JSON.stringify({
+            error: 'Invalid Changelly API credentials',
+            details: 'The Changelly API rejected your credentials (401 Unauthorized). Please verify:\n\n1. Your keys are for PRODUCTION (not sandbox)\n2. API access is enabled in your Changelly account\n3. Your account status is active\n\nDouble-check your API keys in the Changelly dashboard.',
+            status: changellyResponse.status
+          }),
           { 
             status: 400, 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -492,7 +353,11 @@ serve(async (req) => {
       }
       
       return new Response(
-        JSON.stringify(errorDetails),
+        JSON.stringify({
+          error: `Changelly API error: ${changellyResponse.status}`,
+          details: responseText || changellyResponse.statusText,
+          status: changellyResponse.status
+        }),
         { 
           status: 500, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -510,12 +375,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           error: 'Invalid response from Changelly API',
-          details: responseText,
-          debug_info: {
-            parse_error: parseError.message,
-            response_body_raw: responseText,
-            response_length: responseText.length
-          }
+          details: responseText
         }),
         { 
           status: 500, 
@@ -531,12 +391,7 @@ serve(async (req) => {
         JSON.stringify({
           error: 'Changelly API error',
           details: responseData.error.message || responseData.error,
-          code: responseData.error.code,
-          response_body_raw: responseText,
-          debug_info: {
-            changelly_error: responseData.error,
-            full_response: responseData
-          }
+          code: responseData.error.code
         }),
         { 
           status: 400, 
@@ -556,21 +411,13 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('💥 Edge Function Error')
-    console.error('Error name:', error.name)
-    console.error('Error message:', error.message)
-    console.error('Error stack:', error.stack)
+    console.error('💥 Edge Function Error:', error)
     
     return new Response(
       JSON.stringify({ 
         error: 'Internal server error',
         details: error.message,
-        timestamp: new Date().toISOString(),
-        debug_info: {
-          error_name: error.name,
-          error_stack: error.stack,
-          function_version: 'debug-vault-storage-v1'
-        }
+        timestamp: new Date().toISOString()
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
