@@ -101,78 +101,90 @@ serve(async (req) => {
       )
     }
 
-    // Get the base64 encoded API key from vault
-    console.log('🔍 Fetching CHANGELLY_API_KEY_BASE64 from vault...')
+    // Try multiple approaches to get API keys
+    let publicKey: string | null = null
+    let privateKey: string | null = null
+
+    // First, try to get the base64 encoded key from vault
+    console.log('🔍 Attempting to fetch CHANGELLY_API_KEY_BASE64 from vault...')
     const { data: base64KeyData, error: base64KeyError } = await supabase
       .from('vault')
       .select('secret')
       .eq('name', 'CHANGELLY_API_KEY_BASE64')
       .maybeSingle()
 
-    if (base64KeyError) {
-      console.error('❌ Base64 key vault query error:', base64KeyError)
+    if (base64KeyData?.secret && !base64KeyError) {
+      console.log('✅ Found CHANGELLY_API_KEY_BASE64 in vault')
+      try {
+        const decodedKeys = atob(base64KeyData.secret.trim())
+        const keyParts = decodedKeys.split(':')
+        
+        if (keyParts.length === 2) {
+          publicKey = keyParts[0].trim()
+          privateKey = keyParts[1].trim()
+          console.log('✅ Successfully decoded base64 API keys')
+        } else {
+          console.warn('⚠️ Invalid base64 key format, trying individual keys...')
+        }
+      } catch (decodeError) {
+        console.warn('⚠️ Failed to decode base64 key:', decodeError.message)
+      }
+    } else {
+      console.log('⚠️ CHANGELLY_API_KEY_BASE64 not found or error:', base64KeyError?.message)
+    }
+
+    // If base64 approach failed, try individual keys from Deno environment
+    if (!publicKey || !privateKey) {
+      console.log('🔍 Trying to get individual API keys from environment...')
+      
+      // Check if keys are available as direct environment variables
+      const envPublicKey = Deno.env.get('CHANGELLY_PUBLIC_KEY')
+      const envPrivateKey = Deno.env.get('CHANGELLY_PRIVATE_KEY')
+      
+      if (envPublicKey && envPrivateKey) {
+        publicKey = envPublicKey.trim()
+        privateKey = envPrivateKey.trim()
+        console.log('✅ Found individual API keys in environment')
+      } else {
+        console.log('⚠️ Individual keys not found in environment')
+        
+        // Try to get individual keys from vault as fallback
+        console.log('🔍 Trying individual keys from vault...')
+        
+        const [publicKeyResult, privateKeyResult] = await Promise.all([
+          supabase.from('vault').select('secret').eq('name', 'CHANGELLY_PUBLIC_KEY').maybeSingle(),
+          supabase.from('vault').select('secret').eq('name', 'CHANGELLY_PRIVATE_KEY').maybeSingle()
+        ])
+        
+        if (publicKeyResult.data?.secret && privateKeyResult.data?.secret) {
+          publicKey = publicKeyResult.data.secret.trim()
+          privateKey = privateKeyResult.data.secret.trim()
+          console.log('✅ Found individual API keys in vault')
+        }
+      }
+    }
+
+    // Final validation
+    if (!publicKey || !privateKey) {
+      console.error('❌ No valid Changelly API keys found')
       return new Response(
         JSON.stringify({ 
-          error: 'Failed to retrieve API key from vault',
-          details: base64KeyError.message,
+          error: 'Changelly API keys not configured',
+          details: 'Please add CHANGELLY_API_KEY_BASE64 (base64 encoded "public:private") or individual CHANGELLY_PUBLIC_KEY and CHANGELLY_PRIVATE_KEY to Supabase secrets',
           debugInfo: { 
             requestId, 
-            step: 'base64_key_vault_error',
-            errorCode: base64KeyError.code
+            step: 'api_keys_not_found',
+            attempted: ['CHANGELLY_API_KEY_BASE64', 'individual_env_keys', 'individual_vault_keys']
           }
         }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    if (!base64KeyData?.secret) {
-      console.error('❌ CHANGELLY_API_KEY_BASE64 not found in vault')
-      return new Response(
-        JSON.stringify({ 
-          error: 'API key not configured',
-          details: 'CHANGELLY_API_KEY_BASE64 not found in vault. Please add this secret.',
-          debugInfo: { requestId, step: 'base64_key_not_found' }
-        }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    const base64ApiKey = base64KeyData.secret.trim()
-    console.log('✅ Found base64 API key in vault')
-    console.log('🔑 Base64 key length:', base64ApiKey.length)
-
-    // Decode the base64 key to get public and private keys
-    let publicKey: string
-    let privateKey: string
-    
-    try {
-      console.log('🔓 Decoding base64 API key...')
-      const decodedKeys = atob(base64ApiKey)
-      const keyParts = decodedKeys.split(':')
-      
-      if (keyParts.length !== 2) {
-        throw new Error(`Invalid key format. Expected "public:private" but got ${keyParts.length} parts`)
-      }
-      
-      publicKey = keyParts[0].trim()
-      privateKey = keyParts[1].trim()
-      
-      console.log('✅ Successfully decoded API keys')
-      console.log('🔑 Public key length:', publicKey.length)
-      console.log('🔑 Private key length:', privateKey.length)
-      console.log('🔑 Public key preview:', publicKey.substring(0, 8) + '...')
-      
-    } catch (decodeError) {
-      console.error('❌ Failed to decode base64 API key:', decodeError)
-      return new Response(
-        JSON.stringify({ 
-          error: 'Invalid API key format',
-          details: `Failed to decode base64 key: ${decodeError.message}`,
-          debugInfo: { requestId, step: 'key_decode_error' }
-        }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
+    console.log('🔑 API keys validated:')
+    console.log('   - Public key length:', publicKey.length)
+    console.log('   - Private key length:', privateKey.length)
+    console.log('   - Public key preview:', publicKey.substring(0, 8) + '...')
 
     // Validate key formats
     if (publicKey.length < 8 || privateKey.length < 16) {
