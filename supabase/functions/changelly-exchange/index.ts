@@ -187,7 +187,7 @@ serve(async (req) => {
       )
     }
 
-    // Create Changelly API request - Fixed the request structure
+    // Create Changelly API request
     const changellyRequest = {
       id: requestId,
       jsonrpc: "2.0",
@@ -222,6 +222,7 @@ serve(async (req) => {
       
       console.log('✅ HMAC-SHA512 signature created successfully')
       console.log('🔐 Signature length:', signatureHex.length)
+      console.log('🔐 Signature preview:', signatureHex.substring(0, 16) + '...')
       
     } catch (cryptoError) {
       console.error('❌ Signature creation error:', cryptoError)
@@ -235,7 +236,7 @@ serve(async (req) => {
       )
     }
 
-    // Fixed: Use the correct Changelly API endpoint
+    // Use the correct Changelly API endpoint
     const apiUrl = 'https://api.changelly.com/v2'
     const headers = {
       'Content-Type': 'application/json',
@@ -245,13 +246,11 @@ serve(async (req) => {
 
     console.log('🌐 Making API call to Changelly:')
     console.log('   - URL:', apiUrl)
-    console.log('   - Public Key:', publicKey.substring(0, 8) + '...')
-    console.log('   - Signature length:', signatureHex.length)
-    console.log('   - Headers:', JSON.stringify({
-      'Content-Type': headers['Content-Type'],
-      'X-Api-Key': headers['X-Api-Key'].substring(0, 8) + '...',
-      'X-Api-Signature': headers['X-Api-Signature'].substring(0, 16) + '...'
-    }))
+    console.log('   - Method: POST')
+    console.log('   - Content-Type:', headers['Content-Type'])
+    console.log('   - X-Api-Key:', publicKey.substring(0, 8) + '...' + publicKey.substring(publicKey.length - 4))
+    console.log('   - X-Api-Signature length:', signatureHex.length)
+    console.log('   - Request body length:', message.length)
 
     // Make the API call
     console.log('📡 Sending request to Changelly API...')
@@ -276,7 +275,9 @@ serve(async (req) => {
       const fetchTime = Date.now() - fetchStartTime
       console.log(`📥 API response received in ${fetchTime}ms`)
       console.log('📊 Response status:', response.status)
+      console.log('📊 Response status text:', response.statusText)
       console.log('📊 Response ok:', response.ok)
+      console.log('📊 Response headers:', JSON.stringify(Object.fromEntries(response.headers.entries())))
       
     } catch (fetchError) {
       console.error('❌ Network/Fetch error:', fetchError)
@@ -298,7 +299,11 @@ serve(async (req) => {
     let responseText: string
     try {
       responseText = await response.text()
-      console.log('📄 Raw response body:', responseText)
+      console.log('📄 Raw response body length:', responseText.length)
+      console.log('📄 Raw response body preview:', responseText.substring(0, 500))
+      if (responseText.length > 500) {
+        console.log('📄 Response body truncated... (total length:', responseText.length, ')')
+      }
     } catch (responseReadError) {
       console.error('❌ Failed to read response body:', responseReadError)
       return new Response(
@@ -311,34 +316,61 @@ serve(async (req) => {
       )
     }
 
-    // Handle non-200 responses
+    // Handle non-200 responses with detailed analysis
     if (!response.ok) {
-      console.error(`❌ API returned error status: ${response.status}`)
+      console.error(`❌ API returned error status: ${response.status} ${response.statusText}`)
+      console.error('❌ Full error response body:', responseText)
       
       let userFriendlyMessage = ''
+      let detailedError = responseText
+      
+      // Try to parse the error response for more details
+      try {
+        const errorData = JSON.parse(responseText)
+        if (errorData.error) {
+          detailedError = JSON.stringify(errorData.error, null, 2)
+          if (errorData.error.message) {
+            detailedError = errorData.error.message
+          }
+        }
+      } catch (parseError) {
+        console.log('⚠️ Could not parse error response as JSON')
+      }
+      
       if (response.status === 401) {
-        userFriendlyMessage = `Authentication failed. Please verify your Changelly API keys are correct.`
+        userFriendlyMessage = `Authentication failed. Please verify your Changelly API keys are correct and active.`
       } else if (response.status === 403) {
-        userFriendlyMessage = `Access forbidden. Your API keys may not have the required permissions.`
+        userFriendlyMessage = `Access forbidden. Your API keys may not have the required permissions for this operation.`
       } else if (response.status === 400) {
-        userFriendlyMessage = `Bad request. The API request format may be incorrect.`
+        userFriendlyMessage = `Bad request. The API request format may be incorrect or missing required parameters.`
       } else if (response.status === 429) {
         userFriendlyMessage = `Rate limit exceeded. Please wait before making more requests.`
       } else if (response.status >= 500) {
-        userFriendlyMessage = `Changelly server error. This is likely temporary.`
+        userFriendlyMessage = `Changelly server error (${response.status}). This is likely temporary.`
       } else {
-        userFriendlyMessage = `Unexpected API response status: ${response.status}`
+        userFriendlyMessage = `Unexpected API response status: ${response.status} ${response.statusText}`
       }
       
       return new Response(
         JSON.stringify({
           error: userFriendlyMessage,
-          details: responseText,
+          details: detailedError,
           debugInfo: {
             requestId,
             step: 'api_error_response',
             status: response.status,
-            headers: Object.fromEntries(response.headers.entries())
+            statusText: response.statusText,
+            headers: Object.fromEntries(response.headers.entries()),
+            requestSent: {
+              url: apiUrl,
+              method: 'POST',
+              headers: {
+                'Content-Type': headers['Content-Type'],
+                'X-Api-Key': headers['X-Api-Key'].substring(0, 8) + '...',
+                'X-Api-Signature': headers['X-Api-Signature'].substring(0, 16) + '...'
+              },
+              bodyLength: message.length
+            }
           }
         }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -350,8 +382,14 @@ serve(async (req) => {
     try {
       responseData = JSON.parse(responseText)
       console.log('✅ Response parsed successfully')
-      console.log('📋 Has result:', !!responseData.result)
-      console.log('📋 Has error:', !!responseData.error)
+      console.log('📋 Response structure:', {
+        hasId: !!responseData.id,
+        hasJsonrpc: !!responseData.jsonrpc,
+        hasResult: !!responseData.result,
+        hasError: !!responseData.error,
+        resultType: typeof responseData.result,
+        resultLength: Array.isArray(responseData.result) ? responseData.result.length : 'not array'
+      })
     } catch (parseError) {
       console.error('❌ Response parse error:', parseError)
       return new Response(
