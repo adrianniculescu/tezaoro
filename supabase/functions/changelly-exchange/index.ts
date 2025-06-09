@@ -81,7 +81,7 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     console.log('Supabase client initialized')
 
-    // Get API credentials from vault - trying the base64 key first
+    // Get API credentials from vault
     console.log('🔍 Fetching Changelly API credentials from vault...')
 
     const { data: secretsData, error: secretsError } = await supabase
@@ -174,8 +174,8 @@ serve(async (req) => {
     }
 
     console.log('✅ API credentials retrieved successfully')
-    console.log('🔍 Public key length:', publicKey?.length || 0)
-    console.log('🔍 Private key length:', privateKey?.length || 0)
+    console.log('🔍 Public key preview:', publicKey?.substring(0, 8) + '...' + publicKey?.substring(-4) || 'N/A')
+    console.log('🔍 Private key preview:', privateKey?.substring(0, 8) + '...' + privateKey?.substring(-4) || 'N/A')
 
     // Validate credentials exist and are not empty
     if (!publicKey || !privateKey || publicKey.length === 0 || privateKey.length === 0) {
@@ -192,7 +192,7 @@ serve(async (req) => {
       )
     }
 
-    // Validate minimum key lengths (Changelly keys should be longer)
+    // Enhanced key validation
     if (publicKey.length < 20 || privateKey.length < 20) {
       console.error('❌ API keys appear too short for Changelly API')
       console.error('🔍 Public key length:', publicKey.length)
@@ -201,6 +201,26 @@ serve(async (req) => {
         JSON.stringify({ 
           error: 'Invalid API key format',
           details: `API keys appear too short. Public: ${publicKey.length} chars, Private: ${privateKey.length} chars. Please verify your Changelly API keys.`
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
+    // Check for placeholder values
+    const placeholderPatterns = ['your_', 'placeholder', 'example', 'test_key', 'sample']
+    const hasPlaceholder = placeholderPatterns.some(pattern => 
+      publicKey.toLowerCase().includes(pattern) || privateKey.toLowerCase().includes(pattern)
+    )
+    
+    if (hasPlaceholder) {
+      console.error('❌ API keys appear to be placeholder values')
+      return new Response(
+        JSON.stringify({ 
+          error: 'Placeholder API credentials detected',
+          details: 'Please replace placeholder API keys with real Changelly credentials from your account dashboard'
         }),
         { 
           status: 400, 
@@ -245,7 +265,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           error: 'Failed to process API credentials',
-          details: 'Error creating signature key'
+          details: 'Error creating signature key - please verify your private key format'
         }),
         { 
           status: 500, 
@@ -263,7 +283,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           error: 'Failed to create request signature',
-          details: 'Error signing request'
+          details: 'Error signing request - please verify your private key'
         }),
         { 
           status: 500, 
@@ -277,6 +297,7 @@ serve(async (req) => {
       .join('')
 
     console.log('🔐 HMAC signature created with length:', signatureHex.length)
+    console.log('🔐 Signature preview:', signatureHex.substring(0, 16) + '...')
 
     // Make request to Changelly API
     const changellyHeaders = {
@@ -286,6 +307,11 @@ serve(async (req) => {
     }
 
     console.log('📡 Making request to Changelly API...')
+    console.log('📡 Headers preview:', {
+      'Content-Type': changellyHeaders['Content-Type'],
+      'X-Api-Key': publicKey.substring(0, 8) + '...' + publicKey.substring(-4),
+      'X-Api-Signature': signatureHex.substring(0, 16) + '...'
+    })
 
     let changellyResponse
     try {
@@ -325,15 +351,27 @@ serve(async (req) => {
       if (changellyResponse.status === 401) {
         console.error('🔍 401 Unauthorized Analysis:')
         console.error('  - This indicates invalid API credentials')
-        console.error('  - Please verify your keys are correct and active')
-        console.error('  - Check that your Changelly account has the required permissions')
+        console.error('  - Public key format appears valid, length:', publicKey.length)
+        console.error('  - Private key format appears valid, length:', privateKey.length)
+        console.error('  - HMAC signature length correct:', signatureHex.length === 128)
+        console.error('  - Possible causes:')
+        console.error('    1. Keys are from Changelly SANDBOX instead of PRODUCTION')
+        console.error('    2. API access not enabled in Changelly dashboard')
+        console.error('    3. Keys belong to different API version')
+        console.error('    4. Account suspended or restricted')
         
         return new Response(
           JSON.stringify({ 
             error: 'Invalid Changelly API credentials',
-            details: 'The Changelly API rejected your credentials. Please verify:\n1. Your API keys are correct and copied completely\n2. Your API keys are active and not expired\n3. Your Changelly account has the necessary permissions\n4. You have enabled the required API methods in your Changelly dashboard',
+            details: 'The Changelly API rejected your credentials (401 Unauthorized). Possible causes:\n\n1. Using SANDBOX keys instead of PRODUCTION keys\n2. API access not enabled in your Changelly dashboard\n3. Keys from wrong API version\n4. Account suspended or restricted\n\nPlease verify:\n- Your keys are for PRODUCTION (not sandbox)\n- API access is enabled in your Changelly account\n- Your account status is active',
             status: changellyResponse.status,
-            response_body: responseText
+            response_body: responseText,
+            debug_info: {
+              public_key_length: publicKey.length,
+              private_key_length: privateKey.length,
+              signature_length: signatureHex.length,
+              api_endpoint: 'https://api.changelly.com/v2'
+            }
           }),
           { 
             status: 400, 
