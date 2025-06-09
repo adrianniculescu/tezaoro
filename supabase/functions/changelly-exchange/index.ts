@@ -101,85 +101,78 @@ serve(async (req) => {
       )
     }
 
-    // Get the public key from vault
-    console.log('🔍 Fetching CHANGELLY_PUBLIC_KEY from vault...')
-    const { data: publicKeyData, error: publicKeyError } = await supabase
+    // Get the base64 encoded API key from vault
+    console.log('🔍 Fetching CHANGELLY_API_KEY_BASE64 from vault...')
+    const { data: base64KeyData, error: base64KeyError } = await supabase
       .from('vault')
       .select('secret')
-      .eq('name', 'CHANGELLY_PUBLIC_KEY')
+      .eq('name', 'CHANGELLY_API_KEY_BASE64')
       .maybeSingle()
 
-    if (publicKeyError) {
-      console.error('❌ Public key vault query error:', publicKeyError)
+    if (base64KeyError) {
+      console.error('❌ Base64 key vault query error:', base64KeyError)
       return new Response(
         JSON.stringify({ 
-          error: 'Failed to retrieve public API key from vault',
-          details: publicKeyError.message,
+          error: 'Failed to retrieve API key from vault',
+          details: base64KeyError.message,
           debugInfo: { 
             requestId, 
-            step: 'public_key_vault_error',
-            errorCode: publicKeyError.code
+            step: 'base64_key_vault_error',
+            errorCode: base64KeyError.code
           }
         }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    if (!publicKeyData?.secret) {
-      console.error('❌ CHANGELLY_PUBLIC_KEY not found in vault')
+    if (!base64KeyData?.secret) {
+      console.error('❌ CHANGELLY_API_KEY_BASE64 not found in vault')
       return new Response(
         JSON.stringify({ 
-          error: 'Public API key not configured',
-          details: 'CHANGELLY_PUBLIC_KEY not found in vault. Please add this secret.',
-          debugInfo: { requestId, step: 'public_key_not_found' }
+          error: 'API key not configured',
+          details: 'CHANGELLY_API_KEY_BASE64 not found in vault. Please add this secret.',
+          debugInfo: { requestId, step: 'base64_key_not_found' }
         }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Get the private key from vault
-    console.log('🔍 Fetching CHANGELLY_PRIVATE_KEY from vault...')
-    const { data: privateKeyData, error: privateKeyError } = await supabase
-      .from('vault')
-      .select('secret')
-      .eq('name', 'CHANGELLY_PRIVATE_KEY')
-      .maybeSingle()
+    const base64ApiKey = base64KeyData.secret.trim()
+    console.log('✅ Found base64 API key in vault')
+    console.log('🔑 Base64 key length:', base64ApiKey.length)
 
-    if (privateKeyError) {
-      console.error('❌ Private key vault query error:', privateKeyError)
+    // Decode the base64 key to get public and private keys
+    let publicKey: string
+    let privateKey: string
+    
+    try {
+      console.log('🔓 Decoding base64 API key...')
+      const decodedKeys = atob(base64ApiKey)
+      const keyParts = decodedKeys.split(':')
+      
+      if (keyParts.length !== 2) {
+        throw new Error(`Invalid key format. Expected "public:private" but got ${keyParts.length} parts`)
+      }
+      
+      publicKey = keyParts[0].trim()
+      privateKey = keyParts[1].trim()
+      
+      console.log('✅ Successfully decoded API keys')
+      console.log('🔑 Public key length:', publicKey.length)
+      console.log('🔑 Private key length:', privateKey.length)
+      console.log('🔑 Public key preview:', publicKey.substring(0, 8) + '...')
+      
+    } catch (decodeError) {
+      console.error('❌ Failed to decode base64 API key:', decodeError)
       return new Response(
         JSON.stringify({ 
-          error: 'Failed to retrieve private API key from vault',
-          details: privateKeyError.message,
-          debugInfo: { 
-            requestId, 
-            step: 'private_key_vault_error',
-            errorCode: privateKeyError.code
-          }
+          error: 'Invalid API key format',
+          details: `Failed to decode base64 key: ${decodeError.message}`,
+          debugInfo: { requestId, step: 'key_decode_error' }
         }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
-
-    if (!privateKeyData?.secret) {
-      console.error('❌ CHANGELLY_PRIVATE_KEY not found in vault')
-      return new Response(
-        JSON.stringify({ 
-          error: 'Private API key not configured',
-          details: 'CHANGELLY_PRIVATE_KEY not found in vault. Please add this secret.',
-          debugInfo: { requestId, step: 'private_key_not_found' }
-        }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    const publicKey = publicKeyData.secret.trim()
-    const privateKey = privateKeyData.secret.trim()
-
-    console.log('✅ Found API keys in vault')
-    console.log('🔑 Public key length:', publicKey.length)
-    console.log('🔑 Private key length:', privateKey.length)
-    console.log('🔑 Public key preview:', publicKey.substring(0, 8) + '...')
 
     // Validate key formats
     if (publicKey.length < 8 || privateKey.length < 16) {
