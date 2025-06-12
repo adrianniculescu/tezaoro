@@ -5,7 +5,8 @@ import PageLayout from '@/components/PageLayout';
 import JsonLdSchema from '@/components/seo/JsonLdSchema';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { User, Clock } from 'lucide-react';
+import { User, Clock, ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
 const ScalpingVsSwingTrading = () => {
@@ -34,8 +35,15 @@ const ScalpingVsSwingTrading = () => {
 
       <article className="py-16 md:py-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
-          <div className="mb-8">
-            <div className="flex items-center gap-2 mb-4">
+          <Link to="/blog">
+            <Button variant="ghost" className="mb-8 flex items-center gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back to Blog
+            </Button>
+          </Link>
+
+          <div className="mb-12">
+            <div className="flex items-center gap-2 mb-6">
               <Badge variant="secondary">Strategy Comparison</Badge>
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-1">
@@ -49,11 +57,11 @@ const ScalpingVsSwingTrading = () => {
               </div>
             </div>
             
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-8 leading-tight">
               Scalping vs. Swing Trading: Algorithmic Strategies Compared
             </h1>
             
-            <div className="aspect-video bg-gradient-to-br from-primary/20 to-accent/20 rounded-lg mb-8 flex items-center justify-center">
+            <div className="aspect-video bg-gradient-to-br from-primary/20 to-accent/20 rounded-lg mb-12 flex items-center justify-center">
               <img 
                 src="/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png" 
                 alt="Tezaoro - Trading Strategies"
@@ -62,34 +70,34 @@ const ScalpingVsSwingTrading = () => {
             </div>
           </div>
 
-          <Card className="glass-card bg-card p-8">
-            <div className="prose prose-lg prose-invert max-w-none">
-              <p className="text-xl text-muted-foreground mb-8">
+          <Card className="glass-card bg-card p-8 md:p-12">
+            <div className="prose prose-lg md:prose-xl prose-invert max-w-none prose-headings:font-bold prose-headings:mb-8 prose-headings:mt-12 prose-headings:leading-tight prose-p:mb-8 prose-p:leading-relaxed prose-p:text-base md:prose-p:text-lg prose-li:mb-4 prose-li:leading-relaxed prose-ul:mb-10 prose-ol:mb-10">
+              <p className="text-xl md:text-2xl text-muted-foreground mb-12 leading-relaxed">
                 Algorithmic trading offers a variety of strategies, but two of the most popular are scalping and swing trading. Understanding the differences can help you choose the best approach for your goals and risk profile.
               </p>
 
-              <h2 className="text-2xl font-bold mb-4">Speed and Precision in Scalping Algorithms</h2>
-              <p className="mb-6">
+              <h2 className="text-2xl md:text-3xl font-bold mb-8">Speed and Precision in Scalping Algorithms</h2>
+              <p className="mb-8 text-base md:text-lg leading-relaxed">
                 Scalping algorithms execute dozens or even hundreds of trades per day, aiming to profit from small price movements. They require fast execution, low latency, and strict risk controls.
               </p>
 
-              <h2 className="text-2xl font-bold mb-4">Patience and Analysis in Swing Trading Bots</h2>
-              <p className="mb-6">
+              <h2 className="text-2xl md:text-3xl font-bold mb-8">Patience and Analysis in Swing Trading Bots</h2>
+              <p className="mb-8 text-base md:text-lg leading-relaxed">
                 Swing trading bots hold positions for days or weeks, seeking to capture larger price moves. These strategies rely on technical analysis, trend identification, and careful timing.
               </p>
 
-              <h2 className="text-2xl font-bold mb-4">Backtested Results on Tezaoro</h2>
-              <p className="mb-6">
+              <h2 className="text-2xl md:text-3xl font-bold mb-8">Backtested Results on Tezaoro</h2>
+              <p className="mb-8 text-base md:text-lg leading-relaxed">
                 Tezaoro allows you to backtest both scalping and swing trading algorithms across multiple markets. Compare performance metrics like win rate, drawdown, and average trade duration to find what works best for you.
               </p>
 
-              <h2 className="text-2xl font-bold mb-4">Conclusion</h2>
-              <p className="mb-6">
+              <h2 className="text-2xl md:text-3xl font-bold mb-8">Conclusion</h2>
+              <p className="mb-8 text-base md:text-lg leading-relaxed">
                 Both scalping and swing trading can be effective when executed with discipline and the right tools. Tezaoro's platform supports both approaches, giving you the flexibility to adapt to any market condition.
               </p>
 
-              <div className="mt-8 p-4 bg-primary/10 rounded-lg">
-                <p className="text-sm text-muted-foreground mb-2">Explore different trading strategies</p>
+              <div className="mt-12 p-6 bg-primary/10 rounded-lg">
+                <p className="text-sm text-muted-foreground mb-4">Explore different trading strategies</p>
                 <div className="flex gap-4">
                   <Link to="/guide/top-crypto-algorithmic-trading-strategies" className="text-primary hover:underline">Crypto Strategies</Link>
                   <Link to="/guide/backtesting-trading-algorithm" className="text-primary hover:underline">Strategy Testing</Link>

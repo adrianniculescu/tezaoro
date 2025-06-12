@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Helmet } from 'react-helmet';
 import PageLayout from '@/components/PageLayout';
@@ -5,6 +6,7 @@ import JsonLdSchema from '@/components/seo/JsonLdSchema';
 import PageHeader from '@/components/PageHeader';
 import { ArrowLeft, Clock, User, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 
 const TezaoroFiatGatewayReview = () => {
@@ -45,7 +47,7 @@ const TezaoroFiatGatewayReview = () => {
             description="Global banking integration across 180+ countries with 3DS2-secured purchases, SEPA/SWIFT support, and dynamic KYC."
           />
 
-          <div className="flex items-center gap-6 mb-8 text-sm text-muted-foreground">
+          <div className="flex items-center gap-6 mb-12 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
               <span>April 2025</span>
@@ -60,7 +62,7 @@ const TezaoroFiatGatewayReview = () => {
             </div>
           </div>
 
-          <div className="aspect-video bg-gradient-to-br from-primary/20 to-accent/20 rounded-lg mb-8 flex items-center justify-center">
+          <div className="aspect-video bg-gradient-to-br from-primary/20 to-accent/20 rounded-lg mb-12 flex items-center justify-center">
             <img 
               src="/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png" 
               alt="Tezaoro Fiat Gateway"
@@ -68,81 +70,83 @@ const TezaoroFiatGatewayReview = () => {
             />
           </div>
 
-          <div className="prose prose-lg max-w-none">
-            <h2>Global Banking Integration & Multi-Channel Support</h2>
-            
-            <p>Tezaoro&apos;s fiat gateway accommodates <strong>180+ countries</strong> with comprehensive payment infrastructure:</p>
+          <Card className="glass-card bg-card p-8 md:p-12">
+            <div className="prose prose-lg md:prose-xl max-w-none prose-headings:font-bold prose-headings:mb-8 prose-headings:mt-12 prose-headings:leading-tight prose-p:mb-8 prose-p:leading-relaxed prose-p:text-base md:prose-p:text-lg prose-li:mb-4 prose-li:leading-relaxed prose-ul:mb-10 prose-ol:mb-10">
+              <h2 className="text-2xl md:text-3xl font-bold mb-8">Global Banking Integration & Multi-Channel Support</h2>
+              
+              <p className="mb-8 text-base md:text-lg leading-relaxed">Tezaoro&apos;s fiat gateway accommodates <strong>180+ countries</strong> with comprehensive payment infrastructure:</p>
 
-            <h3>Payment Methods:</h3>
-            <ul>
-              <li><strong>Credit/Debit Cards:</strong> 3DS2-secured purchases boasting 99.9% approval rates</li>
-              <li><strong>SEPA/SWIFT:</strong> $10M daily corporate wire capacity</li>
-              <li><strong>Dynamic KYC:</strong> $250/day limits via email verification, scaling to $500K for institutions</li>
-            </ul>
+              <h3 className="text-xl md:text-2xl font-semibold mb-6">Payment Methods:</h3>
+              <ul className="list-disc pl-6 mb-10 space-y-4">
+                <li className="text-base md:text-lg leading-relaxed"><strong>Credit/Debit Cards:</strong> 3DS2-secured purchases boasting 99.9% approval rates</li>
+                <li className="text-base md:text-lg leading-relaxed"><strong>SEPA/SWIFT:</strong> $10M daily corporate wire capacity</li>
+                <li className="text-base md:text-lg leading-relaxed"><strong>Dynamic KYC:</strong> $250/day limits via email verification, scaling to $500K for institutions</li>
+              </ul>
 
-            <p>The platform&apos;s white-label API lets businesses embed branded fiat ramps, a feature adopted by <strong>73% of European e-commerce platforms</strong>. Chainlink-powered oracles enable decentralized fiat settlements and auto-refund smart contracts.</p>
+              <p className="mb-8 text-base md:text-lg leading-relaxed">The platform&apos;s white-label API lets businesses embed branded fiat ramps, a feature adopted by <strong>73% of European e-commerce platforms</strong>. Chainlink-powered oracles enable decentralized fiat settlements and auto-refund smart contracts.</p>
 
-            <h2>Enterprise Solutions & Fee Transparency</h2>
-            
-            <p>Institutions leverage advanced features designed for high-volume operations:</p>
+              <h2 className="text-2xl md:text-3xl font-bold mb-8">Enterprise Solutions & Fee Transparency</h2>
+              
+              <p className="mb-8 text-base md:text-lg leading-relaxed">Institutions leverage advanced features designed for high-volume operations:</p>
 
-            <h3>Enterprise Features:</h3>
-            <ul>
-              <li><strong>Real-time FX rate feeds</strong> via WebSocket</li>
-              <li><strong>Automated treasury management</strong> with smart settlement rules</li>
-              <li><strong>PCI-DSS certified</strong> card processing</li>
-              <li><strong>White-label integration</strong> for branded experiences</li>
-            </ul>
+              <h3 className="text-xl md:text-2xl font-semibold mb-6">Enterprise Features:</h3>
+              <ul className="list-disc pl-6 mb-10 space-y-4">
+                <li className="text-base md:text-lg leading-relaxed"><strong>Real-time FX rate feeds</strong> via WebSocket</li>
+                <li className="text-base md:text-lg leading-relaxed"><strong>Automated treasury management</strong> with smart settlement rules</li>
+                <li className="text-base md:text-lg leading-relaxed"><strong>PCI-DSS certified</strong> card processing</li>
+                <li className="text-base md:text-lg leading-relaxed"><strong>White-label integration</strong> for branded experiences</li>
+              </ul>
 
-            <h3>Fee Structure:</h3>
-            <ul>
-              <li><strong>Card payments:</strong> Starting at 1.9%</li>
-              <li><strong>Bank transfers:</strong> 0.5% processing fee</li>
-              <li><strong>Settlement speed:</strong> 90% of EUR deposits in under 2 minutes</li>
-            </ul>
+              <h3 className="text-xl md:text-2xl font-semibold mb-6">Fee Structure:</h3>
+              <ul className="list-disc pl-6 mb-10 space-y-4">
+                <li className="text-base md:text-lg leading-relaxed"><strong>Card payments:</strong> Starting at 1.9%</li>
+                <li className="text-base md:text-lg leading-relaxed"><strong>Bank transfers:</strong> 0.5% processing fee</li>
+                <li className="text-base md:text-lg leading-relaxed"><strong>Settlement speed:</strong> 90% of EUR deposits in under 2 minutes</li>
+              </ul>
 
-            <h2>Regulatory Compliance & Security</h2>
-            
-            <p>Tezaoro&apos;s fiat gateway maintains the highest security and compliance standards:</p>
-            
-            <ul>
-              <li><strong>PCI-DSS Level 1:</strong> Highest card security certification</li>
-              <li><strong>3DS2 Authentication:</strong> Advanced fraud protection</li>
-              <li><strong>AML/KYC Compliance:</strong> Dynamic verification thresholds</li>
-              <li><strong>GDPR Compliant:</strong> Full European data protection</li>
-              <li><strong>Multi-jurisdictional licenses:</strong> Operating across 180+ countries</li>
-            </ul>
+              <h2 className="text-2xl md:text-3xl font-bold mb-8">Regulatory Compliance & Security</h2>
+              
+              <p className="mb-8 text-base md:text-lg leading-relaxed">Tezaoro&apos;s fiat gateway maintains the highest security and compliance standards:</p>
+              
+              <ul className="list-disc pl-6 mb-10 space-y-4">
+                <li className="text-base md:text-lg leading-relaxed"><strong>PCI-DSS Level 1:</strong> Highest card security certification</li>
+                <li className="text-base md:text-lg leading-relaxed"><strong>3DS2 Authentication:</strong> Advanced fraud protection</li>
+                <li className="text-base md:text-lg leading-relaxed"><strong>AML/KYC Compliance:</strong> Dynamic verification thresholds</li>
+                <li className="text-base md:text-lg leading-relaxed"><strong>GDPR Compliant:</strong> Full European data protection</li>
+                <li className="text-base md:text-lg leading-relaxed"><strong>Multi-jurisdictional licenses:</strong> Operating across 180+ countries</li>
+              </ul>
 
-            <h2>Technical Infrastructure</h2>
-            
-            <p>The gateway&apos;s technical architecture ensures reliability and scalability:</p>
-            
-            <ul>
-              <li><strong>Chainlink Oracles:</strong> Decentralized price feeds and settlements</li>
-              <li><strong>Smart Contracts:</strong> Automated refund and escrow systems</li>
-              <li><strong>WebSocket API:</strong> Real-time rate updates</li>
-              <li><strong>Load Balancing:</strong> 99.99% uptime guarantee</li>
-              <li><strong>Multi-region deployment:</strong> Global latency optimization</li>
-            </ul>
+              <h2 className="text-2xl md:text-3xl font-bold mb-8">Technical Infrastructure</h2>
+              
+              <p className="mb-8 text-base md:text-lg leading-relaxed">The gateway&apos;s technical architecture ensures reliability and scalability:</p>
+              
+              <ul className="list-disc pl-6 mb-10 space-y-4">
+                <li className="text-base md:text-lg leading-relaxed"><strong>Chainlink Oracles:</strong> Decentralized price feeds and settlements</li>
+                <li className="text-base md:text-lg leading-relaxed"><strong>Smart Contracts:</strong> Automated refund and escrow systems</li>
+                <li className="text-base md:text-lg leading-relaxed"><strong>WebSocket API:</strong> Real-time rate updates</li>
+                <li className="text-base md:text-lg leading-relaxed"><strong>Load Balancing:</strong> 99.99% uptime guarantee</li>
+                <li className="text-base md:text-lg leading-relaxed"><strong>Multi-region deployment:</strong> Global latency optimization</li>
+              </ul>
 
-            <h2>Integration Benefits</h2>
-            
-            <p>Businesses integrating Tezaoro&apos;s fiat gateway experience:</p>
-            
-            <ul>
-              <li><strong>Revenue increase:</strong> Average 34% boost in conversion rates</li>
-              <li><strong>Market expansion:</strong> Access to 180+ countries instantly</li>
-              <li><strong>Reduced complexity:</strong> Single API for all payment methods</li>
-              <li><strong>Cost savings:</strong> Up to 60% lower processing fees</li>
-              <li><strong>Faster settlements:</strong> Near-instant fiat-to-crypto conversions</li>
-            </ul>
+              <h2 className="text-2xl md:text-3xl font-bold mb-8">Integration Benefits</h2>
+              
+              <p className="mb-8 text-base md:text-lg leading-relaxed">Businesses integrating Tezaoro&apos;s fiat gateway experience:</p>
+              
+              <ul className="list-disc pl-6 mb-10 space-y-4">
+                <li className="text-base md:text-lg leading-relaxed"><strong>Revenue increase:</strong> Average 34% boost in conversion rates</li>
+                <li className="text-base md:text-lg leading-relaxed"><strong>Market expansion:</strong> Access to 180+ countries instantly</li>
+                <li className="text-base md:text-lg leading-relaxed"><strong>Reduced complexity:</strong> Single API for all payment methods</li>
+                <li className="text-base md:text-lg leading-relaxed"><strong>Cost savings:</strong> Up to 60% lower processing fees</li>
+                <li className="text-base md:text-lg leading-relaxed"><strong>Faster settlements:</strong> Near-instant fiat-to-crypto conversions</li>
+              </ul>
 
-            <h2>Conclusion</h2>
-            
-            <p>Tezaoro&apos;s Fiat Gateway represents the <strong>top crypto fiat gateway for 2025</strong>, seamlessly bridging traditional finance with Web3 ecosystems. With support for 180+ countries, institutional-grade security, and competitive fee structures, it empowers businesses to integrate crypto payments without sacrificing user experience or regulatory compliance.</p>
+              <h2 className="text-2xl md:text-3xl font-bold mb-8">Conclusion</h2>
+              
+              <p className="mb-8 text-base md:text-lg leading-relaxed">Tezaoro&apos;s Fiat Gateway represents the <strong>top crypto fiat gateway for 2025</strong>, seamlessly bridging traditional finance with Web3 ecosystems. With support for 180+ countries, institutional-grade security, and competitive fee structures, it empowers businesses to integrate crypto payments without sacrificing user experience or regulatory compliance.</p>
 
-            <p>The platform&apos;s combination of SEPA crypto purchases, dynamic KYC thresholds, and white-label fiat ramps makes it an essential infrastructure component for any business entering the crypto space.</p>
-          </div>
+              <p className="mb-8 text-base md:text-lg leading-relaxed">The platform&apos;s combination of SEPA crypto purchases, dynamic KYC thresholds, and white-label fiat ramps makes it an essential infrastructure component for any business entering the crypto space.</p>
+            </div>
+          </Card>
         </div>
       </article>
     </PageLayout>

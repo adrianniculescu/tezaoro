@@ -30,26 +30,26 @@ const GuideContent = ({
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <Link to="/blog">
-        <Button variant="ghost" className="mb-6 flex items-center gap-2">
+        <Button variant="ghost" className="mb-8 flex items-center gap-2">
           <ArrowLeft className="h-4 w-4" />
           Back to Blog
         </Button>
       </Link>
       
       <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
+        <div className="mb-12">
           {category && (
-            <Badge variant="default" className="mb-4">{category}</Badge>
+            <Badge variant="default" className="mb-6">{category}</Badge>
           )}
           
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">{title}</h1>
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">{title}</h1>
           
           {description && (
-            <p className="text-xl text-muted-foreground mb-6">{description}</p>
+            <p className="text-xl md:text-2xl text-muted-foreground mb-8 leading-relaxed">{description}</p>
           )}
           
           {(author || date || readTime) && (
-            <div className="flex items-center gap-4 text-sm text-muted-foreground border-b border-border pb-6">
+            <div className="flex items-center gap-6 text-sm text-muted-foreground border-b border-border pb-8 mb-8">
               {author && (
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4" />
@@ -72,14 +72,16 @@ const GuideContent = ({
           )}
         </div>
         
-        <Card className="glass-card bg-card p-8">
+        <Card className="glass-card bg-card p-8 md:p-12">
           {content ? (
             <div 
-              className="prose prose-lg max-w-none dark:prose-invert"
+              className="prose prose-lg md:prose-xl max-w-none dark:prose-invert prose-headings:font-bold prose-headings:mb-6 prose-headings:mt-12 prose-headings:leading-tight prose-p:mb-6 prose-p:leading-relaxed prose-p:text-base md:prose-p:text-lg prose-li:mb-3 prose-li:leading-relaxed prose-ul:mb-8 prose-ol:mb-8 prose-blockquote:mb-8 prose-pre:mb-8"
               dangerouslySetInnerHTML={{ __html: content }}
             />
           ) : (
-            children
+            <div className="prose prose-lg md:prose-xl max-w-none dark:prose-invert prose-headings:font-bold prose-headings:mb-6 prose-headings:mt-12 prose-headings:leading-tight prose-p:mb-6 prose-p:leading-relaxed prose-p:text-base md:prose-p:text-lg prose-li:mb-3 prose-li:leading-relaxed prose-ul:mb-8 prose-ol:mb-8 prose-blockquote:mb-8 prose-pre:mb-8">
+              {children}
+            </div>
           )}
         </Card>
       </div>
