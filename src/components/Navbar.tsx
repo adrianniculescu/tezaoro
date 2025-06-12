@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -17,6 +16,7 @@ const Navbar = () => {
   const menuItems = [
     { label: 'Features', href: '/features' },
     { label: 'Algorithms', href: '/algorithms' },
+    { label: 'Trading Tools', href: '/trading-tools' },
     { label: 'Pricing', href: '/pricing' },
     { label: 'Documentation', href: '/documentation' },
     { label: 'Blog', href: '/blog' },
