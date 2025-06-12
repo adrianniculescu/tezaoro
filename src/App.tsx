@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import AuthGuard from "@/components/auth/AuthGuard";
 import Index from "./pages/Index";
 import Home from "./pages/Home";
 import Features from "./pages/Features";
@@ -31,6 +32,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import TradingTools from "./pages/TradingTools";
 import NotFound from "./pages/NotFound";
+import Auth from "./pages/Auth";
 
 // Blog posts
 import AIAlgorithmicTrading from "./pages/blog/AIAlgorithmicTrading";
@@ -67,63 +69,66 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/features" element={<Features />} />
-          <Route path="/pricing" element={<Pricing />} />
-          <Route path="/documentation" element={<Documentation />} />
-          <Route path="/api" element={<Api />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/exchange" element={<Exchange />} />
-          <Route path="/dex-aggregator" element={<DexAggregator />} />
-          <Route path="/fiat-gateway" element={<FiatGateway />} />
-          <Route path="/trading-tools" element={<TradingTools />} />
-          <Route path="/market-making" element={<MarketMaking />} />
-          <Route path="/token-listing" element={<TokenListing />} />
-          <Route path="/tokenomics-consulting" element={<TokenomicsConsulting />} />
-          <Route path="/algorithms" element={<Algorithms />} />
-          <Route path="/performance" element={<Performance />} />
-          <Route path="/platform" element={<Platform />} />
-          <Route path="/resources" element={<Resources />} />
-          <Route path="/support" element={<Support />} />
-          <Route path="/how-it-works" element={<HowItWorks />} />
-          <Route path="/small-cap" element={<SmallCap />} />
-          <Route path="/micro-cap" element={<MicroCap />} />
-          <Route path="/nano-cap" element={<NanoCap />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/terms-of-service" element={<TermsOfService />} />
-          
-          {/* Blog routes */}
-          <Route path="/blog/ai-algorithmic-trading" element={<AIAlgorithmicTrading />} />
-          <Route path="/blog/algorithmic-vs-manual-trading" element={<AlgorithmicVsManualTrading />} />
-          <Route path="/blog/backtesting-trading-algorithm" element={<BacktestingTradingAlgorithm />} />
-          <Route path="/blog/building-first-trading-bot" element={<BuildingFirstTradingBot />} />
-          <Route path="/blog/choose-algorithmic-trading-platform" element={<ChooseAlgorithmicTradingPlatform />} />
-          <Route path="/blog/crypto-algorithmic-trading-strategies" element={<CryptoAlgorithmicTradingStrategies />} />
-          <Route path="/blog/future-algorithmic-trading" element={<FutureAlgorithmicTrading />} />
-          <Route path="/blog/institutional-trading-algorithms" element={<InstitutionalTradingAlgorithms />} />
-          <Route path="/blog/nano-cap-crypto-liquidity" element={<NanoCapCryptoLiquidity />} />
-          <Route path="/blog/reduce-slippage-trading" element={<ReduceSlippageTrading />} />
-          <Route path="/blog/risk-management-algorithmic-trading" element={<RiskManagementAlgorithmicTrading />} />
-          <Route path="/blog/scalping-vs-swing-trading" element={<ScalpingVsSwingTrading />} />
-          <Route path="/blog/trading-regulations-compliance" element={<TradingRegulationsCompliance />} />
-          <Route path="/blog/tezaoro-instant-exchange-review" element={<TezaoroInstantExchangeReview />} />
-          <Route path="/blog/tezaoro-fiat-gateway-review" element={<TezaoroFiatGatewayReview />} />
-          <Route path="/blog/tezaoro-dex-aggregator-review" element={<TezaoroDexAggregatorReview />} />
-          
-          {/* Guide routes */}
-          <Route path="/guides/platform-overview" element={<PlatformOverview />} />
-          <Route path="/guides/account-setup" element={<AccountSetup />} />
-          <Route path="/guides/deploying-first-algorithm" element={<DeployingFirstAlgorithm />} />
-          <Route path="/guides/performance-metrics-explained" element={<PerformanceMetricsExplained />} />
-          <Route path="/guides/optimization-techniques" element={<OptimizationTechniques />} />
-          <Route path="/guides/reporting-features" element={<ReportingFeatures />} />
-          <Route path="/guides/performance-dashboard-guide" element={<PerformanceDashboardGuide />} />
-          
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthGuard>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/home" element={<Home />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/features" element={<Features />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/documentation" element={<Documentation />} />
+            <Route path="/api" element={<Api />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/exchange" element={<Exchange />} />
+            <Route path="/dex-aggregator" element={<DexAggregator />} />
+            <Route path="/fiat-gateway" element={<FiatGateway />} />
+            <Route path="/trading-tools" element={<TradingTools />} />
+            <Route path="/market-making" element={<MarketMaking />} />
+            <Route path="/token-listing" element={<TokenListing />} />
+            <Route path="/tokenomics-consulting" element={<TokenomicsConsulting />} />
+            <Route path="/algorithms" element={<Algorithms />} />
+            <Route path="/performance" element={<Performance />} />
+            <Route path="/platform" element={<Platform />} />
+            <Route path="/resources" element={<Resources />} />
+            <Route path="/support" element={<Support />} />
+            <Route path="/how-it-works" element={<HowItWorks />} />
+            <Route path="/small-cap" element={<SmallCap />} />
+            <Route path="/micro-cap" element={<MicroCap />} />
+            <Route path="/nano-cap" element={<NanoCap />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms-of-service" element={<TermsOfService />} />
+            
+            {/* Blog routes */}
+            <Route path="/blog/ai-algorithmic-trading" element={<AIAlgorithmicTrading />} />
+            <Route path="/blog/algorithmic-vs-manual-trading" element={<AlgorithmicVsManualTrading />} />
+            <Route path="/blog/backtesting-trading-algorithm" element={<BacktestingTradingAlgorithm />} />
+            <Route path="/blog/building-first-trading-bot" element={<BuildingFirstTradingBot />} />
+            <Route path="/blog/choose-algorithmic-trading-platform" element={<ChooseAlgorithmicTradingPlatform />} />
+            <Route path="/blog/crypto-algorithmic-trading-strategies" element={<CryptoAlgorithmicTradingStrategies />} />
+            <Route path="/blog/future-algorithmic-trading" element={<FutureAlgorithmicTrading />} />
+            <Route path="/blog/institutional-trading-algorithms" element={<InstitutionalTradingAlgorithms />} />
+            <Route path="/blog/nano-cap-crypto-liquidity" element={<NanoCapCryptoLiquidity />} />
+            <Route path="/blog/reduce-slippage-trading" element={<ReduceSlippageTrading />} />
+            <Route path="/blog/risk-management-algorithmic-trading" element={<RiskManagementAlgorithmicTrading />} />
+            <Route path="/blog/scalping-vs-swing-trading" element={<ScalpingVsSwingTrading />} />
+            <Route path="/blog/trading-regulations-compliance" element={<TradingRegulationsCompliance />} />
+            <Route path="/blog/tezaoro-instant-exchange-review" element={<TezaoroInstantExchangeReview />} />
+            <Route path="/blog/tezaoro-fiat-gateway-review" element={<TezaoroFiatGatewayReview />} />
+            <Route path="/blog/tezaoro-dex-aggregator-review" element={<TezaoroDexAggregatorReview />} />
+            
+            {/* Guide routes */}
+            <Route path="/guides/platform-overview" element={<PlatformOverview />} />
+            <Route path="/guides/account-setup" element={<AccountSetup />} />
+            <Route path="/guides/deploying-first-algorithm" element={<DeployingFirstAlgorithm />} />
+            <Route path="/guides/performance-metrics-explained" element={<PerformanceMetricsExplained />} />
+            <Route path="/guides/optimization-techniques" element={<OptimizationTechniques />} />
+            <Route path="/guides/reporting-features" element={<ReportingFeatures />} />
+            <Route path="/guides/performance-dashboard-guide" element={<PerformanceDashboardGuide />} />
+            
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthGuard>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
