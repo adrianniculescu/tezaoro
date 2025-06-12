@@ -7,7 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Shield } from 'lucide-react';
+
+const ALLOWED_EMAIL = 'office@tezaoro.com';
 
 const AuthForm = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -15,8 +17,25 @@ const AuthForm = () => {
   const [password, setPassword] = useState('');
   const { toast } = useToast();
 
+  const validateEmail = (email: string) => {
+    if (email !== ALLOWED_EMAIL) {
+      toast({
+        title: "Access Restricted",
+        description: "Only authorized personnel can access this system. Please contact the administrator if you believe this is an error.",
+        variant: "destructive",
+      });
+      return false;
+    }
+    return true;
+  };
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateEmail(email)) {
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -63,6 +82,11 @@ const AuthForm = () => {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateEmail(email)) {
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -98,8 +122,17 @@ const AuthForm = () => {
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <Card className="w-full max-w-md p-6 glass-card bg-card">
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-foreground">Tezaoro</h1>
+          <div className="flex items-center justify-center mb-2">
+            <Shield className="h-8 w-8 text-primary mr-2" />
+            <h1 className="text-2xl font-bold text-foreground">Tezaoro</h1>
+          </div>
           <p className="text-muted-foreground">AI-Powered Trading Platform</p>
+          <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-lg">
+            <p className="text-sm text-amber-700 dark:text-amber-300">
+              <Shield className="h-4 w-4 inline mr-1" />
+              Restricted Access - Authorized Personnel Only
+            </p>
+          </div>
         </div>
 
         <Tabs defaultValue="signin" className="w-full">
@@ -115,7 +148,7 @@ const AuthForm = () => {
                 <Input
                   id="signin-email"
                   type="email"
-                  placeholder="Enter your email"
+                  placeholder="Enter authorized email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -158,7 +191,7 @@ const AuthForm = () => {
                 <Input
                   id="signup-email"
                   type="email"
-                  placeholder="Enter your email"
+                  placeholder="Enter authorized email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
