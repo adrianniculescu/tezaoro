@@ -1,4 +1,3 @@
-
 import React from 'react';
 import PageLayout from '@/components/PageLayout';
 import PageHeader from '@/components/PageHeader';
@@ -50,7 +49,7 @@ const Documentation = () => {
                   Get familiar with the Tezaoro platform interface and key features.
                 </p>
                 <Button variant="link" className="p-0 h-auto flex items-center gap-1" disabled={true}>
-                  <span>Read guide</span>
+                  <span>in development</span>
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Card>
@@ -66,7 +65,7 @@ const Documentation = () => {
                   Learn how to set up your account, security settings, and preferences.
                 </p>
                 <Button variant="link" className="p-0 h-auto flex items-center gap-1" disabled={true}>
-                  <span>Read guide</span>
+                  <span>in development</span>
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Card>
@@ -82,12 +81,13 @@ const Documentation = () => {
                   A step-by-step guide to selecting and deploying your first trading algorithm.
                 </p>
                 <Button variant="link" className="p-0 h-auto flex items-center gap-1" disabled={true}>
-                  <span>Read guide</span>
+                  <span>in development</span>
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Card>
             </div>
           </div>
+          
           
           <div className="mb-16">
             <Tabs defaultValue="algorithms" className="w-full">
