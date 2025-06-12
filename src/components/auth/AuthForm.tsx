@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Shield } from 'lucide-react';
+import TwoFactorVerification from './TwoFactorVerification';
 
 const ALLOWED_EMAIL = 'office@tezaoro.com';
 
@@ -15,6 +16,8 @@ const AuthForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showTwoFactor, setShowTwoFactor] = useState(false);
+  const [pendingCredentials, setPendingCredentials] = useState<{email: string, password: string} | null>(null);
   const { toast } = useToast();
 
   const validateEmail = (email: string) => {
@@ -90,22 +93,31 @@ const AuthForm = () => {
     setIsLoading(true);
 
     try {
+      // First check if user exists by attempting sign in
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
+        if (error.message.includes('Invalid login credentials')) {
+          toast({
+            title: "Invalid credentials",
+            description: "Please check your email and password and try again.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: error.message,
+            variant: "destructive",
+          });
+        }
       } else {
-        toast({
-          title: "Welcome back!",
-          description: "You have been successfully signed in.",
-        });
+        // Sign out immediately and show 2FA
+        await supabase.auth.signOut();
+        setPendingCredentials({ email, password });
+        setShowTwoFactor(true);
       }
     } catch (error) {
       toast({
@@ -117,6 +129,29 @@ const AuthForm = () => {
       setIsLoading(false);
     }
   };
+
+  const handleTwoFactorBack = () => {
+    setShowTwoFactor(false);
+    setPendingCredentials(null);
+  };
+
+  const handleTwoFactorSuccess = () => {
+    setShowTwoFactor(false);
+    setPendingCredentials(null);
+    setEmail('');
+    setPassword('');
+  };
+
+  if (showTwoFactor && pendingCredentials) {
+    return (
+      <TwoFactorVerification
+        email={pendingCredentials.email}
+        password={pendingCredentials.password}
+        onBack={handleTwoFactorBack}
+        onSuccess={handleTwoFactorSuccess}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">

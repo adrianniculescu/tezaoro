@@ -33,6 +33,33 @@ export type Database = {
         }
         Relationships: []
       }
+      two_factor_codes: {
+        Row: {
+          code: string
+          created_at: string
+          expires_at: string
+          id: string
+          user_id: string
+          verified: boolean
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          user_id: string
+          verified?: boolean
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          user_id?: string
+          verified?: boolean
+        }
+        Relationships: []
+      }
       vault: {
         Row: {
           created_at: string
@@ -62,7 +89,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      cleanup_expired_2fa_codes: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      generate_2fa_code: {
+        Args: { user_email: string }
+        Returns: string
+      }
+      verify_2fa_code: {
+        Args: { user_email: string; input_code: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
