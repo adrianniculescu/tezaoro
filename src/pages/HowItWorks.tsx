@@ -191,7 +191,7 @@ const HowItWorks = () => {
                 <Card className="glass-card p-6">
                   <h3 className="text-xl font-bold mb-2">When will the platform be available?</h3>
                   <p className="text-muted-foreground">
-                    The platform is currently in testing mode with a limited group of beta users. We expect to open access to the public in Q3 2023. Join our waitlist to be notified when we launch.
+                    The platform is currently in testing mode with a limited group of beta users. We expect to open access to the public in Q3 2025. Join our waitlist to be notified when we launch.
                   </p>
                 </Card>
               </div>
