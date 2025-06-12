@@ -21,14 +21,17 @@ const TwoFactorVerification = ({ email, password, onBack, onSuccess }: TwoFactor
   const [isResending, setIsResending] = useState(false);
   const { toast } = useToast();
 
+  const SUPABASE_URL = "https://tfzeegaepscycaaciviz.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmemVlZ2FlcHNjeWNhYWNpdml6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MjY0NDAsImV4cCI6MjA2NDIwMjQ0MH0.GLFPR_AdtnruTpIXs_en5R1JLXML3avnqNEwJK6hUdM";
+
   const sendVerificationCode = async () => {
     setIsResending(true);
     try {
-      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/send-2fa-code`, {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/send-2fa-code`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabase.supabaseKey}`,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
         },
         body: JSON.stringify({ email }),
       });
@@ -80,11 +83,11 @@ const TwoFactorVerification = ({ email, password, onBack, onSuccess }: TwoFactor
 
     try {
       // First verify the 2FA code
-      const verifyResponse = await fetch(`${supabase.supabaseUrl}/functions/v1/verify-2fa-code`, {
+      const verifyResponse = await fetch(`${SUPABASE_URL}/functions/v1/verify-2fa-code`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabase.supabaseKey}`,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
         },
         body: JSON.stringify({ email, code }),
       });
