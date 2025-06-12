@@ -1,14 +1,36 @@
-
 import React from 'react';
+import { Helmet } from 'react-helmet';
 import PageLayout from '@/components/PageLayout';
+import JsonLdSchema from '@/components/seo/JsonLdSchema';
 import PageHeader from '@/components/PageHeader';
 import { ArrowLeft, Clock, User, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
 const TezaoroFiatGatewayReview = () => {
+  const postData = {
+    title: "Tezaoro Fiat Gateway Review: Bridging Traditional Finance & Web3 Ecosystems",
+    description: "Global banking integration across 180+ countries with 3DS2-secured purchases, SEPA/SWIFT support, and dynamic KYC.",
+    author: "Tezaoro Team",
+    publishedDate: "2025-01-24T10:00:00Z",
+    modifiedDate: "2025-01-24T10:00:00Z",
+    url: "https://tezaoro.com/blog/tezaoro-fiat-gateway-review",
+    imageUrl: "https://tezaoro.com/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
+    readingTime: "8 min",
+    category: "Product Review",
+    keywords: ["fiat gateway", "crypto fiat ramp", "SEPA crypto", "3DS2 payments", "white-label fiat"]
+  };
+
   return (
     <PageLayout title="Tezaoro Fiat Gateway Review">
+      <JsonLdSchema {...postData} />
+      <Helmet>
+        <title>Tezaoro Fiat Gateway Review: Bridging Traditional Finance & Web3 Ecosystems</title>
+        <meta name="description" content="Global banking integration across 180+ countries with 3DS2-secured purchases, SEPA/SWIFT support, and dynamic KYC." />
+        <meta name="keywords" content="fiat gateway, crypto fiat ramp, SEPA crypto, 3DS2 payments, white-label fiat" />
+        <link rel="canonical" href="https://tezaoro.com/blog/tezaoro-fiat-gateway-review" />
+      </Helmet>
+
       <article className="py-16 md:py-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
           <Link to="/blog">

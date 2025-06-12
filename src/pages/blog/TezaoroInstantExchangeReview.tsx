@@ -1,14 +1,36 @@
-
 import React from 'react';
+import { Helmet } from 'react-helmet';
 import PageLayout from '@/components/PageLayout';
+import JsonLdSchema from '@/components/seo/JsonLdSchema';
 import PageHeader from '@/components/PageHeader';
 import { ArrowLeft, Clock, User, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
 const TezaoroInstantExchangeReview = () => {
+  const postData = {
+    title: "Tezaoro Instant Exchange Review: Revolutionizing High-Speed Crypto Conversions",
+    description: "Unmatched transaction velocity with 15,000 TPS processing, zero slippage for trades under $100K, and non-custodial escrow.",
+    author: "Tezaoro Team",
+    publishedDate: "2025-01-24T10:00:00Z",
+    modifiedDate: "2025-01-24T10:00:00Z",
+    url: "https://tezaoro.com/blog/tezaoro-instant-exchange-review",
+    imageUrl: "https://tezaoro.com/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
+    readingTime: "9 min",
+    category: "Product Review",
+    keywords: ["instant crypto exchange", "crypto conversion", "15000 TPS", "zero slippage", "non-custodial trading"]
+  };
+
   return (
     <PageLayout title="Tezaoro Instant Exchange Review">
+      <JsonLdSchema {...postData} />
+      <Helmet>
+        <title>Tezaoro Instant Exchange Review: Revolutionizing High-Speed Crypto Conversions</title>
+        <meta name="description" content="Unmatched transaction velocity with 15,000 TPS processing, zero slippage for trades under $100K, and non-custodial escrow." />
+        <meta name="keywords" content="instant crypto exchange, crypto conversion, 15000 TPS, zero slippage, non-custodial trading" />
+        <link rel="canonical" href="https://tezaoro.com/blog/tezaoro-instant-exchange-review" />
+      </Helmet>
+
       <article className="py-16 md:py-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
           <Link to="/blog">

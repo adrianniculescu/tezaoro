@@ -1,14 +1,36 @@
-
 import React from 'react';
+import { Helmet } from 'react-helmet';
 import PageLayout from '@/components/PageLayout';
+import JsonLdSchema from '@/components/seo/JsonLdSchema';
 import PageHeader from '@/components/PageHeader';
 import { ArrowLeft, Clock, User, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
 const TezaoroDexAggregatorReview = () => {
+  const postData = {
+    title: "Tezaoro DEX Aggregator Review: Optimizing DeFi Trading Across 80+ Markets",
+    description: "Advanced algorithmic trading infrastructure with quantum-resistant routing, MEV-protected swaps, and gasless trading.",
+    author: "Tezaoro Team",
+    publishedDate: "2025-01-24T10:00:00Z",
+    modifiedDate: "2025-01-24T10:00:00Z",
+    url: "https://tezaoro.com/blog/tezaoro-dex-aggregator-review",
+    imageUrl: "https://tezaoro.com/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
+    readingTime: "10 min",
+    category: "Product Review",
+    keywords: ["DEX aggregator", "DeFi trading", "quantum-resistant routing", "MEV protection", "gasless trading"]
+  };
+
   return (
     <PageLayout title="Tezaoro DEX Aggregator Review">
+      <JsonLdSchema {...postData} />
+      <Helmet>
+        <title>Tezaoro DEX Aggregator Review: Optimizing DeFi Trading Across 80+ Markets</title>
+        <meta name="description" content="Advanced algorithmic trading infrastructure with quantum-resistant routing, MEV-protected swaps, and gasless trading." />
+        <meta name="keywords" content="DEX aggregator, DeFi trading, quantum-resistant routing, MEV protection, gasless trading" />
+        <link rel="canonical" href="https://tezaoro.com/blog/tezaoro-dex-aggregator-review" />
+      </Helmet>
+
       <article className="py-16 md:py-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
           <Link to="/blog">

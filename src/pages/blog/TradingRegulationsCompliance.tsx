@@ -2,14 +2,29 @@
 import React from 'react';
 import { Helmet } from 'react-helmet';
 import PageLayout from '@/components/PageLayout';
+import JsonLdSchema from '@/components/seo/JsonLdSchema';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { User, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const TradingRegulationsCompliance = () => {
+  const postData = {
+    title: "Algorithmic Trading Regulations: A Compliance Guide",
+    description: "Stay compliant with global algo trading regulations. Learn best practices for KYC, reporting, and audits.",
+    author: "Tezaoro Team",
+    publishedDate: "2025-01-24T10:00:00Z",
+    modifiedDate: "2025-01-24T10:00:00Z",
+    url: "https://tezaoro.com/guide/trading-regulations-compliance",
+    imageUrl: "https://tezaoro.com/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
+    readingTime: "9 min",
+    category: "Compliance",
+    keywords: ["algorithmic trading regulations", "trading compliance", "KYC AML trading", "financial regulations"]
+  };
+
   return (
     <PageLayout title="Algorithmic Trading Regulations: A Compliance Guide">
+      <JsonLdSchema {...postData} />
       <Helmet>
         <title>Algorithmic Trading Regulations: A Compliance Guide</title>
         <meta name="description" content="Stay compliant with global algo trading regulations. Learn best practices for KYC, reporting, and audits." />

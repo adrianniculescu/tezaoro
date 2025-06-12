@@ -2,14 +2,29 @@
 import React from 'react';
 import { Helmet } from 'react-helmet';
 import PageLayout from '@/components/PageLayout';
+import JsonLdSchema from '@/components/seo/JsonLdSchema';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { User, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const ScalpingVsSwingTrading = () => {
+  const postData = {
+    title: "Scalping vs. Swing Trading: Algorithmic Strategies Compared",
+    description: "Compare scalping and swing trading algorithms. Learn which approach suits your risk tolerance and goals.",
+    author: "Tezaoro Team",
+    publishedDate: "2025-01-24T10:00:00Z",
+    modifiedDate: "2025-01-24T10:00:00Z",
+    url: "https://tezaoro.com/guide/scalping-vs-swing-trading",
+    imageUrl: "https://tezaoro.com/lovable-uploads/4e78d349-f6e7-45a0-826d-df094405dfee.png",
+    readingTime: "8 min",
+    category: "Strategy Comparison",
+    keywords: ["scalping vs swing trading", "algorithmic trading strategies", "day trading vs swing trading", "trading strategy comparison"]
+  };
+
   return (
     <PageLayout title="Scalping vs. Swing Trading: Algorithmic Strategies Compared">
+      <JsonLdSchema {...postData} />
       <Helmet>
         <title>Scalping vs. Swing Trading: Algorithmic Strategies Compared</title>
         <meta name="description" content="Compare scalping and swing trading algorithms. Learn which approach suits your risk tolerance and goals." />
