@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Card } from "@/components/ui/card";
+import { Helmet } from 'react-helmet';
 
 const FaqSection = () => {
   const faqs = [
@@ -26,8 +27,26 @@ const FaqSection = () => {
     }
   ];
 
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(faq => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.answer
+      }
+    }))
+  };
+
   return (
     <div>
+      <Helmet>
+        <script type="application/ld+json">
+          {JSON.stringify(faqSchema, null, 2)}
+        </script>
+      </Helmet>
       <h2 className="text-3xl font-bold mb-8 text-center">Frequently Asked <span className="text-gradient">Questions</span></h2>
       <div className="space-y-6">
         {faqs.map((faq, index) => (

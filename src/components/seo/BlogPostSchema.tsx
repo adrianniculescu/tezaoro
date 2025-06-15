@@ -15,7 +15,7 @@ interface BlogPostSchemaProps {
   keywords?: string[];
 }
 
-const JsonLdSchema: React.FC<BlogPostSchemaProps> = ({
+const BlogPostSchema: React.FC<BlogPostSchemaProps> = ({
   title,
   description,
   author,
@@ -86,4 +86,4 @@ const JsonLdSchema: React.FC<BlogPostSchemaProps> = ({
   );
 };
 
-export default JsonLdSchema;
+export default BlogPostSchema;

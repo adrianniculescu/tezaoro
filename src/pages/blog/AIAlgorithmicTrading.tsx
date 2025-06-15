@@ -2,7 +2,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet';
 import PageLayout from '@/components/PageLayout';
-import JsonLdSchema from '@/components/seo/JsonLdSchema';
+import BlogPostSchema from '@/components/seo/BlogPostSchema';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { User, Clock } from 'lucide-react';
@@ -24,7 +24,7 @@ const AIAlgorithmicTrading = () => {
 
   return (
     <PageLayout title="How AI Is Transforming Algorithmic Trading">
-      <JsonLdSchema {...postData} />
+      <BlogPostSchema {...postData} />
       <Helmet>
         <title>How AI Is Transforming Algorithmic Trading</title>
         <meta name="description" content="Explore AI's impact on trading algorithms, from predictive analytics to sentiment analysis." />
