@@ -15,6 +15,7 @@ interface GuideContentProps {
   category?: string;
   content?: string;
   children?: React.ReactNode;
+  breadcrumbs?: React.ReactNode;
 }
 
 const GuideContent = ({ 
@@ -25,7 +26,8 @@ const GuideContent = ({
   readTime, 
   category, 
   content, 
-  children 
+  children,
+  breadcrumbs 
 }: GuideContentProps) => {
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -37,6 +39,7 @@ const GuideContent = ({
       </Link>
       
       <div className="max-w-4xl mx-auto">
+        {breadcrumbs}
         <div className="mb-12">
           {category && (
             <Badge variant="default" className="mb-6">{category}</Badge>
