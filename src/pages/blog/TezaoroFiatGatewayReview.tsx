@@ -2,7 +2,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet';
 import PageLayout from '@/components/PageLayout';
-import JsonLdSchema from '@/components/seo/JsonLdSchema';
+import BlogPostSchema from '@/components/seo/BlogPostSchema';
 import PageHeader from '@/components/PageHeader';
 import { ArrowLeft, Clock, User, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -25,7 +25,7 @@ const TezaoroFiatGatewayReview = () => {
 
   return (
     <PageLayout title="Tezaoro Fiat Gateway Review">
-      <JsonLdSchema {...postData} />
+      <BlogPostSchema {...postData} />
       <Helmet>
         <title>Tezaoro Fiat Gateway Review: Bridging Traditional Finance & Web3 Ecosystems</title>
         <meta name="description" content="Global banking integration across 180+ countries with 3DS2-secured purchases, SEPA/SWIFT support, and dynamic KYC." />

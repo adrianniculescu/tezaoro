@@ -2,7 +2,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet';
 import PageLayout from '@/components/PageLayout';
-import JsonLdSchema from '@/components/seo/JsonLdSchema';
+import BlogPostSchema from '@/components/seo/BlogPostSchema';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { User, Clock, ArrowLeft } from 'lucide-react';
@@ -25,7 +25,7 @@ const TradingRegulationsCompliance = () => {
 
   return (
     <PageLayout title="Algorithmic Trading Regulations: A Compliance Guide">
-      <JsonLdSchema {...postData} />
+      <BlogPostSchema {...postData} />
       <Helmet>
         <title>Algorithmic Trading Regulations: A Compliance Guide</title>
         <meta name="description" content="Stay compliant with global algo trading regulations. Learn best practices for KYC, reporting, and audits." />

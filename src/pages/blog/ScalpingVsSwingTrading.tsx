@@ -2,7 +2,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet';
 import PageLayout from '@/components/PageLayout';
-import JsonLdSchema from '@/components/seo/JsonLdSchema';
+import BlogPostSchema from '@/components/seo/BlogPostSchema';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { User, Clock, ArrowLeft } from 'lucide-react';
@@ -25,7 +25,7 @@ const ScalpingVsSwingTrading = () => {
 
   return (
     <PageLayout title="Scalping vs. Swing Trading: Algorithmic Strategies Compared">
-      <JsonLdSchema {...postData} />
+      <BlogPostSchema {...postData} />
       <Helmet>
         <title>Scalping vs. Swing Trading: Algorithmic Strategies Compared</title>
         <meta name="description" content="Compare scalping and swing trading algorithms. Learn which approach suits your risk tolerance and goals." />

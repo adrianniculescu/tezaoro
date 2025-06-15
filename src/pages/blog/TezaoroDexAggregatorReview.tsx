@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { Helmet } from 'react-helmet';
 import PageLayout from '@/components/PageLayout';
-import JsonLdSchema from '@/components/seo/JsonLdSchema';
+import BlogPostSchema from '@/components/seo/BlogPostSchema';
 import PageHeader from '@/components/PageHeader';
 import { ArrowLeft, Clock, User, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -23,7 +24,7 @@ const TezaoroDexAggregatorReview = () => {
 
   return (
     <PageLayout title="Tezaoro DEX Aggregator Review">
-      <JsonLdSchema {...postData} />
+      <BlogPostSchema {...postData} />
       <Helmet>
         <title>Tezaoro DEX Aggregator Review: Optimizing DeFi Trading Across 80+ Markets</title>
         <meta name="description" content="Advanced algorithmic trading infrastructure with quantum-resistant routing, MEV-protected swaps, and gasless trading." />

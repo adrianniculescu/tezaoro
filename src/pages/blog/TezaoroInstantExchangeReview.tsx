@@ -2,7 +2,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet';
 import PageLayout from '@/components/PageLayout';
-import JsonLdSchema from '@/components/seo/JsonLdSchema';
+import BlogPostSchema from '@/components/seo/BlogPostSchema';
 import PageHeader from '@/components/PageHeader';
 import { ArrowLeft, Clock, User, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -25,7 +25,7 @@ const TezaoroInstantExchangeReview = () => {
 
   return (
     <PageLayout title="Tezaoro Instant Exchange Review">
-      <JsonLdSchema {...postData} />
+      <BlogPostSchema {...postData} />
       <Helmet>
         <title>Tezaoro Instant Exchange Review: Revolutionizing High-Speed Crypto Conversions</title>
         <meta name="description" content="Unmatched transaction velocity with 15,000 TPS processing, zero slippage for trades under $100K, and non-custodial escrow." />
