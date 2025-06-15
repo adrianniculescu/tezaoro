@@ -11,7 +11,7 @@ interface PageLayoutProps {
 
 const PageLayout = ({ children, title }: PageLayoutProps) => {
   useEffect(() => {
-    document.title = `${title} | Tezaoro - AI-Powered Algorithmic Trading (MVP)`;
+    document.title = `${title} | Tezaoro`;
   }, [title]);
 
   return (

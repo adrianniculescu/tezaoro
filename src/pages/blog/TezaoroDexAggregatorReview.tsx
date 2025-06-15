@@ -24,7 +24,7 @@ const TezaoroDexAggregatorReview = () => {
     <PageLayout title="Tezaoro DEX Aggregator Review">
       <BlogPostSchema {...postData} />
       <Helmet>
-        <title>Tezaoro DEX Aggregator Review: Optimizing DeFi Trading Across 80+ Markets</title>
+        <title>Tezaoro DEX Aggregator Review: Optimizing DeFi Trading Across 80+ Markets | Tezaoro</title>
         <meta name="description" content="Advanced algorithmic trading infrastructure with quantum-resistant routing, MEV-protected swaps, and gasless trading." />
         <meta name="keywords" content="DEX aggregator, DeFi trading, quantum-resistant routing, MEV protection, gasless trading" />
         <link rel="canonical" href="https://tezaoro.com/blog/tezaoro-dex-aggregator-review" />

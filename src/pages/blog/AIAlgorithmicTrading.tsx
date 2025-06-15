@@ -26,7 +26,7 @@ const AIAlgorithmicTrading = () => {
     <PageLayout title="How AI Is Transforming Algorithmic Trading">
       <BlogPostSchema {...postData} />
       <Helmet>
-        <title>How AI Is Transforming Algorithmic Trading</title>
+        <title>How AI Is Transforming Algorithmic Trading | Tezaoro</title>
         <meta name="description" content="Explore AI's impact on trading algorithms, from predictive analytics to sentiment analysis." />
         <meta name="keywords" content="AI algorithmic trading, machine learning trading, AI trading algorithms, predictive analytics trading" />
         <link rel="canonical" href="https://tezaoro.com/guide/ai-algorithmic-trading" />
