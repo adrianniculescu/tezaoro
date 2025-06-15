@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { Helmet } from 'react-helmet';
 import PageLayout from '@/components/PageLayout';
 import BlogPostSchema from '@/components/seo/BlogPostSchema';
 import PostHeader from '@/components/blog/TezaoroDexAggregatorReview/PostHeader';
 import PostContent from '@/components/blog/TezaoroDexAggregatorReview/PostContent';
+import BreadcrumbNavigation from '@/components/BreadcrumbNavigation';
 
 const TezaoroDexAggregatorReview = () => {
   const postData = {
@@ -20,6 +20,12 @@ const TezaoroDexAggregatorReview = () => {
     keywords: ["DEX aggregator", "DeFi trading", "quantum-resistant routing", "MEV protection", "gasless trading"]
   };
 
+  const breadcrumbItems = [
+    { label: 'Home', href: '/' },
+    { label: 'Blog', href: '/blog' },
+    { label: 'Tezaoro DEX Aggregator Review' },
+  ];
+
   return (
     <PageLayout title="Tezaoro DEX Aggregator Review">
       <BlogPostSchema {...postData} />
@@ -32,6 +38,7 @@ const TezaoroDexAggregatorReview = () => {
 
       <article className="py-16 md:py-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
+          <BreadcrumbNavigation items={breadcrumbItems} />
           <PostHeader />
           <PostContent />
         </div>

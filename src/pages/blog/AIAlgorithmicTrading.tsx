@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Helmet } from 'react-helmet';
 import PageLayout from '@/components/PageLayout';
@@ -7,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { User, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import BreadcrumbNavigation from '@/components/BreadcrumbNavigation';
 
 const AIAlgorithmicTrading = () => {
   const postData = {
@@ -22,6 +22,12 @@ const AIAlgorithmicTrading = () => {
     keywords: ["AI algorithmic trading", "machine learning trading", "AI trading algorithms", "predictive analytics trading"]
   };
 
+  const breadcrumbItems = [
+    { label: 'Home', href: '/' },
+    { label: 'Blog', href: '/blog' },
+    { label: 'How AI Is Transforming Algorithmic Trading' },
+  ];
+
   return (
     <PageLayout title="How AI Is Transforming Algorithmic Trading">
       <BlogPostSchema {...postData} />
@@ -34,6 +40,7 @@ const AIAlgorithmicTrading = () => {
 
       <article className="py-16 md:py-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
+          <BreadcrumbNavigation items={breadcrumbItems} />
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-4">
               <Badge variant="secondary">AI & Technology</Badge>

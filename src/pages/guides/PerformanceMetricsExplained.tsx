@@ -2,11 +2,18 @@
 import React from 'react';
 import PageLayout from '@/components/PageLayout';
 import GuideContent from '@/components/GuideContent';
+import BreadcrumbNavigation from '@/components/BreadcrumbNavigation';
 
 const PerformanceMetricsExplained = () => {
+  const breadcrumbItems = [
+    { label: 'Home', href: '/' },
+    { label: 'Performance', href: '/performance' },
+    { label: 'Performance Metrics Explained' },
+  ];
+
   return (
     <PageLayout title="Performance Metrics Explained">
-      <GuideContent title="Performance Metrics Explained">
+      <GuideContent title="Performance Metrics Explained" breadcrumbs={<BreadcrumbNavigation items={breadcrumbItems} />}>
         <div className="prose prose-invert max-w-none">
           <p className="text-lg mb-6">
             Understanding how your algorithm performs is crucial for long-term trading success. Tezaoro provides a suite of industry-standard performance metrics to help you evaluate and compare strategies with confidence.

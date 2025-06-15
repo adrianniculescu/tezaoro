@@ -1,20 +1,11 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import PageHeader from '@/components/PageHeader';
-import { ArrowLeft, Clock, User, Calendar } from 'lucide-react';
+import { Clock, User, Calendar } from 'lucide-react';
 
 const PostHeader = () => {
   return (
     <>
-      <Link to="/blog">
-        <Button variant="outline" className="mb-8 flex items-center gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          Back to Blog
-        </Button>
-      </Link>
-
       <PageHeader 
         title="Tezaoro DEX Aggregator Review: Optimizing DeFi Trading Across 80+ Markets" 
         description="Advanced algorithmic trading infrastructure with quantum-resistant routing, MEV-protected swaps, and gasless trading."
