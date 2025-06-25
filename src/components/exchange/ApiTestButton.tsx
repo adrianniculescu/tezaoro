@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useChangellyExchange } from '@/hooks/useChangellyExchange';
 import { useToast } from '@/hooks/use-toast';
-import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { CheckCircle, AlertCircle, Loader2, Zap } from 'lucide-react';
 
 const ApiTestButton = () => {
   const [isTestingApi, setIsTestingApi] = useState(false);
@@ -23,7 +23,7 @@ const ApiTestButton = () => {
         console.log('✅ API test successful:', currencies.length, 'currencies found');
         setTestResult('success');
         toast({
-          title: "API Connection Successful! 🎉",
+          title: "🎉 API Connection Successful!",
           description: `Connected to Changelly API - Found ${currencies.length} available currencies`,
         });
       } else {
@@ -49,7 +49,7 @@ const ApiTestButton = () => {
         onClick={testApiConnection}
         disabled={isTestingApi}
         variant="outline"
-        className="flex items-center gap-2"
+        className="flex items-center gap-2 hover:bg-primary/10"
       >
         {isTestingApi ? (
           <Loader2 className="h-4 w-4 animate-spin" />
@@ -57,15 +57,23 @@ const ApiTestButton = () => {
           <CheckCircle className="h-4 w-4 text-green-600" />
         ) : testResult === 'error' ? (
           <AlertCircle className="h-4 w-4 text-red-600" />
-        ) : null}
+        ) : (
+          <Zap className="h-4 w-4" />
+        )}
         {isTestingApi ? 'Testing API...' : 'Test API Connection'}
       </Button>
       
       {testResult === 'success' && (
-        <span className="text-sm text-green-600 font-medium">API Working!</span>
+        <span className="text-sm text-green-600 font-medium flex items-center gap-1">
+          <CheckCircle className="h-3 w-3" />
+          API Working!
+        </span>
       )}
       {testResult === 'error' && (
-        <span className="text-sm text-red-600 font-medium">API Failed</span>
+        <span className="text-sm text-red-600 font-medium flex items-center gap-1">
+          <AlertCircle className="h-3 w-3" />
+          API Failed
+        </span>
       )}
     </div>
   );

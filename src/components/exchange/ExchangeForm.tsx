@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowRightLeft } from 'lucide-react';
+import { ArrowRightLeft, Loader2 } from 'lucide-react';
 import CurrencyInput from './CurrencyInput';
 
 interface ExchangeFormProps {
@@ -37,7 +37,7 @@ const ExchangeForm = ({
       <div className="space-y-6">
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-2">Exchange Cryptocurrencies</h2>
-          <p className="text-muted-foreground">Get real-time exchange rates</p>
+          <p className="text-muted-foreground">Get real-time exchange rates powered by Changelly</p>
         </div>
 
         <div className="space-y-4">
@@ -55,7 +55,7 @@ const ExchangeForm = ({
               variant="outline"
               size="sm"
               onClick={onSwapCurrencies}
-              className="rounded-full p-2"
+              className="rounded-full p-2 hover:bg-muted"
               disabled={loading}
             >
               <ArrowRightLeft className="h-4 w-4" />
@@ -79,7 +79,14 @@ const ExchangeForm = ({
               className="w-full"
               variant="outline"
             >
-              {loading ? 'Calculating...' : 'Get Exchange Rate'}
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Calculating...
+                </>
+              ) : (
+                'Get Exchange Rate'
+              )}
             </Button>
             
             <Button
@@ -91,7 +98,7 @@ const ExchangeForm = ({
           </div>
 
           <div className="text-center text-sm text-muted-foreground">
-            <p>Real-time rates powered by Changelly</p>
+            <p>Secure and instant cryptocurrency exchange</p>
           </div>
         </div>
       </div>
