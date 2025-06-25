@@ -113,11 +113,11 @@ export async function getChangellyApiKeys(
 
   // Final validation
   if (!publicKey || !privateKey) {
-    console.error('❌ No valid Changelly API keys found in any location');
-    throw new Error('No valid Changelly API keys found. Please add CHANGELLY_API_KEY_BASE64 (base64 encoded "public:private") to Supabase secrets');
+    console.error('❌ No valid Changelly SWAP API keys found in any location');
+    throw new Error('No valid Changelly SWAP API keys found. Please add CHANGELLY_API_KEY_BASE64 (base64 encoded "public:private") to Supabase secrets');
   }
 
-  // Enhanced placeholder detection
+  // Enhanced placeholder detection for SWAP API
   const placeholderPatterns = [
     'your_',
     'placeholder',
@@ -127,52 +127,48 @@ export async function getChangellyApiKeys(
     'example_',
     'demo_',
     'test_key',
-    'sample_'
+    'sample_',
+    'swap_api_key',
+    'api_key_here'
   ];
 
   const isPlaceholderPublic = placeholderPatterns.some(pattern => 
     publicKey.toLowerCase().includes(pattern.toLowerCase())
-  ) || publicKey.length < 10;
+  ) || publicKey.length < 8;
 
   const isPlaceholderPrivate = placeholderPatterns.some(pattern => 
     privateKey.toLowerCase().includes(pattern.toLowerCase())
-  ) || privateKey.length < 10;
+  ) || privateKey.length < 8;
 
   if (isPlaceholderPublic || isPlaceholderPrivate) {
-    console.error('❌ Detected placeholder API keys. Current values:');
+    console.error('❌ Detected placeholder SWAP API keys. Current values:');
     console.error('   - Public key:', publicKey);
     console.error('   - Private key:', privateKey);
     console.error('');
-    console.error('Real Changelly API keys should look like:');
-    console.error('   - Public key: Similar to "abcd1234efgh5678ijkl9012mnop3456"');
-    console.error('   - Private key: A longer string like "qrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefgh"');
+    console.error('Real Changelly SWAP API keys should look like alphanumeric strings.');
     console.error('');
-    console.error('To get real API keys:');
-    console.error('1. Go to https://pro.changelly.com/');
-    console.error('2. Sign up or log in');
+    console.error('To get real SWAP API keys:');
+    console.error('1. Go to https://changelly.com/business/exchange-api');
+    console.error('2. Sign up for the SWAP API service');
     console.error('3. Navigate to API settings');
-    console.error('4. Generate new API keys');
+    console.error('4. Generate new SWAP API keys');
     console.error('5. Copy the REAL keys (not the placeholder text)');
     
     throw new Error(`
-PLACEHOLDER API KEYS DETECTED!
+PLACEHOLDER SWAP API KEYS DETECTED!
 
 Current values contain placeholder text:
 - Public key: ${publicKey.substring(0, 30)}...
 - Private key: ${privateKey.substring(0, 30)}...
 
-You need REAL Changelly API keys from https://pro.changelly.com/
+You need REAL Changelly SWAP API keys from https://changelly.com/business/exchange-api
 
-Real API keys look like:
-- Public: abcd1234efgh5678ijkl9012mnop3456 (32 characters)
-- Private: qrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefgh (64+ characters)
-
-Please replace the CHANGELLY_API_KEY_BASE64 secret with base64-encoded real keys.
-Format: base64encode("real_public_key:real_private_key")
+Please replace the CHANGELLY_API_KEY_BASE64 secret with base64-encoded real SWAP keys.
+Format: base64encode("real_swap_public_key:real_swap_private_key")
 `);
   }
 
-  console.log('🔑 Final API keys validated:', {
+  console.log('🔑 Final SWAP API keys validated:', {
     publicKeyLength: publicKey.length,
     privateKeyLength: privateKey.length,
     publicKeyPreview: publicKey.substring(0, 8) + '...',

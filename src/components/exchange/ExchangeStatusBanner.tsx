@@ -16,10 +16,10 @@ const ExchangeStatusBanner = ({ apiError, useMockData }: ExchangeStatusBannerPro
         <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
           <CheckCircle className="h-4 w-4" />
           <Wifi className="h-4 w-4" />
-          <span className="font-medium">Live Exchange Rates Active</span>
+          <span className="font-medium">Live SWAP Exchange Rates Active</span>
         </div>
         <p className="text-sm text-green-600 dark:text-green-400 mt-1">
-          Connected to Changelly API for real-time cryptocurrency exchange rates.
+          Connected to Changelly SWAP API for real-time cryptocurrency exchange rates.
         </p>
       </Card>
     );
@@ -38,13 +38,13 @@ const ExchangeStatusBanner = ({ apiError, useMockData }: ExchangeStatusBannerPro
         <AlertCircle className="h-4 w-4" />
         <WifiOff className="h-4 w-4" />
         <span className="font-medium">
-          {isDemo ? 'Demo Mode' : 'API Connection Issue'}
+          {isDemo ? 'Demo Mode' : 'SWAP API Connection Issue'}
         </span>
       </div>
       <p className={`text-sm ${descColor} mt-1`}>
         {isDemo 
-          ? 'Using sample data for testing purposes. Connect your Changelly API keys for live rates.'
-          : apiError || 'Unable to connect to Changelly API. Please check your configuration.'
+          ? 'Using sample data for testing purposes. Connect your Changelly SWAP API keys for live rates.'
+          : apiError || 'Unable to connect to Changelly SWAP API. Please check your configuration.'
         }
       </p>
     </Card>

@@ -2,7 +2,8 @@
 import type { ChangellyRequest, ChangellyResponse, ApiKeys } from './types.ts';
 import { createHmacSignature } from './crypto-utils.ts';
 
-const CHANGELLY_API_URL = 'https://api.changelly.com/v2';
+// Changelly SWAP API endpoint (different from Pro API)
+const CHANGELLY_SWAP_API_URL = 'https://api.changelly.com';
 
 export async function callChangellyApi(
   request: ChangellyRequest,
@@ -10,7 +11,7 @@ export async function callChangellyApi(
   requestId: string
 ): Promise<ChangellyResponse> {
   const message = JSON.stringify(request);
-  console.log('📝 Changelly request message:', message);
+  console.log('📝 Changelly SWAP request message:', message);
 
   const signature = await createHmacSignature(message, apiKeys.privateKey);
 
@@ -20,15 +21,15 @@ export async function callChangellyApi(
     'X-Api-Signature': signature,
   };
 
-  console.log('🌐 Making API call to Changelly:');
-  console.log('   - URL:', CHANGELLY_API_URL);
+  console.log('🌐 Making API call to Changelly SWAP API:');
+  console.log('   - URL:', CHANGELLY_SWAP_API_URL);
   console.log('   - Method: POST');
   console.log('   - Content-Type:', headers['Content-Type']);
   console.log('   - X-Api-Key:', apiKeys.publicKey.substring(0, 8) + '...' + apiKeys.publicKey.substring(apiKeys.publicKey.length - 4));
   console.log('   - X-Api-Signature length:', signature.length);
   console.log('   - Request body length:', message.length);
 
-  console.log('📡 Sending request to Changelly API...');
+  console.log('📡 Sending request to Changelly SWAP API...');
   
   const controller = new AbortController();
   const timeoutId = setTimeout(() => {
@@ -38,7 +39,7 @@ export async function callChangellyApi(
   
   try {
     const fetchStartTime = Date.now();
-    const response = await fetch(CHANGELLY_API_URL, {
+    const response = await fetch(CHANGELLY_SWAP_API_URL, {
       method: 'POST',
       headers: headers,
       body: message,
@@ -47,7 +48,7 @@ export async function callChangellyApi(
     
     clearTimeout(timeoutId);
     const fetchTime = Date.now() - fetchStartTime;
-    console.log(`📥 API response received in ${fetchTime}ms`);
+    console.log(`📥 SWAP API response received in ${fetchTime}ms`);
     console.log('📊 Response status:', response.status);
     console.log('📊 Response status text:', response.statusText);
     console.log('📊 Response ok:', response.ok);
@@ -61,7 +62,7 @@ export async function callChangellyApi(
     }
 
     if (!response.ok) {
-      console.error(`❌ API returned error status: ${response.status} ${response.statusText}`);
+      console.error(`❌ SWAP API returned error status: ${response.status} ${response.statusText}`);
       console.error('❌ Full error response body:', responseText);
       
       let userFriendlyMessage = '';
@@ -80,17 +81,17 @@ export async function callChangellyApi(
       }
       
       if (response.status === 401) {
-        userFriendlyMessage = `Authentication failed. Please verify your Changelly API keys are correct and active.`;
+        userFriendlyMessage = `Authentication failed with SWAP API. Please verify your Changelly SWAP API keys are correct and active.`;
       } else if (response.status === 403) {
-        userFriendlyMessage = `Access forbidden. Your API keys may not have the required permissions for this operation.`;
+        userFriendlyMessage = `Access forbidden with SWAP API. Your API keys may not have the required permissions for this operation.`;
       } else if (response.status === 400) {
-        userFriendlyMessage = `Bad request. The API request format may be incorrect or missing required parameters.`;
+        userFriendlyMessage = `Bad request to SWAP API. The API request format may be incorrect or missing required parameters.`;
       } else if (response.status === 429) {
-        userFriendlyMessage = `Rate limit exceeded. Please wait before making more requests.`;
+        userFriendlyMessage = `Rate limit exceeded on SWAP API. Please wait before making more requests.`;
       } else if (response.status >= 500) {
-        userFriendlyMessage = `Changelly server error (${response.status}). This is likely temporary.`;
+        userFriendlyMessage = `Changelly SWAP server error (${response.status}). This is likely temporary.`;
       } else {
-        userFriendlyMessage = `Unexpected API response status: ${response.status} ${response.statusText}`;
+        userFriendlyMessage = `Unexpected SWAP API response status: ${response.status} ${response.statusText}`;
       }
       
       throw new Error(JSON.stringify({
@@ -98,12 +99,12 @@ export async function callChangellyApi(
         details: detailedError,
         debugInfo: {
           requestId,
-          step: 'api_error_response',
+          step: 'swap_api_error_response',
           status: response.status,
           statusText: response.statusText,
           headers: Object.fromEntries(response.headers.entries()),
           requestSent: {
-            url: CHANGELLY_API_URL,
+            url: CHANGELLY_SWAP_API_URL,
             method: 'POST',
             headers: {
               'Content-Type': headers['Content-Type'],
@@ -119,7 +120,7 @@ export async function callChangellyApi(
     let responseData;
     try {
       responseData = JSON.parse(responseText);
-      console.log('✅ Response parsed successfully');
+      console.log('✅ SWAP API response parsed successfully');
       console.log('📋 Response structure:', {
         hasId: !!responseData.id,
         hasJsonrpc: !!responseData.jsonrpc,
@@ -129,22 +130,22 @@ export async function callChangellyApi(
         resultLength: Array.isArray(responseData.result) ? responseData.result.length : 'not array'
       });
     } catch (parseError) {
-      console.error('❌ Response parse error:', parseError);
-      throw new Error(`Invalid JSON response from Changelly API: ${parseError.message}`);
+      console.error('❌ SWAP API response parse error:', parseError);
+      throw new Error(`Invalid JSON response from Changelly SWAP API: ${parseError.message}`);
     }
 
     if (responseData.error) {
-      console.error('❌ Changelly API error in response:', responseData.error);
-      throw new Error(`Changelly API returned an error: ${responseData.error.message || JSON.stringify(responseData.error)}`);
+      console.error('❌ Changelly SWAP API error in response:', responseData.error);
+      throw new Error(`Changelly SWAP API returned an error: ${responseData.error.message || JSON.stringify(responseData.error)}`);
     }
 
     return responseData;
   } catch (fetchError) {
-    console.error('❌ Network/Fetch error:', fetchError);
+    console.error('❌ Network/Fetch error with SWAP API:', fetchError);
     if (fetchError.name === 'AbortError') {
-      throw new Error('Request timeout - please try again');
+      throw new Error('Request timeout to SWAP API - please try again');
     }
-    throw new Error(`Network error connecting to Changelly API: ${fetchError.message}`);
+    throw new Error(`Network error connecting to Changelly SWAP API: ${fetchError.message}`);
   } finally {
     clearTimeout(timeoutId);
   }
