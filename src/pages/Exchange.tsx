@@ -8,6 +8,7 @@ import ExchangeForm from '@/components/exchange/ExchangeForm';
 import ExchangeInfoCards from '@/components/exchange/ExchangeInfoCards';
 import ExchangeStatusBanner from '@/components/exchange/ExchangeStatusBanner';
 import ApiTestButton from '@/components/exchange/ApiTestButton';
+import ChangellyApiKeyForm from '@/components/exchange/ChangellyApiKeyForm';
 
 const Exchange = () => {
   console.log('Exchange component: Rendering');
@@ -22,6 +23,7 @@ const Exchange = () => {
   const [currencies, setCurrencies] = useState(['btc', 'eth', 'usdt', 'bnb', 'ada', 'dot', 'ltc']);
   const [apiError, setApiError] = useState<string | null>(null);
   const [useMockData, setUseMockData] = useState(false);
+  const [showApiKeyForm, setShowApiKeyForm] = useState(false);
   
   // Load available currencies on component mount
   useEffect(() => {
@@ -34,6 +36,7 @@ const Exchange = () => {
           console.log('✅ Successfully loaded currencies from API');
           setApiError(null);
           setUseMockData(false);
+          setShowApiKeyForm(false);
           
           toast({
             title: "Live Exchange Rates Active",
@@ -45,6 +48,11 @@ const Exchange = () => {
         const errorMessage = error || (err instanceof Error ? err.message : 'Unable to connect to exchange API');
         setApiError(errorMessage);
         setUseMockData(true);
+        
+        // Show API key form if it's a placeholder key error
+        if (errorMessage.includes('placeholder') || errorMessage.includes('PLACEHOLDER')) {
+          setShowApiKeyForm(true);
+        }
         
         toast({
           title: "API Connection Failed",
@@ -113,6 +121,10 @@ const Exchange = () => {
             apiError={apiError}
             useMockData={useMockData}
           />
+          
+          {showApiKeyForm && (
+            <ChangellyApiKeyForm />
+          )}
           
           <ExchangeForm
             fromCurrency={fromCurrency}
