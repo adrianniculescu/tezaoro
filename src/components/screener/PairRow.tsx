@@ -75,7 +75,7 @@ const PairRow: React.FC<PairRowProps> = ({ pair, rank, timeframe }) => {
         size="sm"
         variant="ghost"
         className="h-7 px-2 text-xs text-green-400 hover:text-green-300 hover:bg-green-500/10"
-        onClick={() => navigate('/dex-exchange')}
+        onClick={() => navigate('/dex')}
       >
         Buy <ExternalLink className="w-3 h-3 ml-1" />
       </Button>
