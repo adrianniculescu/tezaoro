@@ -14,6 +14,7 @@ import Api from "./pages/Api";
 import Contact from "./pages/Contact";
 import Blog from "./pages/Blog";
 import Exchange from "./pages/Exchange";
+import DexExchange from "./pages/DexExchange";
 import DexAggregator from "./pages/DexAggregator";
 import FiatGateway from "./pages/FiatGateway";
 import MarketMaking from "./pages/MarketMaking";
