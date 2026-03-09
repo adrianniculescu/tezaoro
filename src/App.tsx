@@ -32,6 +32,7 @@ import NanoCap from "./pages/NanoCap";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import TradingTools from "./pages/TradingTools";
+import Screener from "./pages/Screener";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 
@@ -86,6 +87,7 @@ const App = () => (
             <Route path="/dex-aggregator" element={<DexAggregator />} />
             <Route path="/fiat-gateway" element={<FiatGateway />} />
             <Route path="/trading-tools" element={<TradingTools />} />
+            <Route path="/screener" element={<Screener />} />
             <Route path="/market-making" element={<MarketMaking />} />
             <Route path="/token-listing" element={<TokenListing />} />
             <Route path="/tokenomics-consulting" element={<TokenomicsConsulting />} />
