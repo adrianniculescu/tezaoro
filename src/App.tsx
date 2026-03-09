@@ -32,6 +32,7 @@ import NanoCap from "./pages/NanoCap";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import TradingTools from "./pages/TradingTools";
+import Screener from "./pages/Screener";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 
