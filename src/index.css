@@ -95,4 +95,22 @@
   .btn-glow:hover {
     box-shadow: 0 0 15px theme('colors.tezaoro.400');
   }
+
+  .dex-gradient-bg {
+    background: radial-gradient(ellipse at 20% 50%, hsl(270 60% 15% / 0.6) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, hsl(150 60% 12% / 0.5) 0%, transparent 50%),
+                hsl(var(--background));
+  }
+
+  .dex-card {
+    @apply bg-card/60 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl;
+    box-shadow: 0 0 40px hsl(270 60% 40% / 0.08), 0 0 80px hsl(150 60% 30% / 0.05);
+  }
+
+  .dex-text-glow {
+    background: linear-gradient(135deg, hsl(270 80% 65%), hsl(150 70% 55%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
 }

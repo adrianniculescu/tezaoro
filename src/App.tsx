@@ -14,6 +14,7 @@ import Api from "./pages/Api";
 import Contact from "./pages/Contact";
 import Blog from "./pages/Blog";
 import Exchange from "./pages/Exchange";
+import DexExchange from "./pages/DexExchange";
 import DexAggregator from "./pages/DexAggregator";
 import FiatGateway from "./pages/FiatGateway";
 import MarketMaking from "./pages/MarketMaking";
@@ -81,6 +82,7 @@ const App = () => (
             <Route path="/contact" element={<Contact />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/exchange" element={<Exchange />} />
+            <Route path="/dex-exchange" element={<DexExchange />} />
             <Route path="/dex-aggregator" element={<DexAggregator />} />
             <Route path="/fiat-gateway" element={<FiatGateway />} />
             <Route path="/trading-tools" element={<TradingTools />} />
