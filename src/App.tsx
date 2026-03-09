@@ -33,6 +33,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import TradingTools from "./pages/TradingTools";
 import Screener from "./pages/Screener";
+import Predict from "./pages/Predict";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 
@@ -88,6 +89,7 @@ const App = () => (
             <Route path="/fiat-gateway" element={<FiatGateway />} />
             <Route path="/trading-tools" element={<TradingTools />} />
             <Route path="/screener" element={<Screener />} />
+            <Route path="/predict" element={<Predict />} />
             <Route path="/market-making" element={<MarketMaking />} />
             <Route path="/token-listing" element={<TokenListing />} />
             <Route path="/tokenomics-consulting" element={<TokenomicsConsulting />} />
