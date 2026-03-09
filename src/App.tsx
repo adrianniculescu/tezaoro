@@ -83,7 +83,7 @@ const App = () => (
             <Route path="/contact" element={<Contact />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/exchange" element={<Exchange />} />
-            <Route path="/dex-exchange" element={<DexExchange />} />
+            <Route path="/dex" element={<DexExchange />} />
             <Route path="/dex-aggregator" element={<DexAggregator />} />
             <Route path="/fiat-gateway" element={<FiatGateway />} />
             <Route path="/trading-tools" element={<TradingTools />} />
