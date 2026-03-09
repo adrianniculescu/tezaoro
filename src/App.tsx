@@ -89,6 +89,7 @@ const App = () => (
             <Route path="/fiat-gateway" element={<FiatGateway />} />
             <Route path="/trading-tools" element={<TradingTools />} />
             <Route path="/screener" element={<Screener />} />
+            <Route path="/predict" element={<Predict />} />
             <Route path="/market-making" element={<MarketMaking />} />
             <Route path="/token-listing" element={<TokenListing />} />
             <Route path="/tokenomics-consulting" element={<TokenomicsConsulting />} />
