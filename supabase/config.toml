@@ -1,1 +1,4 @@
 project_id = "tfzeegaepscycaaciviz"
+
+[functions.dex-screener]
+verify_jwt = false
